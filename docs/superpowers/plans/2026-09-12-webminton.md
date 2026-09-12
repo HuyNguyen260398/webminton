@@ -332,8 +332,8 @@ test('tài chính chưa công bố không lộ khoản thu chi', async ({request
 
 **Interfaces:** Outputs `site_bucket_name`, `data_bucket_name`, `distribution_id`, `site_url`, `user_pool_id`, `user_pool_client_id`, `cognito_domain`, `lambda_function_name`; inputs `environment`, `region`, `name_prefix`, `github_repository`, optional `oidc_provider_arn`, `lambda_zip_path`, `lambda_zip_hash`. Deployment uses these exact names.
 
-- [ ] Đối chiếu mẫu module frontend/api/compute/auth/data; viết check expectations trước: private buckets, no DDB, method auth separation, no global error fallback, API stage `/api`, no duplicate origin path. Terraform test/assert hoặc static policy kiểm các properties này, không test resource name vô nghĩa.
-- [ ] Implement bootstrap state/versioning/OIDC trusts restricted repo/environment, S3 lockfile; module permissions spec §6. Rewrite function gắn duy nhất site behavior:
+- [x] Đối chiếu mẫu module frontend/api/compute/auth/data; viết check expectations trước: private buckets, no DDB, method auth separation, no global error fallback, API stage `/api`, no duplicate origin path. Terraform test/assert hoặc static policy kiểm các properties này, không test resource name vô nghĩa.
+- [x] Implement bootstrap state/versioning/OIDC trusts restricted repo/environment, S3 lockfile; module permissions spec §6. Rewrite function gắn duy nhất site behavior:
 
 ```js
 function handler(event) {
@@ -344,10 +344,10 @@ function handler(event) {
 }
 ```
 
-- [ ] REST public GET authorization NONE; admin resource methods Cognito + scope; API caching disabled, forward Authorization/If-Match, integration deployment hash gồm cấu hình methods/auth. Cognito client no secret, callback/logout đúng site URL. Bootstrap account inputs không hardcode account thật.
-- [ ] Run `terraform fmt -check -recursive infra`, `terraform -chdir=infra/envs/dev init -backend=false`, `terraform -chdir=infra/envs/dev validate`, `tflint --chdir=infra/envs/dev`, `uvx checkov -d infra`; lặp env prod/bootstrap validation. Không suppress security findings chung; lý do exception phải cụ thể.
+- [x] REST public GET authorization NONE; admin resource methods Cognito + scope; API caching disabled, forward Authorization/If-Match, integration deployment hash gồm cấu hình methods/auth. Cognito client no secret, callback/logout đúng site URL. Bootstrap account inputs không hardcode account thật.
+- [x] Run `terraform fmt -check -recursive infra`, `terraform -chdir=infra/envs/dev init -backend=false`, `terraform -chdir=infra/envs/dev validate`, `tflint --chdir=infra/envs/dev`, `uvx checkov -d infra`; lặp env prod/bootstrap validation. Không suppress security findings chung; lý do exception phải cụ thể.
 - [ ] Khi Huy duyệt triển khai và cung cấp account: plan dev, review, apply; seed bằng create-only; chạy AWS integration CAS hai writer thật và restore version. Kiểm tra S3 public access bị chặn.
-- [ ] Commit riêng cho task: `infra: provision serverless tournament stack`.
+- [x] Commit riêng cho task: `infra: provision serverless tournament stack`.
 
 ### Task 13: Quality workflows và kiểm tra PR
 

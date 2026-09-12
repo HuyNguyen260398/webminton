@@ -77,3 +77,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Added public finance disclosure and BTC controls for income, expense estimates, and publish/withdraw state; totals remain server-calculated and personal payments stay private.
 - Red: missing finance route. Green: 57 Vitest tests, TypeScript, static build, and public finance Playwright test pass.
 - Task 10 commit: `91b29e6`.
+
+## Task 12
+
+- Terraform bootstrap and shared dev/prod stack now cover private versioned S3, Lambda, Cognito, API Gateway, CloudFront/OAC, and GitHub OIDC planning role.
+- Red: invalid HCL blocks. Green: formatting, provider init, architecture tests, and dev/prod validation pass.
+- Task 11 commit: `e455502`.
