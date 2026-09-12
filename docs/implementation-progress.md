@@ -23,3 +23,9 @@ AWS deployment/integration and GitHub environment checks remain pending credenti
 - Implemented standings, hash-bound manual tiebreaks, placement seeding, majority awards, and upstream correction/reset protection. Added completed-group fixture.
 - Red: 5 initial failures; corrected test fixture to truly alter seeding. Green: 31 total tests and TypeScript pass.
 - Task 2 commit: `1576eff`.
+
+## Task 4
+
+- Balanced seeded draw and roster-bound confirmation implemented.
+- Red: 6 failures; green: 37 total tests, including 400 seeded roster cases, and TypeScript pass.
+- Task 3 commit: `a493129`.

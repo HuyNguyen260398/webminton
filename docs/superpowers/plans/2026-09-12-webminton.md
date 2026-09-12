@@ -157,7 +157,7 @@ test('không âm thầm thay đội sau khi gọi tranh hạng', () => {
 
 **Interfaces:** `generateDraw(t: TournamentDocument, seed: string): TournamentDocument['draw']`; `confirmDraw(t, rosterHash: string): TournamentDocument`. Seed do backend sinh, helper này pure. Hash gồm active IDs, gender, skillBand; thuật toán `balanced-v1` theo spec §5.
 
-- [ ] Test một seed cho cùng kết quả, không trùng/mất IDs, đội >=2 nữ/2 nam, chênh size<=1, thiếu skill báo lỗi, 7 nữ báo không đủ, roster đổi không confirm:
+- [x] Test một seed cho cùng kết quả, không trùng/mất IDs, đội >=2 nữ/2 nam, chênh size<=1, thiếu skill báo lỗi, 7 nữ báo không đủ, roster đổi không confirm:
 
 ```ts
 test('seed cố định bảo toàn roster', () => {
@@ -170,9 +170,9 @@ test('seed cố định bảo toàn roster', () => {
 });
 ```
 
-- [ ] Chạy đỏ; viết seeded PRNG/shuffle và allocator theo spec, giới hạn 100 attempts; lưu algorithmVersion/seed/rosterHash/assignment. Không dùng frontend Math.random làm kết quả authoritative.
-- [ ] Chạy test nhiều roster 16/17/23/24 người khả thi và 100 seed, kiểm tra invariant, không test xác suất từng người bằng tỷ lệ tùy tiện.
-- [ ] Commit riêng cho task: `feat: add constrained reproducible team draw`.
+- [x] Chạy đỏ; viết seeded PRNG/shuffle và allocator theo spec, giới hạn 100 attempts; lưu algorithmVersion/seed/rosterHash/assignment. Không dùng frontend Math.random làm kết quả authoritative.
+- [x] Chạy test nhiều roster 16/17/23/24 người khả thi và 100 seed, kiểm tra invariant, không test xác suất từng người bằng tỷ lệ tùy tiện.
+- [x] Commit riêng cho task: `feat: add constrained reproducible team draw`.
 
 ### Task 5: Cặp đấu và lịch sân
 
