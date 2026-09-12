@@ -180,7 +180,7 @@ test('seed cố định bảo toàn roster', () => {
 
 **Interfaces:** `validateLineup(t, match: Match): void`; `findScheduleConflicts(matches: Match[]): Array<{matchIds:[string,string]; reason:'court'|'athlete'}>`; `reorderMatches(matches: Match[], orderedIds: string[]): Match[]`.
 
-- [ ] Test duplicate athlete, wrong team/gender, trùng sân hoặc người khi khoảng giờ giao nhau; mốc kết thúc bằng bắt đầu không trùng. Test reordering không sửa ID/score:
+- [x] Test duplicate athlete, wrong team/gender, trùng sân hoặc người khi khoảng giờ giao nhau; mốc kết thúc bằng bắt đầu không trùng. Test reordering không sửa ID/score:
 
 ```ts
 test('đổi thứ tự giữ nguyên điểm và ID', () => {
@@ -192,9 +192,9 @@ test('đổi thứ tự giữ nguyên điểm và ID', () => {
 });
 ```
 
-- [ ] Chạy đỏ; implement interval overlap `a.start<b.end && b.start<a.end`, bỏ qua trận chưa có giờ, yêu cầu cả startsAt/endsAt cùng có hoặc cùng null. Giữ constraints khi upsert lineup hoặc schedule.
-- [ ] Chạy xanh.
-- [ ] Commit riêng cho task: `feat: validate lineups and court scheduling`.
+- [x] Chạy đỏ; implement interval overlap `a.start<b.end && b.start<a.end`, bỏ qua trận chưa có giờ, yêu cầu cả startsAt/endsAt cùng có hoặc cùng null. Giữ constraints khi upsert lineup hoặc schedule.
+- [x] Chạy xanh.
+- [x] Commit riêng cho task: `feat: validate lineups and court scheduling`.
 
 ### Task 6: Tài chính và quản lý roster bằng JSON thủ công
 

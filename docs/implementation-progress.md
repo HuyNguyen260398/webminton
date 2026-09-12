@@ -29,3 +29,9 @@ AWS deployment/integration and GitHub environment checks remain pending credenti
 - Balanced seeded draw and roster-bound confirmation implemented.
 - Red: 6 failures; green: 37 total tests, including 400 seeded roster cases, and TypeScript pass.
 - Task 3 commit: `a493129`.
+
+## Task 5
+
+- Lineup eligibility, interval scheduling conflicts and identity-preserving order implemented.
+- Red: 3 failures; green: 40 tests and TypeScript pass.
+- Task 4 commit: `140a32f`.
