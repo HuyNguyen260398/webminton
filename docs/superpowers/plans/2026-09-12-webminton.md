@@ -313,7 +313,7 @@ test('refresh đường dẫn lịch vẫn mở đúng trang', async ({page}) =>
 
 **Interfaces:** Commands upsertExpense/upsertSponsor/upsertIncome/recordFeePayment/publishFinance/finalizeTournament; totals chỉ từ server. Awards đọc results trên landing/bracket, không tự suy ra winner trên client.
 
-- [ ] Test thực thu 1.000.000 BTC đã nhận + 500.000 tài trợ đã nhận − 300.000 chi đã trả = 1.200.000; unpaid expense chỉ vào dự toán. Khách trước publish thấy “Chưa công bố thu chi”, sau publish thấy summary không có phí cá nhân:
+- [x] Test thực thu 1.000.000 BTC đã nhận + 500.000 tài trợ đã nhận − 300.000 chi đã trả = 1.200.000; unpaid expense chỉ vào dự toán. Khách trước publish thấy “Chưa công bố thu chi”, sau publish thấy summary không có phí cá nhân:
 
 ```ts
 test('tài chính chưa công bố không lộ khoản thu chi', async ({request}) => {
@@ -322,9 +322,9 @@ test('tài chính chưa công bố không lộ khoản thu chi', async ({request
 });
 ```
 
-- [ ] Chạy đỏ; implement quantity/unit price, paid/received, sponsor tiers và overrides có lý do, tổng cam kết vs thực thu, góp thêm/người chỉ đề xuất. Payment retries cùng requestId không nhân đôi.
-- [ ] Chạy xanh, xem tiền Việt trên mobile, kiểm tra 0 VĐV và đồng tài trợ.
-- [ ] Commit riêng cho task: `feat: add transparent finance and tournament awards`.
+- [x] Chạy đỏ; implement quantity/unit price, paid/received, sponsor tiers và overrides có lý do, tổng cam kết vs thực thu, góp thêm/người chỉ đề xuất. Payment retries cùng requestId không nhân đôi.
+- [x] Chạy xanh, xem tiền Việt trên mobile, kiểm tra 0 VĐV và đồng tài trợ.
+- [x] Commit riêng cho task: `feat: add transparent finance and tournament awards`.
 
 ### Task 12: Terraform AWS dev/prod và bootstrap
 

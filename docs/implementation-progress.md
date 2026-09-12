@@ -71,3 +71,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Added Vietnamese draw and schedule routes with a saved server-side draw, public standings/bracket views, and BTC controls for lineups, score, walkover, court, and order.
 - Red: draw/schedule routes absent. Green: TypeScript, 57 Vitest tests, static export, and Playwright draw flow for 24 athletes all pass.
 - Task 9 commit: `c3a1c78`.
+
+## Task 11
+
+- Added public finance disclosure and BTC controls for income, expense estimates, and publish/withdraw state; totals remain server-calculated and personal payments stay private.
+- Red: missing finance route. Green: 57 Vitest tests, TypeScript, static build, and public finance Playwright test pass.
+- Task 10 commit: `91b29e6`.
