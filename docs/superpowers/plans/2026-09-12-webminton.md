@@ -97,7 +97,7 @@ test('không nhận revision âm', () => {
 
 **Interfaces:** `isFinalScore(score: Score): boolean`; `generateGroupMatches(teams: Team[], categories: Category[]): Match[]`. ID deterministic `group-{teamAId}-{teamBId}-{category}`, order 1–18; score/pairs null, pending. Consumes schema.
 
-- [ ] Viết các test bao gồm đảo chiều điểm và 6 cặp đội:
+- [x] Viết các test bao gồm đảo chiều điểm và 6 cặp đội:
 
 ```ts
 test.each([[21,0],[21,19],[22,20],[24,22],[25,23],[25,24]])(
@@ -117,11 +117,11 @@ test('4 đội có 18 trận, mỗi đội 9 trận', () => {
 });
 ```
 
-- [ ] Chạy `pnpm --filter @webminton/domain test score round-robin`, xác nhận đỏ.
-- [ ] Implement công thức spec §5 và nested pairs `i<j`, không hardcode tên đội; từ chối config ngoài thể thức MVP.
-- [ ] Thêm type command `setWalkover` có matchId, absentSide ('a'|'b'), reason; test server đặt 0–21 khi A vắng và 21–0 khi B vắng, status=walkover. Task 3 tính walkover vào pointsFor/wins/advancement, Task 7 lưu command, Task 10 có thao tác admin “Xử thua do vắng mặt”. Nếu hai bên vắng thì chờ BTC, không tự chọn winner.
-- [ ] Chạy lại tests.
-- [ ] Commit riêng cho task: `feat: implement 21-25 scoring and round robin`.
+- [x] Chạy `pnpm --filter @webminton/domain test score round-robin`, xác nhận đỏ.
+- [x] Implement công thức spec §5 và nested pairs `i<j`, không hardcode tên đội; từ chối config ngoài thể thức MVP.
+- [x] Thêm type command `setWalkover` có matchId, absentSide ('a'|'b'), reason; test server đặt 0–21 khi A vắng và 21–0 khi B vắng, status=walkover. Task 3 tính walkover vào pointsFor/wins/advancement, Task 7 lưu command, Task 10 có thao tác admin “Xử thua do vắng mặt”. Nếu hai bên vắng thì chờ BTC, không tự chọn winner.
+- [x] Chạy lại tests.
+- [x] Commit riêng cho task: `feat: implement 21-25 scoring and round robin`.
 
 ### Task 3: BXH, tranh hạng và sửa kết quả phụ thuộc
 

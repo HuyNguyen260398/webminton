@@ -11,3 +11,9 @@ Branch: `feat/webminton-implementation`. Each completed task gets a separate com
 - pnpm launcher stalls in the sandbox while resolving its managed version; direct Node 24 invocations of the installed test/typecheck tools produce the verification above.
 
 AWS deployment/integration and GitHub environment checks remain pending credentials and deployment inputs. No cloud resources created.
+
+## Task 2
+
+- Scoring, 21–0 walkovers and six round-robin encounters implemented.
+- Red: 10 behavioral failures; green: 23 total tests pass, TypeScript passes.
+- Task 1 commit: `7990590`.
