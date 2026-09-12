@@ -1,3 +1,5 @@
+import { generateGroupMatches } from "../round-robin";
+import { deriveTournament } from "../derive";
 import seed from "../../../../data/tournament.seed.json";
 import { TournamentSchema, type Athlete } from "../schema";
 
@@ -15,4 +17,14 @@ export function makeRoster(count: number): Athlete[] {
     note: "Dữ liệu kiểm thử",
     active: true,
   }));
+}
+
+export function makeCompletedGroup() {
+  const t = makeTournament();
+  t.matches = generateGroupMatches(t.teams, t.rules.categories).map((m) => ({
+    ...m,
+    status: "completed",
+    score: { a: 21, b: 18 },
+  }));
+  return deriveTournament(t);
 }

@@ -129,7 +129,7 @@ test('4 đội có 18 trận, mỗi đội 9 trận', () => {
 
 **Interfaces:** `deriveTournament(t: TournamentDocument): TournamentDocument`; `calculateStandings(t): TournamentDocument['results']['standings']`; `seedPlacement(t): TournamentDocument`; `applyScore(t, matchId: string, score: Score): TournamentDocument`. Invalid score throws `INVALID_SCORE`; reseed locked throws `PLACEMENT_RESET_REQUIRED`. Shared domain errors use code/messageVi, mapped in Task 7.
 
-- [ ] Viết tests: pointsFor ưu tiên hơn wins; hòa hoàn toàn rank=null; chưa đủ 18 không seed; completedGroup tạo 6 trận, first_place lấy rank1/2. Test sửa điểm sau khi một trận placement called:
+- [x] Viết tests: pointsFor ưu tiên hơn wins; hòa hoàn toàn rank=null; chưa đủ 18 không seed; completedGroup tạo 6 trận, first_place lấy rank1/2. Test sửa điểm sau khi một trận placement called:
 
 ```ts
 test('không âm thầm thay đội sau khi gọi tranh hạng', () => {
@@ -146,10 +146,10 @@ test('không âm thầm thay đội sau khi gọi tranh hạng', () => {
 });
 ```
 
-- [ ] Chạy tests đỏ, đảm bảo fixture thật sự đổi seed bằng assertion thứ hạng trước/sau trong test riêng.
-- [ ] Implement comparator từng tiêu chí và tied groups; tie decision chỉ nhận cùng kết quả hash. Tạo matches placement theo ID `first_place-{category}`/`third_place-{category}`. Derive winner cho score hợp lệ, awards sau thắng 2/3, finalized sau đủ 24.
-- [ ] Thêm test thắng hai nội dung vẫn giữ trận thứ ba; resetPlacement xóa score/công bố của 6 trận và lưu audit tại command layer; category winners trả mảng khi hòa. Chạy tests xanh.
-- [ ] Commit riêng cho task: `feat: derive standings and placement results`.
+- [x] Chạy tests đỏ, đảm bảo fixture thật sự đổi seed bằng assertion thứ hạng trước/sau trong test riêng.
+- [x] Implement comparator từng tiêu chí và tied groups; tie decision chỉ nhận cùng kết quả hash. Tạo matches placement theo ID `first_place-{category}`/`third_place-{category}`. Derive winner cho score hợp lệ, awards sau thắng 2/3, finalized sau đủ 24.
+- [x] Thêm test thắng hai nội dung vẫn giữ trận thứ ba; resetPlacement xóa score/công bố của 6 trận và lưu audit tại command layer; category winners trả mảng khi hòa. Chạy tests xanh.
+- [x] Commit riêng cho task: `feat: derive standings and placement results`.
 
 ### Task 4: Bốc thăm có ràng buộc và có thể tiếp tục
 

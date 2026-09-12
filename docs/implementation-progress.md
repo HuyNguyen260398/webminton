@@ -17,3 +17,9 @@ AWS deployment/integration and GitHub environment checks remain pending credenti
 - Scoring, 21–0 walkovers and six round-robin encounters implemented.
 - Red: 10 behavioral failures; green: 23 total tests pass, TypeScript passes.
 - Task 1 commit: `7990590`.
+
+## Task 3
+
+- Implemented standings, hash-bound manual tiebreaks, placement seeding, majority awards, and upstream correction/reset protection. Added completed-group fixture.
+- Red: 5 initial failures; corrected test fixture to truly alter seeding. Green: 31 total tests and TypeScript pass.
+- Task 2 commit: `1576eff`.
