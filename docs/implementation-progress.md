@@ -35,3 +35,11 @@ AWS deployment/integration and GitHub environment checks remain pending credenti
 - Lineup eligibility, interval scheduling conflicts and identity-preserving order implemented.
 - Red: 3 failures; green: 40 tests and TypeScript pass.
 - Task 4 commit: `140a32f`.
+
+## Task 6
+
+- Cash/budget accounting, equal-tier sponsorships, JSON roster validation/diff/apply and CLI implemented.
+- Red: 6 failures; green: 46 total tests, root TypeScript passes. API transport integration follows in Task 7.
+- Task 5 commit: `2f427fa`.
+
+Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; validate accepts clean empty roster. Re-ran all 46 tests and root typecheck successfully.

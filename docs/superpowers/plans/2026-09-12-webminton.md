@@ -202,8 +202,8 @@ test('đổi thứ tự giữ nguyên điểm và ID', () => {
 
 **Interfaces:** `calculateFinance(t): {receivedVnd:number; paidVnd:number; balanceVnd:number; budgetExpenseVnd:number; additionalPerAthleteVnd:number|null}`; `rankSponsors(t): Array<{id:string;tier:'diamond'|'gold'|'friendly'}>`; `parseRosterConfig(input: unknown): {etag:string;athletes:Athlete[]}`. CLI `roster-config export|validate|diff|apply --file <private-path>`; export đọc admin API, apply gửi command `replaceRoster` cùng ETag gốc và requestId. API client hoàn thiện ở Task 7; Task 6 kiểm parser/diff bằng fake transport.
 
-- [ ] Test totals không double count, cam kết khác cash, 0 VĐV trả null, thiếu 10.001đ/3 người cần 4.000đ/người. Hai tài trợ cùng top nhận Kim cương, mức khác kế tiếp nhận Vàng.
-- [ ] Viết test parser bảo toàn ID và từ chối trùng ID:
+- [x] Test totals không double count, cam kết khác cash, 0 VĐV trả null, thiếu 10.001đ/3 người cần 4.000đ/người. Hai tài trợ cùng top nhận Kim cương, mức khác kế tiếp nhận Vàng.
+- [x] Viết test parser bảo toàn ID và từ chối trùng ID:
 
 ```ts
 test('JSON roster không nhận ID trùng', () => {
@@ -213,10 +213,10 @@ test('JSON roster không nhận ID trùng', () => {
 });
 ```
 
-- [ ] Chạy `pnpm exec vitest run packages/domain/test/finance.test.ts scripts/test/roster-config.test.ts` đỏ.
-- [ ] Implement tài chính theo spec §5; parser strict, stable IDs, preview thêm/sửa/xóa. CLI giữ ETag gốc, không tự retry conflict bằng ETag mới. Không lưu roster thật chứa điện thoại vào Git, seed vẫn sạch. Excel chỉ làm tham chiếu, không xây importer.
-- [ ] Test apply qua fake transport gửi đúng roster/ETag/requestId, không gửi điểm hoặc tài chính; viết hướng dẫn export → sửa JSON thủ công → validate → diff → apply. Chạy xanh.
-- [ ] Commit riêng cho task: `feat: add finance calculations and manual JSON roster workflow`.
+- [x] Chạy `pnpm exec vitest run packages/domain/test/finance.test.ts scripts/test/roster-config.test.ts` đỏ.
+- [x] Implement tài chính theo spec §5; parser strict, stable IDs, preview thêm/sửa/xóa. CLI giữ ETag gốc, không tự retry conflict bằng ETag mới. Không lưu roster thật chứa điện thoại vào Git, seed vẫn sạch. Excel chỉ làm tham chiếu, không xây importer.
+- [x] Test apply qua fake transport gửi đúng roster/ETag/requestId, không gửi điểm hoặc tài chính; viết hướng dẫn export → sửa JSON thủ công → validate → diff → apply. Chạy xanh.
+- [x] Commit riêng cho task: `feat: add finance calculations and manual JSON roster workflow`.
 
 ### Task 7: Repository S3, auth, API commands và projection
 
