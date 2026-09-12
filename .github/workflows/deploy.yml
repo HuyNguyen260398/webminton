@@ -1,0 +1,70 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        default: dev
+        options: [dev, prod]
+permissions:
+  contents: read
+concurrency:
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yml
+  deploy:
+    needs: quality
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '${{ github.sha }}'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @webminton/backend build
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Terraform apply exact release
+        working-directory: infra/envs/${{ inputs.environment || 'dev' }}
+        run: |
+          terraform init -backend-config="bucket=${{ vars.STATE_BUCKET_NAME }}" -backend-config="region=${{ vars.AWS_REGION }}"
+          terraform plan -out=release.tfplan
+          terraform apply release.tfplan
+      - name: Read infrastructure outputs
+        id: outputs
+        working-directory: infra/envs/${{ inputs.environment || 'dev' }}
+        run: |
+          {
+            echo "site_bucket=$(terraform output -raw site_bucket_name)"
+            echo "distribution_id=$(terraform output -raw distribution_id)"
+            echo "site_url=$(terraform output -raw site_url)"
+          } >> "$GITHUB_OUTPUT"
+      - run: pnpm --filter @webminton/frontend build
+        env:
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ vars.COGNITO_CLIENT_ID }}
+          NEXT_PUBLIC_COGNITO_DOMAIN: ${{ vars.COGNITO_DOMAIN }}
+      - name: Upload immutable assets then HTML
+        run: |
+          aws s3 sync frontend/out "s3://${{ steps.outputs.outputs.site_bucket }}" --exclude '*.html' --cache-control 'public,max-age=31536000,immutable'
+          aws s3 sync frontend/out "s3://${{ steps.outputs.outputs.site_bucket }}" --exclude '*' --include '*.html' --cache-control 'no-cache'
+          aws cloudfront create-invalidation --distribution-id "${{ steps.outputs.outputs.distribution_id }}" --paths '/*'
+      - name: Smoke deployment
+        run: pnpm exec tsx scripts/smoke-deployment.ts "${{ steps.outputs.outputs.site_url }}"

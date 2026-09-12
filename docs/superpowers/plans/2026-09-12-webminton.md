@@ -366,7 +366,7 @@ function handler(event) {
 
 **Interfaces:** deployment requires reusable `quality` workflow success on same SHA, protected `dev`/`prod` environment, OIDC role, outputs Task 12; smoke accepts `SITE_URL`. GitHub vars `AWS_REGION`, `STATE_BUCKET_NAME`, `AWS_DEPLOY_ROLE_ARN`, `NAME_PREFIX`, `GITHUB_REPOSITORY`; environment tfvars xác định environment, không secrets trong frontend.
 
-- [ ] Implement jobs dependencies và serialization:
+- [x] Implement jobs dependencies và serialization:
 
 ```yaml
 permissions:
@@ -387,10 +387,10 @@ jobs:
     # Job body follows the ordered release steps below.
 ```
 
-- [ ] Bổ sung steps thực theo thứ tự: checkout exact SHA, frozen install, build backend ZIP, OIDC, remote init, `terraform plan -out=release.tfplan`, `terraform apply release.tfplan`, outputs, frontend build, lưu release manifest/hash/artifacts, upload immutable chunks trước HTML, invalidate HTML, smoke. Không chạy seed thường kỳ, không cấp quyền data write cho site upload role. Dùng GitHub concurrency group theo environment nếu workflow mở rộng cả dev/prod.
-- [ ] Smoke GET `/`, các route trailing slash, GET public JSON, unauthorized POST trả 401/403 JSON (không 200 HTML), missing API giữ error status. Authenticated smoke dùng danh tính test staging riêng, không bypass auth prod.
+- [x] Bổ sung steps thực theo thứ tự: checkout exact SHA, frozen install, build backend ZIP, OIDC, remote init, `terraform plan -out=release.tfplan`, `terraform apply release.tfplan`, outputs, frontend build, lưu release manifest/hash/artifacts, upload immutable chunks trước HTML, invalidate HTML, smoke. Không chạy seed thường kỳ, không cấp quyền data write cho site upload role. Dùng GitHub concurrency group theo environment nếu workflow mở rộng cả dev/prod.
+- [x] Smoke GET `/`, các route trailing slash, GET public JSON, unauthorized POST trả 401/403 JSON (không 200 HTML), missing API giữ error status. Authenticated smoke dùng danh tính test staging riêng, không bypass auth prod.
 - [ ] Diễn tập deploy fail ở quality không chạm AWS; deploy lỗi smoke đánh dấu failed. Rollback chọn artifact SHA trước, deploy backend/schema tương thích rồi site, kiểm revision/ETag data không đổi.
-- [ ] Commit riêng cho task: `ci: deploy verified releases and document rollback`.
+- [x] Commit riêng cho task: `ci: deploy verified releases and document rollback`.
 
 ### Task 15: Diễn tập giải và bàn giao
 

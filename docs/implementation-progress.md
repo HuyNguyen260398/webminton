@@ -89,3 +89,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Added reusable quality and protected Terraform plan workflows with frozen installs, tests, static builds, E2E, Terraform validation and failure-only reports.
 - Green: local lint/typecheck/test, actionlint, Terraform formatting, and architecture checks.
 - Task 12 commit: `69290dd`.
+
+## Task 14
+
+- Added same-SHA deploy workflow with protected environment/OIDC, Terraform apply, ordered immutable asset upload, CloudFront invalidation, and endpoint smoke checks.
+- Green: actionlint, TypeScript, and 59 Vitest tests. Live AWS deployment remains dependent on Huy's account/environment variables.
+- Task 13 commit: `2467fd5`.
