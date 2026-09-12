@@ -17,6 +17,12 @@ const empty = z.strictObject({});
 export const CommandSchema = z.discriminatedUnion("type", [
   command("configureTournament", InfoSchema.partial()),
   command(
+    "configureCourts",
+    z.strictObject({
+      courts: z.array(z.strictObject({ id: Id, name: reason })).max(20),
+    }),
+  ),
+  command(
     "replaceRoster",
     z.strictObject({ athletes: z.array(AthleteSchema) }),
   ),

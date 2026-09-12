@@ -59,3 +59,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Visually inspected full-page desktop and mobile screenshots: poster palette, hierarchy and borders preserved; no horizontal overflow.
 - Installed matching Chromium 1243 for Playwright 1.63.0. Preview API runs only from scripts/serve-preview.ts, outside production bundle.
 - Task 7 commit: `9368ac9`.
+
+## Task 9
+
+- Cognito PKCE session, public read-only athlete list, tournament/court settings, and version restore UI implemented.
+- Red: missing `configureCourts` command. Green: 57 Vitest tests, TypeScript, frontend static build, and two Playwright admin/athlete flows pass.
+- Task 8 commit: `2d47c2a`.

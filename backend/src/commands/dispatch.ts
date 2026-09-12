@@ -53,6 +53,19 @@ export async function executeCommand(
     case "configureTournament":
       t.info = { ...t.info, ...c.payload };
       break;
+    case "configureCourts": {
+      const nextCourtIds = new Set(c.payload.courts.map((court) => court.id));
+      if (nextCourtIds.size !== c.payload.courts.length)
+        throw new Error("INVALID_COURTS");
+      if (
+        t.matches.some(
+          (match) => match.courtId && !nextCourtIds.has(match.courtId),
+        )
+      )
+        throw new Error("COURT_IN_USE");
+      t.courts = c.payload.courts;
+      break;
+    }
     case "replaceRoster":
       replaceRoster(t, c.payload.athletes);
       break;

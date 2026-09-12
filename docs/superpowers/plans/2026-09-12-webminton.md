@@ -270,7 +270,7 @@ test('landing giữ thông tin chưa chốt và tiếng Việt', async ({page}) 
 
 **Interfaces:** API client `getAdminTournament()` và `sendCommand(command,etag)`; client giữ requestId qua retry. `AdminSession` dùng Cognito hosted login PKCE, static callback tại `/quan-tri/`, logout xóa private query data. Tất cả command forms có conflict UI giữ giá trị người dùng.
 
-- [ ] Test khách xem tên mà response không có phone; non-admin không lưu; CLI cập nhật roster JSON và sửa tên không đổi ID, trang danh sách phản ánh thay đổi; session hết hạn không mất draft:
+- [x] Test khách xem tên mà response không có phone; non-admin không lưu; CLI cập nhật roster JSON và sửa tên không đổi ID, trang danh sách phản ánh thay đổi; session hết hạn không mất draft:
 
 ```ts
 test('khách không thấy thông tin liên hệ cá nhân', async ({request}) => {
@@ -281,9 +281,9 @@ test('khách không thấy thông tin liên hệ cá nhân', async ({request}) =
 });
 ```
 
-- [ ] Chạy đỏ; implement bảng chỉ đọc từ JSON, tìm kiếm/lọc giới tính/đội; không có form thêm/sửa/import VĐV; phí là payment thực tế; cấu hình giữ null thay giá trị đoán. Seed UI chưa có admin phải có hướng dẫn vận hành, không tạo tài khoản công khai.
-- [ ] Implement versions/restore preview với reason; tích hợp CLI roster-config với API admin từ Task 7. Test conflict hai browser contexts và stale ETag. Chạy xanh.
-- [ ] Commit riêng cho task: `feat: add admin access and athlete management`.
+- [x] Chạy đỏ; implement bảng chỉ đọc từ JSON, tìm kiếm/lọc giới tính/đội; không có form thêm/sửa/import VĐV; phí là payment thực tế; cấu hình giữ null thay giá trị đoán. Seed UI chưa có admin phải có hướng dẫn vận hành, không tạo tài khoản công khai.
+- [x] Implement versions/restore preview với reason; tích hợp CLI roster-config với API admin từ Task 7. Test conflict hai browser contexts và stale ETag. Chạy xanh.
+- [x] Commit riêng cho task: `feat: add admin access and athlete management`.
 
 ### Task 10: Vòng quay tên và sơ đồ giải
 
