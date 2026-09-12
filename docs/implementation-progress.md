@@ -65,3 +65,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Cognito PKCE session, public read-only athlete list, tournament/court settings, and version restore UI implemented.
 - Red: missing `configureCourts` command. Green: 57 Vitest tests, TypeScript, frontend static build, and two Playwright admin/athlete flows pass.
 - Task 8 commit: `2d47c2a`.
+
+## Task 10
+
+- Added Vietnamese draw and schedule routes with a saved server-side draw, public standings/bracket views, and BTC controls for lineups, score, walkover, court, and order.
+- Red: draw/schedule routes absent. Green: TypeScript, 57 Vitest tests, static export, and Playwright draw flow for 24 athletes all pass.
+- Task 9 commit: `c3a1c78`.

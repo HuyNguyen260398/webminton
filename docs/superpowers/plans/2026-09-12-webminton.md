@@ -291,7 +291,7 @@ test('khách không thấy thông tin liên hệ cá nhân', async ({request}) =
 
 **Interfaces:** Gọi commands generateDraw/confirmDraw/resetDraw/setLineup/publishLineup/reorderMatches/setSchedule/setScore/setWalkover/resolveTie/resetPlacement. Query refresh sau success; polling 15s/focus, không polling khi tab ẩn.
 
-- [ ] Viết E2E: bốc 24 người, reload giữ draft, confirm mỗi người một đội; reduced motion vẫn thấy kết quả. Flow đủ 18 scores → BXH → 6 placements → champion; chưa đủ 18 không có tên seed. Test màn hình edit score không cho 21–20.
+- [x] Viết E2E: bốc 24 người, reload giữ draft, confirm mỗi người một đội; reduced motion vẫn thấy kết quả. Flow đủ 18 scores → BXH → 6 placements → champion; chưa đủ 18 không có tên seed. Test màn hình edit score không cho 21–20.
 
 ```ts
 test('refresh đường dẫn lịch vẫn mở đúng trang', async ({page}) => {
@@ -302,10 +302,10 @@ test('refresh đường dẫn lịch vẫn mở đúng trang', async ({page}) =>
 });
 ```
 
-- [ ] Chạy đỏ; wheel diễn lại draft backend, disable double clicks, nút bỏ hoạt ảnh, aria-live kết quả. Hiển thị độ lệch các đội và cảnh báo thiếu dữ liệu trình độ.
-- [ ] Render 18 cards/table, BXH đúng criteria; 2 placement encounters ×3 matches; tên theo pair ID, nháp kín hiện “Chưa công bố”. Admin dùng select VĐV, reorder có nút lên/xuống ngoài drag. Conflict score giữ form; downstream reset preview liệt kê trận ảnh hưởng, yêu cầu reason/confirm.
-- [ ] Test public network payload không có lineup kín, interval conflict thông báo tiếng Việt, đại diện hai admins sửa. Chạy xanh.
-- [ ] Commit riêng cho task: `feat: add draw and tournament control screens`.
+- [x] Chạy đỏ; wheel diễn lại draft backend, disable double clicks, nút bỏ hoạt ảnh, aria-live kết quả. Hiển thị độ lệch các đội và cảnh báo thiếu dữ liệu trình độ.
+- [x] Render 18 cards/table, BXH đúng criteria; 2 placement encounters ×3 matches; tên theo pair ID, nháp kín hiện “Chưa công bố”. Admin dùng select VĐV, reorder có nút lên/xuống ngoài drag. Conflict score giữ form; downstream reset preview liệt kê trận ảnh hưởng, yêu cầu reason/confirm.
+- [x] Test public network payload không có lineup kín, interval conflict thông báo tiếng Việt, đại diện hai admins sửa. Chạy xanh.
+- [x] Commit riêng cho task: `feat: add draw and tournament control screens`.
 
 ### Task 11: Thu chi, tài trợ và vinh danh
 
