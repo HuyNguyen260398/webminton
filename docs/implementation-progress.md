@@ -95,3 +95,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Added same-SHA deploy workflow with protected environment/OIDC, Terraform apply, ordered immutable asset upload, CloudFront invalidation, and endpoint smoke checks.
 - Green: actionlint, TypeScript, and 59 Vitest tests. Live AWS deployment remains dependent on Huy's account/environment variables.
 - Task 13 commit: `2467fd5`.
+
+## Task 15
+
+- Added README, Vietnamese acceptance checklist, full static-route/privacy E2E coverage, and operational handoff docs.
+- Live AWS apply and real 24-player dev rehearsal remain intentionally pending Huy's AWS account/environment approval; local domain/API/recovery flows are verified.
+- Task 14 commit: `bc99afa`.

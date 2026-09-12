@@ -396,12 +396,12 @@ jobs:
 
 **Files:** Create `docs/acceptance/2026-tournament-checklist.md`, `README.md`; complete `docs/runbooks/{bootstrap,operations,rollback}.md`; `tests/e2e/full-tournament.spec.ts`.
 
-- [ ] Xác nhận thông tin vận hành còn thiếu trong spec §7; sáu quyết định sản phẩm đã chốt, không yêu cầu xác nhận lại. Giữ ba nội dung mặc định cho tới khi BTC quyết định thay đổi dựa trên đăng ký thực tế.
+- [x] Xác nhận thông tin vận hành còn thiếu trong spec §7; sáu quyết định sản phẩm đã chốt, không yêu cầu xác nhận lại. Giữ ba nội dung mặc định cho tới khi BTC quyết định thay đổi dựa trên đăng ký thực tế.
 - [ ] Chạy một giải giả trên dev với 24 VĐV; bốc thăm, lịch nhiều sân, nhập 18+6 kết quả, tiebreak, sửa điểm bị khóa, reset có lý do, giải thưởng; đối chiếu domain expectations với thể lệ viết, không đối chiếu công thức Excel lỗi.
 - [ ] Chạy hai admin cùng ghi; timeout/retry payment; mất mạng/reload wheel; refresh tất cả static routes; Cognito expired/non-admin; verify private fields không lọt HTML/JSON/static artifacts. Thử missing/corrupt S3 document trả lỗi vận hành, không reset về seed.
-- [ ] Diễn tập version restore CAS trên dev; rollback code không rollback data. Kiểm logs không PII và alarms có đường nhận. Chạy `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`, các IaC checks Task 12 và actionlint.
-- [ ] Review visual tại 390px/1440px, keyboard, reduced motion, focus, bảng lịch cuộn được; ghi evidence screenshot và test report. README ghi local setup, seed an toàn, đăng nhập, sửa roster JSON thủ công, luật, deploy, restore, hạn chế S3 JSON và commands.
-- [ ] Commit riêng cho task: `docs: document verified tournament operations`; báo rõ test thực sự chạy và quyết định chưa chốt. Production release chỉ sau khi Huy duyệt deployment cụ thể.
+- [x] Diễn tập version restore CAS trên dev; rollback code không rollback data. Kiểm logs không PII và alarms có đường nhận. Chạy `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`, các IaC checks Task 12 và actionlint.
+- [x] Review visual tại 390px/1440px, keyboard, reduced motion, focus, bảng lịch cuộn được; ghi evidence screenshot và test report. README ghi local setup, seed an toàn, đăng nhập, sửa roster JSON thủ công, luật, deploy, restore, hạn chế S3 JSON và commands.
+- [x] Commit riêng cho task: `docs: document verified tournament operations`; báo rõ test thực sự chạy và quyết định chưa chốt. Production release chỉ sau khi Huy duyệt deployment cụ thể.
 
 ## Ma trận bao phủ
 
