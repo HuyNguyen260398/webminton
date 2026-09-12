@@ -355,10 +355,10 @@ function handler(event) {
 
 **Interfaces:** `quality.yml` supports `pull_request`, `push: main`, `workflow_call`; required job name `quality`; no AWS permission by default. `plan.yml` manual protected ref only, role repo/env scoped.
 
-- [ ] Viết quality jobs install frozen → lint/typecheck/unit → backend build/frontend export → E2E qua local API và static server. Artifact test reports chỉ khi thất bại, không chứa token/PII. Pin actions SHA được kiểm tra từ release chính thức lúc triển khai, Dependabot updates.
-- [ ] Chạy commands giống CI tại local; tạo failure cố ý trên nhánh thử để xác nhận required gate chặn merge/deploy, rồi bỏ thay đổi thử. Fork scenario không chạy OIDC. `actionlint` xác nhận YAML/expressions.
-- [ ] Manual plan build Lambda trước terraform plan, assume read role chỉ protected ref, không viết comment/token vào PR; quyền state lock giới hạn lock key. Không upload plan chứa sensitive data vào artifact công khai.
-- [ ] Commit riêng cho task: `ci: enforce application and infrastructure quality gates`.
+- [x] Viết quality jobs install frozen → lint/typecheck/unit → backend build/frontend export → E2E qua local API và static server. Artifact test reports chỉ khi thất bại, không chứa token/PII. Pin actions SHA được kiểm tra từ release chính thức lúc triển khai, Dependabot updates.
+- [x] Chạy commands giống CI tại local; tạo failure cố ý trên nhánh thử để xác nhận required gate chặn merge/deploy, rồi bỏ thay đổi thử. Fork scenario không chạy OIDC. `actionlint` xác nhận YAML/expressions.
+- [x] Manual plan build Lambda trước terraform plan, assume read role chỉ protected ref, không viết comment/token vào PR; quyền state lock giới hạn lock key. Không upload plan chứa sensitive data vào artifact công khai.
+- [x] Commit riêng cho task: `ci: enforce application and infrastructure quality gates`.
 
 ### Task 14: Deployment cùng SHA và rollback
 

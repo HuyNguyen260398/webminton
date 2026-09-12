@@ -1,0 +1,39 @@
+name: Quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm test:e2e
+      - run: terraform fmt -check -recursive infra
+      - run: terraform -chdir=infra/envs/dev init -backend=false
+      - run: terraform -chdir=infra/envs/dev validate
+      - run: terraform -chdir=infra/envs/prod init -backend=false
+      - run: terraform -chdir=infra/envs/prod validate
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: test-results/
+          if-no-files-found: ignore

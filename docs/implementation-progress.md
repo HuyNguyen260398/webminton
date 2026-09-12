@@ -83,3 +83,9 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Terraform bootstrap and shared dev/prod stack now cover private versioned S3, Lambda, Cognito, API Gateway, CloudFront/OAC, and GitHub OIDC planning role.
 - Red: invalid HCL blocks. Green: formatting, provider init, architecture tests, and dev/prod validation pass.
 - Task 11 commit: `e455502`.
+
+## Task 13
+
+- Added reusable quality and protected Terraform plan workflows with frozen installs, tests, static builds, E2E, Terraform validation and failure-only reports.
+- Green: local lint/typecheck/test, actionlint, Terraform formatting, and architecture checks.
+- Task 12 commit: `69290dd`.
