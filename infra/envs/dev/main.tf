@@ -6,14 +6,14 @@ terraform {
 }
 provider "aws" { region = var.region }
 module "stack" {
-  source           = "../../modules/stack"
-  region           = var.region
-  name_prefix      = var.name_prefix
-  lambda_zip_path  = var.lambda_zip_path
-  lambda_role_arn  = var.lambda_role_arn
-  site_bucket_name = var.site_bucket_name
-  callback_urls    = var.callback_urls
-  logout_urls      = var.logout_urls
+  source                = "../../modules/stack"
+  region                = var.region
+  name_prefix           = var.name_prefix
+  lambda_zip_path       = var.lambda_zip_path
+  site_bucket_name      = var.site_bucket_name
+  callback_urls         = var.callback_urls
+  logout_urls           = var.logout_urls
+  cognito_domain_prefix = var.cognito_domain_prefix
 }
 output "site_bucket_name" { value = module.stack.site_bucket_name }
 output "data_bucket_name" { value = module.stack.data_bucket_name }

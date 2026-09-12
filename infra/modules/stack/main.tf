@@ -61,6 +61,10 @@ resource "aws_cognito_user_pool_client" "spa" {
   logout_urls                          = var.logout_urls
   supported_identity_providers         = ["COGNITO"]
 }
+resource "aws_cognito_user_pool_domain" "main" {
+  domain       = var.cognito_domain_prefix
+  user_pool_id = aws_cognito_user_pool.admins.id
+}
 resource "aws_api_gateway_rest_api" "api" { name = "${var.name_prefix}-api" }
 resource "aws_api_gateway_resource" "public" {
   rest_api_id = aws_api_gateway_rest_api.api.id
