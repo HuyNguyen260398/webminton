@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "revision": 0,
+  "id": "noi-bo-2026",
+  "updatedAt": "2026-09-12T00:00:00.000Z",
+  "info": {
+    "name": "Giải cầu lông nội bộ 2026",
+    "clubName": "Hội lông thủ CN1416",
+    "slogan": "Đánh hết sức · Thua hết hồn · Nhậu hết mình",
+    "location": "Sân cầu lông Tấn Phúc",
+    "startsAt": null,
+    "dateLabel": "Cuối tháng 10/2026 — chưa chốt ngày",
+    "registrationDeadline": null,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "feeVnd": null,
+    "contactName": null,
+    "contactPhone": null,
+    "zaloUrl": null,
+    "qrAssetPath": null,
+    "qrPublished": false
+  },
+  "rules": {
+    "teamCount": 4,
+    "categories": ["mens_doubles", "womens_doubles", "mixed_doubles"],
+    "setTarget": 21,
+    "cap": 25,
+    "changeEndsAt": 11,
+    "minLead": 2,
+    "ranking": ["pointsFor", "wins", "difference", "manualHeadToHead"],
+    "placementWins": 2,
+    "lateMinutes": 10,
+    "walkoverScore": {
+      "winner": 21,
+      "loser": 0
+    }
+  },
+  "athletes": [],
+  "teams": [
+    {
+      "id": "red",
+      "name": "Đội Đỏ",
+      "color": "#E63D27",
+      "captainId": null
+    },
+    {
+      "id": "blue",
+      "name": "Đội Xanh",
+      "color": "#2563EB",
+      "captainId": null
+    },
+    {
+      "id": "yellow",
+      "name": "Đội Vàng",
+      "color": "#FFD644",
+      "captainId": null
+    },
+    {
+      "id": "white",
+      "name": "Đội Trắng",
+      "color": "#FFFDF4",
+      "captainId": null
+    }
+  ],
+  "matches": [],
+  "courts": [],
+  "draw": {
+    "status": "not_started",
+    "algorithmVersion": "balanced-v1",
+    "seed": null,
+    "rosterHash": null,
+    "assignment": {}
+  },
+  "tieDecisions": [],
+  "sponsorships": [],
+  "finance": {
+    "published": false,
+    "feePayments": [],
+    "income": [
+      {
+        "id": "organizer",
+        "label": "Ban tổ chức đóng góp",
+        "amountVnd": 1000000,
+        "received": false
+      }
+    ],
+    "expenses": [
+      {
+        "id": "0",
+        "label": "Thuê sân",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "1",
+        "label": "Cầu thi đấu",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "2",
+        "label": "Huy chương",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "3",
+        "label": "Cúp / kỷ niệm chương",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "4",
+        "label": "Nước uống, khăn",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "5",
+        "label": "Tiệc tổng kết",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "6",
+        "label": "In poster, banner",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      },
+      {
+        "id": "7",
+        "label": "Chi phí khác",
+        "quantity": 0,
+        "unitPriceVnd": 0,
+        "paid": false,
+        "note": ""
+      }
+    ]
+  },
+  "results": {
+    "standings": [],
+    "champion": null,
+    "runnerUp": null,
+    "third": null,
+    "consolation": null,
+    "finalized": false,
+    "categoryWinners": {}
+  },
+  "audit": [],
+  "requests": []
+}

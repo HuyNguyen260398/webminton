@@ -1,0 +1,22 @@
+{
+  "name": "webminton",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "prettier --check packages data *.json *.yaml",
+    "format": "prettier --write packages data *.json *.yaml",
+    "build": "pnpm -r build",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "5.0.0",
+    "prettier": "3.6.2",
+    "@types/node": "24.10.1"
+  }
+}
