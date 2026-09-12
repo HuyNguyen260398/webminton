@@ -51,3 +51,11 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - S3 adapter checked with a controlled transport enforcing conditional headers; live AWS integration remains Task 12. Local runner identity never enters Lambda bundle.
 - Fixed direct node_modules import in seed tool and AWS SDK dynamic-require incompatibility by exporting the client factory and bundling Lambda as handler.cjs.
 - Task 6 commit: `5d80fef`.
+
+## Task 8
+
+- Next.js static export, Vietnamese navigation, live tournament landing, rules, sponsor tiers and original poster links implemented.
+- Browser red: missing heading in scaffold. Green: 2 Playwright cases at 1440/390px, static build/typecheck passes.
+- Visually inspected full-page desktop and mobile screenshots: poster palette, hierarchy and borders preserved; no horizontal overflow.
+- Installed matching Chromium 1243 for Playwright 1.63.0. Preview API runs only from scripts/serve-preview.ts, outside production bundle.
+- Task 7 commit: `9368ac9`.

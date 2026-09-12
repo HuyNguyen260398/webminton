@@ -19,7 +19,8 @@
     "vitest": "5.0.0",
     "prettier": "3.6.2",
     "@types/node": "24.10.1",
-    "tsx": "4.23.13"
+    "tsx": "4.23.13",
+    "@playwright/test": "1.63.0"
   },
   "type": "module"
 }

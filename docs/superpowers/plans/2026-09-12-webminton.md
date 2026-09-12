@@ -249,7 +249,7 @@ test('ETag cũ không ghi đè bản mới', async () => {
 
 **Interfaces:** `getPublicTournament(): Promise<PublicTournament>` với type infer từ projection schema; `formatVnd(number):string`; `formatDate(iso:string):string`; public API responses không chứa private document. App layout dùng shared nav sáu route trong spec.
 
-- [ ] Tạo E2E đọc tiêu đề, trạng thái ngày chưa chốt, navigation và không có contact placeholder `[Tên]`. Chạy trên export, kỳ vọng đỏ:
+- [x] Tạo E2E đọc tiêu đề, trạng thái ngày chưa chốt, navigation và không có contact placeholder `[Tên]`. Chạy trên export, kỳ vọng đỏ:
 
 ```ts
 test('landing giữ thông tin chưa chốt và tiếng Việt', async ({page}) => {
@@ -260,9 +260,9 @@ test('landing giữ thông tin chưa chốt và tiếng Việt', async ({page}) 
 });
 ```
 
-- [ ] Scaffold App Router với export/trailingSlash; xây tokens theo spec §3. Dùng text thật từ JSON, không hardcode ngày/phí; ảnh poster có alt, width/height; không bắt buộc image optimizer server. Ngày/phí runtime đổi qua API không cần redeploy; metadata build-time chỉ dùng tên giải chung, không embed thông tin có thể đổi.
-- [ ] Tạo loading/error/retry/empty, navigation mobile bàn phím. QR chỉ render khi flag public đã xác nhận. Chạy `pnpm --filter @webminton/frontend build`, Playwright 390×844 và 1440×900; xem screenshots đối chiếu 3 poster, chỉnh clipping/contrast.
-- [ ] Commit riêng cho task: `feat: build Vietnamese poster-inspired landing`.
+- [x] Scaffold App Router với export/trailingSlash; xây tokens theo spec §3. Dùng text thật từ JSON, không hardcode ngày/phí; ảnh poster có alt, width/height; không bắt buộc image optimizer server. Ngày/phí runtime đổi qua API không cần redeploy; metadata build-time chỉ dùng tên giải chung, không embed thông tin có thể đổi.
+- [x] Tạo loading/error/retry/empty, navigation mobile bàn phím. QR chỉ render khi flag public đã xác nhận. Chạy `pnpm --filter @webminton/frontend build`, Playwright 390×844 và 1440×900; xem screenshots đối chiếu 3 poster, chỉnh clipping/contrast.
+- [x] Commit riêng cho task: `feat: build Vietnamese poster-inspired landing`.
 
 ### Task 9: Đăng nhập BTC, danh sách VĐV và cấu hình giải
 
