@@ -224,7 +224,7 @@ test('JSON roster không nhận ID trùng', () => {
 
 **Interfaces:** `TournamentRepository.read(): Promise<{document:TournamentDocument;etag:string}>`; `write(document,expectedEtag): Promise<{etag:string}>`; `listVersions(cursor?): Promise<{items:Array<{versionId:string;lastModified:string}>;nextCursor?:string}>`; `readVersion(versionId): Promise<TournamentDocument>`; `create(document): Promise<void>`. `executeCommand(repository, command:TournamentCommand, context:{actorSub:string;etag:string}): Promise<{document:TournamentDocument;etag:string;replayed:boolean}>`. `toPublicTournament(t)` trả allowlist từ spec §3. `handler(event)` dùng REST API proxy event. MemoryRepository mô phỏng CAS/versions, chỉ dùng local/test.
 
-- [ ] Viết integration ở command layer: hai request đọc cùng ETag, chỉ một thành công; requestId replay không tăng revision/phí; giả group admin trong request body bị bỏ; projection không có phone/note/feePayments/pairs bí mật; public mutation 403/401.
+- [x] Viết integration ở command layer: hai request đọc cùng ETag, chỉ một thành công; requestId replay không tăng revision/phí; giả group admin trong request body bị bỏ; projection không có phone/note/feePayments/pairs bí mật; public mutation 403/401.
 
 ```ts
 test('ETag cũ không ghi đè bản mới', async () => {
@@ -237,11 +237,11 @@ test('ETag cũ không ghi đè bản mới', async () => {
 });
 ```
 
-- [ ] Chạy `pnpm --filter @webminton/backend test` đỏ. Implement S3 GetObject body parse/validate; PutObject `IfMatch`, seed `IfNoneMatch:'*'`; map errors spec §4. Handler bắt JSON malformed, body limit, unknown commands, thiếu precondition. Router không có catch-all write public.
-- [ ] Hoàn thiện CLI roster-config và command replaceRoster: validate refs, giữ nguyên dữ liệu ngoài roster, từ chối xóa người có trận/payment, khóa thay đổi thành viên sau draw confirmed; cho đổi tên giữ ID. Implement mỗi command file theo domain Tasks 1–6: field allowlist, validate trước mutation, derive, audit và idempotency cùng một write. Hash payload deterministic. JWT group lấy từ gateway claims, scope kiểm tại authorizer và server, không parse token không verify. Missing scope/group/client không được quyền admin.
-- [ ] Implement restore: đọc version, validate schema, giữ revision hiện tại+1 và ledger request/audit hiện tại, thêm restore event, tính lại; không CopyObject đè mù. Test restore đồng thời thất bại 409 và old invalid schema bị từ chối.
-- [ ] Viết local API adapter gọi router, test identity chỉ tồn tại local runner, không bypass env trong Lambda production. Chạy tests xanh.
-- [ ] Commit riêng cho task: `feat: expose protected tournament API with S3 concurrency`.
+- [x] Chạy `pnpm --filter @webminton/backend test` đỏ. Implement S3 GetObject body parse/validate; PutObject `IfMatch`, seed `IfNoneMatch:'*'`; map errors spec §4. Handler bắt JSON malformed, body limit, unknown commands, thiếu precondition. Router không có catch-all write public.
+- [x] Hoàn thiện CLI roster-config và command replaceRoster: validate refs, giữ nguyên dữ liệu ngoài roster, từ chối xóa người có trận/payment, khóa thay đổi thành viên sau draw confirmed; cho đổi tên giữ ID. Implement mỗi command file theo domain Tasks 1–6: field allowlist, validate trước mutation, derive, audit và idempotency cùng một write. Hash payload deterministic. JWT group lấy từ gateway claims, scope kiểm tại authorizer và server, không parse token không verify. Missing scope/group/client không được quyền admin.
+- [x] Implement restore: đọc version, validate schema, giữ revision hiện tại+1 và ledger request/audit hiện tại, thêm restore event, tính lại; không CopyObject đè mù. Test restore đồng thời thất bại 409 và old invalid schema bị từ chối.
+- [x] Viết local API adapter gọi router, test identity chỉ tồn tại local runner, không bypass env trong Lambda production. Chạy tests xanh.
+- [x] Commit riêng cho task: `feat: expose protected tournament API with S3 concurrency`.
 
 ### Task 8: Next.js landing theo poster và shell tiếng Việt
 

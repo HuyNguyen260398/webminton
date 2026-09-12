@@ -1,0 +1,19 @@
+{
+  "name": "@webminton/backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "esbuild src/handler.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/handler.cjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1131.0",
+    "@webminton/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "@types/aws-lambda": "8.10.163"
+  }
+}

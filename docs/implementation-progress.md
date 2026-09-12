@@ -43,3 +43,11 @@ AWS deployment/integration and GitHub environment checks remain pending credenti
 - Task 5 commit: `2f427fa`.
 
 Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; validate accepts clean empty roster. Re-ran all 46 tests and root typecheck successfully.
+
+## Task 7
+
+- Protected HTTP routing, filtered public projection, command validation/audit/idempotency, CAS S3 adapter, version restore, local runner and create-only seed tool implemented.
+- Red: 5 command/auth failures and 3 routing/restore failures; green: 56 tests, root TypeScript and Lambda CJS build/load smoke pass.
+- S3 adapter checked with a controlled transport enforcing conditional headers; live AWS integration remains Task 12. Local runner identity never enters Lambda bundle.
+- Fixed direct node_modules import in seed tool and AWS SDK dynamic-require incompatibility by exporting the client factory and bundling Lambda as handler.cjs.
+- Task 6 commit: `5d80fef`.
