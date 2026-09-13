@@ -12,7 +12,10 @@
     "format": "prettier --write packages data *.json *.yaml",
     "build": "pnpm -r build",
     "test:e2e": "playwright test",
-    "roster": "node --import tsx scripts/roster-cli.ts"
+    "roster": "node --import tsx scripts/roster-cli.ts",
+    "local:data": "node --import tsx scripts/make-local-data.ts",
+    "dev:api": "node --import tsx scripts/serve-local-api.ts",
+    "dev:web": "pnpm --filter @webminton/frontend dev"
   },
   "devDependencies": {
     "typescript": "7.0.2",
