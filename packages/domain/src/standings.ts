@@ -11,9 +11,16 @@ export function resultsHash(t: TournamentDocument): string {
     ),
   );
 }
-export function calculateStandings(
-  t: TournamentDocument,
-): TournamentDocument["results"]["standings"] {
+export interface Standing {
+  teamId: string;
+  played: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  wins: number;
+  difference: number;
+  rank: number | null;
+}
+export function calculateStandings(t: TournamentDocument): Standing[] {
   const rows = t.teams.map((team) => ({
     teamId: team.id,
     played: 0,

@@ -1,15 +1,24 @@
-import type { TournamentDocument, Athlete } from "./schema";
+import type { Team } from "./schema";
+import type { PrivateAthlete, PrivateRoster } from "./roster";
 import { sha256Hex, sha256Uint32LE } from "./hash";
-export function rosterHash(t: TournamentDocument) {
+
+export interface DrawResult {
+  status: "confirmed";
+  algorithmVersion: "balanced-v1";
+  assignment: Record<string, string>;
+}
+
+export function rosterHash(roster: PrivateRoster): string {
   return sha256Hex(
     JSON.stringify(
-      t.athletes
+      roster.athletes
         .filter((a) => a.active)
         .map((a) => ({ id: a.id, gender: a.gender, skillBand: a.skillBand }))
         .sort((a, b) => a.id.localeCompare(b.id)),
     ),
   );
 }
+
 function random(seed: string) {
   let n = sha256Uint32LE(seed);
   return () => {
@@ -20,6 +29,7 @@ function random(seed: string) {
     return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
   };
 }
+
 function shuffle<T>(items: T[], rng: () => number) {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
@@ -28,11 +38,15 @@ function shuffle<T>(items: T[], rng: () => number) {
   }
   return out;
 }
+
+// Balanced by gender first, then skill band, then team size. The caller is
+// responsible for refusing to redraw a tournament that has already started.
 export function generateDraw(
-  t: TournamentDocument,
+  roster: PrivateRoster,
+  teams: Team[],
   seed: string,
-): TournamentDocument["draw"] {
-  const athletes = t.athletes
+): DrawResult {
+  const athletes = roster.athletes
     .filter((a) => a.active)
     .sort((a, b) => a.id.localeCompare(b.id));
   if (athletes.some((a) => a.skillBand === null))
@@ -43,16 +57,11 @@ export function generateDraw(
     )
   )
     throw new Error("INSUFFICIENT_ROSTER");
-  if (
-    t.draw.status === "confirmed" ||
-    t.matches.some((m) => m.status !== "pending")
-  )
-    throw new Error("DRAW_LOCKED");
   for (let attempt = 0; attempt < 100; attempt++) {
     const rng = random(`${seed}:${attempt}`),
-      groups = t.teams.map((team) => ({
+      groups = teams.map((team) => ({
         id: team.id,
-        athletes: [] as Athlete[],
+        athletes: [] as PrivateAthlete[],
       }));
     for (const gender of ["male", "female"])
       for (const skill of [1, 2, 3])
@@ -76,30 +85,12 @@ export function generateDraw(
       1
     )
       return {
-        status: "draft",
+        status: "confirmed",
         algorithmVersion: "balanced-v1",
-        seed,
-        rosterHash: rosterHash(t),
         assignment: Object.fromEntries(
           groups.flatMap((g) => g.athletes.map((a) => [a.id, g.id])),
         ),
       };
   }
   throw new Error("DRAW_NOT_FOUND");
-}
-export function confirmDraw(
-  input: TournamentDocument,
-  hash: string,
-): TournamentDocument {
-  const t = structuredClone(input);
-  if (hash !== rosterHash(t) || hash !== t.draw.rosterHash)
-    throw new Error("STALE_ROSTER");
-  if (t.draw.status === "not_started") throw new Error("DRAW_NOT_STARTED");
-  if (t.athletes.filter((a) => a.active).some((a) => !t.draw.assignment[a.id]))
-    throw new Error("INVALID_DRAW");
-  t.athletes.forEach((a) => {
-    a.teamId = a.active ? t.draw.assignment[a.id] : null;
-  });
-  t.draw.status = "confirmed";
-  return t;
 }

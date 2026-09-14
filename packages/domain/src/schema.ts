@@ -25,10 +25,7 @@ export const AthleteSchema = z.strictObject({
   id: Id,
   name: text,
   gender: z.enum(["male", "female"]),
-  skillBand: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
   teamId: Id.nullable(),
-  phone: z.string().max(30).nullable(),
-  note,
   active: z.boolean(),
 });
 export const TeamSchema = z.strictObject({
@@ -70,7 +67,7 @@ export const InfoSchema = z.strictObject({
   zaloUrl: z.url().nullable(),
   qrAssetPath: z
     .string()
-    .regex(/^\/images\/[a-zA-Z0-9._-]+$/)
+    .regex(/^\/[a-zA-Z0-9/._-]+$/)
     .nullable(),
   qrPublished: z.boolean(),
 });
@@ -101,25 +98,9 @@ export const ExpenseSchema = z
     (e) => Number.isSafeInteger(e.quantity * e.unitPriceVnd),
     "Thành tiền phải là số nguyên đồng",
   );
-export const PaymentSchema = z.strictObject({
-  id: Id,
-  athleteId: Id,
-  amountVnd: Money,
-  receivedAt: time,
-});
-export const StandingSchema = z.strictObject({
-  teamId: Id,
-  played: z.number().int().nonnegative(),
-  pointsFor: Money,
-  pointsAgainst: Money,
-  wins: z.number().int().nonnegative(),
-  difference: z.number().int(),
-  rank: z.number().int().min(1).max(4).nullable(),
-});
-export const TournamentSchema = z
+export const PublicTournamentSchema = z
   .strictObject({
     schemaVersion: z.literal(1),
-    revision: z.number().int().nonnegative(),
     id: z.literal("noi-bo-2026"),
     updatedAt: time,
     info: InfoSchema,
@@ -152,10 +133,8 @@ export const TournamentSchema = z
     matches: z.array(MatchSchema),
     courts: z.array(z.strictObject({ id: Id, name: text })),
     draw: z.strictObject({
-      status: z.enum(["not_started", "draft", "confirmed"]),
+      status: z.enum(["not_started", "confirmed"]),
       algorithmVersion: z.literal("balanced-v1"),
-      seed: text.nullable(),
-      rosterHash: text.nullable(),
       assignment: z.record(Id, Id),
     }),
     tieDecisions: z.array(
@@ -170,36 +149,9 @@ export const TournamentSchema = z
     sponsorships: z.array(SponsorSchema),
     finance: z.strictObject({
       published: z.boolean(),
-      feePayments: z.array(PaymentSchema),
       income: z.array(IncomeSchema),
       expenses: z.array(ExpenseSchema),
     }),
-    results: z.strictObject({
-      standings: z.array(StandingSchema),
-      champion: Id.nullable(),
-      runnerUp: Id.nullable(),
-      third: Id.nullable(),
-      consolation: Id.nullable(),
-      finalized: z.boolean(),
-      categoryWinners: z.partialRecord(CategorySchema, z.array(Id)),
-    }),
-    audit: z.array(
-      z.strictObject({
-        id: Id,
-        actorSub: text,
-        action: text,
-        at: time,
-        revision: z.number().int().nonnegative(),
-      }),
-    ),
-    requests: z.array(
-      z.strictObject({
-        id: Id,
-        actorSub: text,
-        payloadHash: text,
-        committedRevision: z.number().int().nonnegative(),
-      }),
-    ),
   })
   .superRefine((t, ctx) => {
     const fail = (message: string) => ctx.addIssue({ code: "custom", message });
@@ -213,11 +165,8 @@ export const TournamentSchema = z
       t.matches,
       t.courts,
       t.sponsorships,
-      t.finance.feePayments,
       t.finance.income,
       t.finance.expenses,
-      t.audit,
-      t.requests,
     ].forEach(unique);
     const teams = new Set(t.teams.map((x) => x.id)),
       athletes = new Set(t.athletes.map((x) => x.id)),
@@ -227,7 +176,6 @@ export const TournamentSchema = z
     };
     t.athletes.forEach((x) => ref(x.teamId, teams));
     t.teams.forEach((x) => ref(x.captainId, athletes));
-    t.finance.feePayments.forEach((x) => ref(x.athleteId, athletes));
     t.matches.forEach((m) => {
       [m.teamAId, m.teamBId, m.winnerTeamId].forEach((id) => ref(id, teams));
       ref(m.courtId, courts);
@@ -248,14 +196,6 @@ export const TournamentSchema = z
       ref(a, athletes);
       ref(team, teams);
     });
-    [
-      t.results.champion,
-      t.results.runnerUp,
-      t.results.third,
-      t.results.consolation,
-      ...t.results.standings.map((x) => x.teamId),
-      ...Object.values(t.results.categoryWinners).flat(),
-    ].forEach((id) => ref(id, teams));
     t.tieDecisions.forEach((d) => {
       [...d.tiedTeamIds, ...d.orderedTeamIds].forEach((id) => ref(id, teams));
       if (
@@ -267,7 +207,7 @@ export const TournamentSchema = z
     if (t.info.qrPublished && !t.info.qrAssetPath)
       fail("Chưa có mã QR được xác nhận");
   });
-export type TournamentDocument = z.infer<typeof TournamentSchema>;
+export type TournamentDocument = z.infer<typeof PublicTournamentSchema>;
 export type Athlete = z.infer<typeof AthleteSchema>;
 export type Team = z.infer<typeof TeamSchema>;
 export type Match = z.infer<typeof MatchSchema>;

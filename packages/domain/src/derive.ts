@@ -1,9 +1,21 @@
-import type { TournamentDocument } from "./schema";
+import type { TournamentDocument, Category, Match } from "./schema";
 import { isFinalScore } from "./score";
-import { calculateStandings } from "./standings";
-export function deriveTournament(
-  input: TournamentDocument,
-): TournamentDocument {
+import { calculateStandings, type Standing } from "./standings";
+
+export interface DerivedResults {
+  matches: Match[];
+  standings: Standing[];
+  champion: string | null;
+  runnerUp: string | null;
+  third: string | null;
+  consolation: string | null;
+  finalized: boolean;
+  categoryWinners: Partial<Record<Category, string[]>>;
+}
+
+// Results are never stored. They are recomputed from match scores on every
+// load, so a hand-edited document cannot disagree with its own standings.
+export function deriveTournament(input: TournamentDocument): DerivedResults {
   const t = structuredClone(input);
   for (const m of t.matches) {
     m.winnerTeamId = null;
@@ -21,11 +33,13 @@ export function deriveTournament(
       m.winnerTeamId = m.score.a > m.score.b ? m.teamAId : m.teamBId;
     }
   }
-  t.results.standings = calculateStandings(t);
-  t.results.champion = null;
-  t.results.runnerUp = null;
-  t.results.third = null;
-  t.results.consolation = null;
+
+  const standings = calculateStandings(t);
+  let champion: string | null = null;
+  let runnerUp: string | null = null;
+  let third: string | null = null;
+  let consolation: string | null = null;
+
   for (const phase of ["first_place", "third_place"] as const) {
     const matches = t.matches.filter((m) => m.phase === phase),
       wins = new Map<string, number>();
@@ -39,14 +53,15 @@ export function deriveTournament(
         ) ?? null)
       : null;
     if (phase === "first_place") {
-      t.results.champion = winner;
-      t.results.runnerUp = loser;
+      champion = winner;
+      runnerUp = loser;
     } else {
-      t.results.third = winner;
-      t.results.consolation = loser;
+      third = winner;
+      consolation = loser;
     }
   }
-  t.results.categoryWinners = {};
+
+  const categoryWinners: Partial<Record<Category, string[]>> = {};
   for (const category of t.rules.categories) {
     const counts = t.teams.map((team) => ({
       id: team.id,
@@ -59,13 +74,22 @@ export function deriveTournament(
     }));
     const max = Math.max(...counts.map((x) => x.count));
     if (max > 0)
-      t.results.categoryWinners[category] = counts
+      categoryWinners[category] = counts
         .filter((x) => x.count === max)
         .map((x) => x.id);
   }
-  t.results.finalized =
-    t.results.finalized &&
-    t.matches.length === 24 &&
-    t.matches.every((m) => m.winnerTeamId !== null);
-  return t;
+
+  const finalized =
+    t.matches.length === 24 && t.matches.every((m) => m.winnerTeamId !== null);
+
+  return {
+    matches: t.matches,
+    standings,
+    champion,
+    runnerUp,
+    third,
+    consolation,
+    finalized,
+    categoryWinners,
+  };
 }

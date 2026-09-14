@@ -34,10 +34,11 @@ test("two wins determine champion without removing third match", () => {
   let t = seedPlacement(completed());
   const finals = t.matches.filter((m) => m.phase === "first_place");
   for (const m of finals.slice(0, 2)) t = applyScore(t, m.id, { a: 21, b: 10 });
-  expect(t.results.champion).toBe("red");
-  expect(t.results.runnerUp).toBe("blue");
+  const results = deriveTournament(t);
+  expect(results.champion).toBe("red");
+  expect(results.runnerUp).toBe("blue");
   expect(t.matches).toHaveLength(24);
-  expect(t.results.finalized).toBe(false);
+  expect(results.finalized).toBe(false);
   expect(t.matches.find((m) => m.id === finals[2].id)!.score).toBeNull();
 });
 test("changing an upstream result cannot invalidate a called final", () => {

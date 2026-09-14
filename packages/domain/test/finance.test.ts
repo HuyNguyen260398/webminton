@@ -1,9 +1,9 @@
 import { test, expect } from "vitest";
-import { makeTournament, makeRoster } from "../src/testing/fixtures";
+import { makeTournament, makePublicAthletes } from "../src/testing/fixtures";
 import { calculateFinance, rankSponsors } from "../src/finance";
 test("cash totals exclude unpaid budgets and unreceived pledges", () => {
   const t = makeTournament();
-  t.athletes = makeRoster(3);
+  t.athletes = makePublicAthletes(3);
   t.finance.income[0].received = true;
   t.sponsorships = [
     {
@@ -63,7 +63,7 @@ test("additional contribution rounds up to thousands and handles zero athletes",
     },
   ];
   expect(calculateFinance(t).additionalPerAthleteVnd).toBeNull();
-  t.athletes = makeRoster(3);
+  t.athletes = makePublicAthletes(3);
   expect(calculateFinance(t).additionalPerAthleteVnd).toBe(4000);
 });
 test("equal sponsor amounts share tiers and next distinct amount is gold", () => {

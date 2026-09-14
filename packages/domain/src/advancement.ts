@@ -1,15 +1,26 @@
 import type { TournamentDocument, Score, Match } from "./schema";
 import { deriveTournament } from "./derive";
 import { isFinalScore } from "./score";
+
+// deriveTournament returns results rather than a document, so fold the
+// recomputed winnerTeamId values back onto the document being built.
+function withWinners(t: TournamentDocument): TournamentDocument {
+  return { ...t, matches: deriveTournament(t).matches };
+}
+
 export function seedPlacement(input: TournamentDocument): TournamentDocument {
-  const t = deriveTournament(input),
-    group = t.matches.filter((m) => m.phase === "group"),
+  const derived = deriveTournament(input);
+  const t: TournamentDocument = {
+    ...structuredClone(input),
+    matches: derived.matches,
+  };
+  const group = t.matches.filter((m) => m.phase === "group"),
     old = t.matches.filter((m) => m.phase !== "group");
   const ready =
     group.length === 18 &&
     group.every((m) => m.winnerTeamId) &&
-    t.results.standings.every((r) => r.rank !== null);
-  const desired = ready ? t.results.standings.map((r) => r.teamId) : [];
+    derived.standings.every((r) => r.rank !== null);
+  const desired = ready ? derived.standings.map((r) => r.teamId) : [];
   // Group by phase instead of display order: admins may reorder freely.
   const first = old.find((m) => m.phase === "first_place"),
     third = old.find((m) => m.phase === "third_place");
@@ -26,7 +37,7 @@ export function seedPlacement(input: TournamentDocument): TournamentDocument {
   if (old.some((m) => m.status !== "pending"))
     throw new Error("PLACEMENT_RESET_REQUIRED");
   t.matches = group;
-  if (!ready) return deriveTournament(t);
+  if (!ready) return withWinners(t);
   for (const [index, phase] of (
     ["first_place", "third_place"] as const
   ).entries())
@@ -61,8 +72,9 @@ export function seedPlacement(input: TournamentDocument): TournamentDocument {
       };
       t.matches.push(m);
     }
-  return deriveTournament(t);
+  return withWinners(t);
 }
+
 export function applyScore(
   input: TournamentDocument,
   id: string,
@@ -74,12 +86,11 @@ export function applyScore(
   if (!m) throw new Error("MATCH_NOT_FOUND");
   m.score = score;
   m.status = "completed";
-  t.results.finalized = false;
   return seedPlacement(t);
 }
+
 export function resetPlacement(input: TournamentDocument): TournamentDocument {
   const t = structuredClone(input);
   t.matches = t.matches.filter((m) => m.phase === "group");
-  t.results.finalized = false;
-  return deriveTournament(t);
+  return withWinners(t);
 }

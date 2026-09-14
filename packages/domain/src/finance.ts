@@ -5,9 +5,7 @@ export function calculateFinance(t: TournamentDocument) {
     if (!Number.isSafeInteger(n)) throw new Error("MONEY_OVERFLOW");
     return n;
   };
-  const fees = sum(t.finance.feePayments.map((p) => p.amountVnd));
   const receivedVnd = sum([
-    fees,
     ...t.finance.income.filter((x) => x.received).map((x) => x.amountVnd),
     ...t.sponsorships.filter((x) => x.received).map((x) => x.amountVnd),
   ]);
@@ -20,7 +18,6 @@ export function calculateFinance(t: TournamentDocument) {
     t.finance.expenses.map((e) => e.quantity * e.unitPriceVnd),
   );
   const pledgedVnd = sum([
-    fees,
     ...t.finance.income.map((x) => x.amountVnd),
     ...t.sponsorships.map((x) => x.amountVnd),
   ]);

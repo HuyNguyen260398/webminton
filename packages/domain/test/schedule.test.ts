@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { makeCompletedGroup, makeRoster } from "../src/testing/fixtures";
+import { makeCompletedGroup, makePublicAthletes } from "../src/testing/fixtures";
 import {
   findScheduleConflicts,
   reorderMatches,
@@ -33,7 +33,7 @@ test("interval overlap detects court and athlete conflicts but allows adjacent s
 });
 test("lineups require two active eligible teammates on each side", () => {
   const t = makeCompletedGroup();
-  t.athletes = makeRoster(8);
+  t.athletes = makePublicAthletes(8);
   for (const [i, a] of t.athletes.entries()) a.teamId = i < 4 ? "red" : "blue";
   const m = t.matches[0];
   m.pairA = ["athlete-1", "athlete-3"];
