@@ -95,16 +95,18 @@ button.secondary,
 /* ---- Scrolling divider between poster sections ---- */
 .marquee {
   display: flex;
-  gap: 28px;
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 14px 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 28px;
+  padding: 14px var(--gutter);
   border-block: var(--border);
   background: var(--ink);
   color: var(--paper);
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 2px;
+  text-align: center;
   text-transform: uppercase;
 }
 .marquee b {
