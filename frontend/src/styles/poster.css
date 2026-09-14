@@ -1,0 +1,271 @@
+/* The poster design system.
+   Reference: assets/poster_designs/thong-bao-trang-{1,2,3}.jpg
+   Colour tokens live in globals.css. Any visual change here gets compared
+   against those three JPGs. */
+
+:root {
+  --shadow-hard: 9px 9px 0 var(--ink);
+  --shadow-hard-sm: 5px 5px 0 var(--ink);
+  --gutter: clamp(16px, 5vw, 64px);
+}
+
+/* Yellow ground with the poster's regular dot grid. */
+.poster-ground {
+  background-color: var(--yellow);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(23, 21, 15, 0.18) 1.2px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+.section {
+  padding-block: clamp(40px, 8vw, 96px);
+}
+
+.container {
+  width: min(1100px, 100% - var(--gutter) * 2);
+  margin-inline: auto;
+  padding: 0;
+}
+
+/* ---- Slabs: reversed-out blocks with a hard offset shadow ---- */
+.slab {
+  display: inline-block;
+  padding: 0.18em 0.5em;
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-hard);
+  font-weight: 900;
+  line-height: 1.08;
+  text-transform: uppercase;
+}
+.slab--red {
+  background: var(--red);
+  color: var(--paper);
+}
+.slab--black {
+  background: var(--ink);
+  color: var(--yellow);
+}
+.slab--yellow {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+/* ---- Cards ---- */
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-hard);
+  padding: clamp(20px, 3vw, 34px);
+}
+.card--dashed {
+  border-style: dashed;
+  box-shadow: none;
+}
+.card > h3 {
+  margin: 0 0 18px;
+  color: var(--red);
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.card > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Pills ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow-hard-sm);
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+.pill--red {
+  background: var(--red);
+  color: var(--paper);
+}
+.pill--green {
+  background: var(--green);
+  color: var(--paper);
+}
+.pill--yellow {
+  background: var(--yellow);
+  color: var(--ink);
+}
+.pill--outline {
+  background: var(--paper);
+  color: var(--ink);
+}
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+/* ---- Numbered discs ---- */
+.disc {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--paper);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.disc--black {
+  background: var(--ink);
+}
+.disc--red {
+  background: var(--red);
+}
+.disc--green {
+  background: var(--green);
+}
+/* Small red bullet discs, as on the poster's plain bullet lists. */
+.bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bullets > li {
+  position: relative;
+  margin-bottom: 16px;
+  padding-left: 26px;
+}
+.bullets > li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.bullets > li:last-child {
+  margin-bottom: 0;
+}
+
+/* Numbered rows pairing a disc with text. */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps > li {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.steps > li:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Photo frames ---- */
+.photo-frame {
+  margin: 0;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-hard);
+  padding: 12px 12px 0;
+}
+.photo-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  max-width: 100%;
+}
+.photo-frame figcaption {
+  padding: 10px 2px 12px;
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ---- Stickers ---- */
+.bubble {
+  position: relative;
+  display: inline-block;
+  padding: 10px 18px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow-hard-sm);
+  font-weight: 800;
+  font-style: italic;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -13px;
+  left: 28px;
+  border: 7px solid transparent;
+  border-top-color: var(--ink);
+}
+
+.badge-circle {
+  display: grid;
+  place-items: center;
+  width: 118px;
+  height: 118px;
+  padding: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--paper);
+  font-weight: 800;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* ---- Dotted-leader rows, as on the QUỸ GIẢI table ---- */
+.leaders {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-block: 12px;
+  border-bottom: 2px dotted rgba(23, 21, 15, 0.25);
+}
+.leaders:last-child {
+  border-bottom: 0;
+}
+.leaders > span:first-child {
+  flex: 0 1 auto;
+}
+.leaders > i {
+  flex: 1 1 auto;
+  height: 0;
+  border-bottom: 2px dotted rgba(23, 21, 15, 0.4);
+}
+.leaders > b {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ---- Rotation, disabled for reduced motion ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .rot {
+    transform: rotate(var(--rot, 0deg));
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --shadow-hard: 6px 6px 0 var(--ink);
+  }
+  .slab {
+    box-shadow: var(--shadow-hard-sm);
+  }
+}

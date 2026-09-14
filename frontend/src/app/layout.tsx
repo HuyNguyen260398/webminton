@@ -1,46 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import "./globals.css";
+
 export const metadata: Metadata = {
-  title: "Webminton · Giải cầu lông nội bộ 2026",
+  title: "Giải cầu lông nội bộ 2026 · Hội lông thủ CN1416",
   description:
-    "Hội lông thủ CN1416 — thông tin giải, danh sách VĐV, bốc thăm và lịch thi đấu.",
+    "Bốn đội, ba nội dung, hai mươi bốn trận gói gọn trong một buổi — thông tin giải, thể lệ thi đấu và nhà tài trợ.",
 };
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body>
+      <body className="poster-ground">
         <a className="skip" href="#main">
           Đến nội dung chính
         </a>
-        <header>
-          <div className="nav-wrap">
-            <Link className="brand" href="/">
-              <span>W</span>WEBMINTON
-              <span
-                style={{
-                  background: "none",
-                  color: "inherit",
-                  fontSize: 11,
-                  letterSpacing: 1,
-                }}
-              >
-                {" "}
-                / CN1416
-              </span>
-            </Link>
-            <nav className="nav-links" aria-label="Điều hướng chính">
-              <Link href="/">Trang chủ</Link>
-              <Link href="/van-dong-vien/">Vận động viên</Link>
-              <Link href="/boc-tham/">Bốc thăm</Link>
-              <Link href="/lich-thi-dau/">Lịch thi đấu</Link>
-              <Link href="/thu-chi/">Thu chi</Link>
-              <Link className="admin-link" href="/quan-tri/">
-                Ban tổ chức ↗
-              </Link>
-            </nav>
-          </div>
-        </header>
         {children}
         <footer className="footer">
           <div className="container">
