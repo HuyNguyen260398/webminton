@@ -113,15 +113,6 @@ button.secondary,
   color: var(--yellow);
 }
 
-/* ---- Section headings shared by the live-data sections ---- */
-.section > .container > h2 {
-  margin: 0 0 28px;
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-}
-
 /* ---- Tables: scroll inside their own container, never widen the page ---- */
 .table-scroll {
   overflow-x: auto;

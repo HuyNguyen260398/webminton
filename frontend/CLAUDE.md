@@ -16,7 +16,8 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 | Piece | Use |
 | --- | --- |
 | `.poster-ground` | yellow ground with the poster's dot grid, set on `<body>` |
-| `<Slab tone rotate>` | reversed-out title block, hard offset shadow |
+| `<Section id title>` | live-data section; `title` is the two slab lines |
+| `<Slab tone rotate as>` | reversed-out title block, hard offset shadow |
 | `<Card title dashed>` | cream panel, 3px border, hard offset shadow |
 | `<Pill tone>` | rounded label — red/green/yellow/outline |
 | `<NumberDisc n tone>` | numbered circle for ordered rule lists |
@@ -28,6 +29,10 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 
 ## Conventions
 
+- Every section title is the same red `Slab` rotated -1.5°, split across two
+  lines (`THỂ LỆ / THI ĐẤU`, `BẢNG / XẾP HẠNG`). The posters add a right-aligned
+  name/club meta beside it; the live sections deliberately do not, since five
+  more repetitions down one page read as noise.
 - Shadows are **hard and un-blurred**: `--shadow-hard` (9px) and
   `--shadow-hard-sm` (5px), never a blur radius.
 - Rotations go through the `rot` class plus a `--rot` custom property, so
