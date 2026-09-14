@@ -450,3 +450,82 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= Poster 2 — thể lệ thi đấu ================= */
+.poster-two__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 32px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: clamp(32px, 4.5vw, 56px);
+}
+.poster-two__title {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  letter-spacing: -0.01em;
+  padding: 0.3em 0.55em;
+}
+.poster-two__meta {
+  margin: 8px 0 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* Exactly two columns, as on the poster — auto-fit would give three at
+   desktop width and break the poster's card pairing. DOM order interleaves
+   the columns so the rows land as drawn. align-items:start keeps each card
+   its own height rather than stretching to the row. */
+.poster-two__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(20px, 3vw, 32px);
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .poster-two__grid {
+    grid-template-columns: 1fr;
+  }
+}
+.poster-two__grid p {
+  margin: 0 0 14px;
+}
+
+.poster-two__fee {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--ink);
+  color: var(--paper);
+}
+.poster-two__fee-mark {
+  color: var(--yellow);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.poster-two__fee-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.poster-two__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  justify-content: space-between;
+  margin-top: clamp(28px, 4vw, 48px);
+  padding-top: 20px;
+  border-top: var(--border);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .poster-two__meta {
+    text-align: left;
+  }
+}
