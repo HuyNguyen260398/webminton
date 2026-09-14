@@ -17,12 +17,13 @@
     "dev": "pnpm --filter @webminton/frontend dev"
   },
   "devDependencies": {
-    "typescript": "7.0.2",
-    "vitest": "5.0.0",
-    "prettier": "3.6.2",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.10.1",
+    "prettier": "3.6.2",
+    "sharp": "^0.35.4",
     "tsx": "4.23.13",
-    "@playwright/test": "1.63.0"
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
   },
   "type": "module"
 }
