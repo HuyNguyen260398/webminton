@@ -1,0 +1,2 @@
+# Tên bucket phải là duy nhất trên toàn AWS.
+site_bucket_name = "webminton-site-doi-thanh-ten-cua-ban"
