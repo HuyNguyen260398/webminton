@@ -3,6 +3,7 @@ import { useTournament } from "../lib/use-tournament";
 import { PosterOne } from "../features/landing/PosterOne";
 import { PosterTwo } from "../features/landing/PosterTwo";
 import { PosterThree } from "../features/landing/PosterThree";
+import { LiveSections } from "../features/landing/LiveSections";
 
 export default function Page() {
   const { view, error, reload } = useTournament();
@@ -28,6 +29,7 @@ export default function Page() {
       </div>
       <PosterTwo t={view.t} />
       <PosterThree t={view.t} />
+      <LiveSections view={view} />
     </main>
   );
 }
