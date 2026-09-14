@@ -708,7 +708,11 @@
    flag sits and the score where the seed sits. The bracket lines stay off the
    group stage — a round robin has nothing to converge on. */
 .draw-stage {
-  display: inline-block;
+  /* Block, not the slab's inline-block: two slabs in a row otherwise share a
+     line and the stage label lands on top of the section title. */
+  display: block;
+  width: fit-content;
+  max-width: 100%;
   margin: 30px 0 18px;
   padding: 0.16em 0.6em;
   border: var(--border);
@@ -883,6 +887,9 @@
    ĐẤU and NHÀ TÀI TRỢ, minus the name/club meta: one poster repeating it is a
    standalone sheet, five more down the page is noise. */
 .section-title {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
   margin: 0 0 clamp(32px, 4.5vw, 56px);
   padding: 0.3em 0.55em;
   font-size: clamp(1.8rem, 4.5vw, 3rem);

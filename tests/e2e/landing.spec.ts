@@ -58,6 +58,24 @@ test("lists every athlete, all 24 matches and the four placings", async ({
   await expect(page.locator("#bang-xep-hang tbody tr")).toHaveCount(4);
 });
 
+// Both the section title and the stage label are slabs, and a slab is an
+// inline-block: without an explicit block display they share a line and
+// overlap. jsdom has no layout, so this can only be caught here.
+test("each stage label sits below its section title, never beside it", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const title = await page
+    .locator("#lich-thi-dau > .container > h2")
+    .boundingBox();
+  const stages = page.locator("#lich-thi-dau .draw-stage");
+  await expect(stages).toHaveCount(2);
+  for (let i = 0; i < 2; i++) {
+    const stage = await stages.nth(i).boundingBox();
+    expect(stage!.y).toBeGreaterThanOrEqual(title!.y + title!.height);
+  }
+});
+
 test("names the sponsors under their tiers", async ({ page }) => {
   await page.goto("/");
   await expect(
