@@ -36,6 +36,11 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
   order interleaves the two columns.
 - Any `<img>` with an `aspect-ratio` also needs `height: auto`, or the HTML
   `height` attribute wins and the aspect ratio is ignored.
+- Photo frames are **6:5**, not the poster's 4:3. `cam-vang.jpg` is a 3:4
+  portrait, so it fills the frame's width at 100% of the source; a taller
+  frame is the only way to show more of that scene. Keep `poster.css`'s
+  `aspect-ratio`, the `PhotoFrame` width/height attributes and
+  `scripts/optimize-assets.ts` in agreement.
 - Everything must survive 390px wide with no horizontal scroll; tables go
   inside `.table-scroll`.
 - Files here are outside `pnpm lint`, so `pnpm format` will not reformat them.

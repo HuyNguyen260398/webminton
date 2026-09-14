@@ -95,7 +95,7 @@ export function PhotoFrame({
 }) {
   return (
     <figure className="photo-frame rot" style={rot(rotate)}>
-      <img src={src} alt={alt} width={1200} height={900} loading="lazy" />
+      <img src={src} alt={alt} width={1200} height={1000} loading="lazy" />
       <figcaption>{caption}</figcaption>
     </figure>
   );

@@ -4,10 +4,14 @@ import sharp from "sharp";
 // assets/images holds full-size iOS captures (16 MB total). These are the
 // web-sized copies the landing page actually ships.
 //
-// The three photos are cropped to 4:3 here rather than left to the CSS
-// aspect-ratio, so what lands in the frame is decided once and visibly —
-// a centre crop of a tall portrait cuts heads off. `gravity` picks which
-// edge to keep.
+// The three photos are cropped here rather than left to the CSS
+// aspect-ratio, so what lands in the frame is decided once and visibly.
+//
+// The frames are 6:5, not 4:3. cam-vang.jpg is a 3:4 portrait, so it fills
+// the frame's width at 100% of the source — the subject cannot be made
+// smaller without letterboxing, and a taller frame is the only way to reveal
+// more of the scene above and below it. Photos 1 and 3 are native 4:3 and
+// give up ~10% of their width, which is invisible on a centred group shot.
 type Job = {
   from: string;
   to: string;
@@ -26,7 +30,7 @@ const jobs: Job[] = [
     from: "assets/images/20241006_113947225_iOS.jpg",
     to: "frontend/public/photos/doi-hinh-mua-truoc.jpg",
     width: 1200,
-    height: 900,
+    height: 1000,
     quality: 78,
     fit: "cover",
     gravity: "centre",
@@ -36,17 +40,17 @@ const jobs: Job[] = [
     from: "assets/images/20241124_101608887_iOS.jpg",
     to: "frontend/public/photos/cam-vang.jpg",
     width: 1200,
-    height: 900,
+    height: 1000,
     quality: 78,
     fit: "cover",
     gravity: "north",
-    offset: 0.18,
+    offset: 0.16,
   },
   {
     from: "assets/images/20231217_142514521_iOS.jpg",
     to: "frontend/public/photos/hiep-phu-ngoai-quan.jpg",
     width: 1200,
-    height: 900,
+    height: 1000,
     quality: 78,
     fit: "cover",
     gravity: "centre",

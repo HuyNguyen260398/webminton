@@ -186,7 +186,7 @@
   /* height:auto is required — without it the img's height attribute wins and
      aspect-ratio is ignored, leaving portrait sources absurdly tall. */
   height: auto;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 6 / 5;
   object-fit: cover;
   max-width: 100%;
 }
