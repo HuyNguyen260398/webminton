@@ -13,6 +13,7 @@
     "build": "pnpm -r build",
     "test:e2e": "playwright test",
     "validate": "node --import tsx scripts/validate-tournament.ts",
+    "draw": "node --import tsx scripts/draw-teams.ts",
     "dev": "pnpm --filter @webminton/frontend dev"
   },
   "devDependencies": {
