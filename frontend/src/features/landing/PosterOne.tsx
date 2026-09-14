@@ -13,7 +13,7 @@ const PHOTOS = [
   {
     src: "/photos/cam-vang.jpg",
     caption: "Cầm vàng thì đừng để vàng rơi",
-    alt: "Một thành viên cười tươi giơ tấm huy chương vừa giành được",
+    alt: "Một thành viên cười tươi giơ tấm huy chương vàng vừa giành được bên bàn tiệc sau giải",
     rotate: 1.5,
   },
   {
