@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { readFileSync } from "node:fs";
 import { LiveSections } from "../src/features/landing/LiveSections";
 import { parseTournament } from "../src/lib/use-tournament";
+import type { TournamentDocument } from "../../packages/domain/src/schema";
 
-const shipped = JSON.parse(
-  readFileSync("frontend/public/tournament.json", "utf8"),
-);
+import { makeTournament } from "../../packages/domain/src/testing/fixtures";
+
+// The empty fixture, not the shipped file: these assert the show/hide rules,
+// which must not change when the tournament data does.
+const shipped = makeTournament();
 
 const athlete = (id: string, name: string, teamId: string | null = null) => ({
   id,
@@ -18,9 +20,9 @@ const athlete = (id: string, name: string, teamId: string | null = null) => ({
 
 const match = (over: Record<string, unknown> = {}) => ({
   id: "m1",
-  phase: "group",
+  phase: "group" as const,
   encounterId: "e1",
-  category: "mens_doubles",
+  category: "mens_doubles" as const,
   order: 1,
   teamAId: "red",
   teamBId: "blue",
@@ -30,14 +32,14 @@ const match = (over: Record<string, unknown> = {}) => ({
   courtId: null,
   startsAt: null,
   endsAt: null,
-  status: "pending",
+  status: "pending" as const,
   score: null,
   winnerTeamId: null,
   ...over,
-});
+}) as TournamentDocument["matches"][number];
 
 describe("LiveSections", () => {
-  it("renders nothing for the shipped empty tournament", () => {
+  it("renders nothing for an empty tournament", () => {
     const { container } = render(
       <LiveSections view={parseTournament(shipped)} />,
     );

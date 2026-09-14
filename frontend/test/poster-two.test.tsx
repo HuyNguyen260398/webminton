@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { readFileSync } from "node:fs";
 import { PosterTwo } from "../src/features/landing/PosterTwo";
-import { PublicTournamentSchema } from "../../packages/domain/src/schema";
+import { makeTournament } from "../../packages/domain/src/testing/fixtures";
 
-const t = PublicTournamentSchema.parse(
-  JSON.parse(readFileSync("frontend/public/tournament.json", "utf8")),
-);
+// The empty fixture, not the shipped file: these assert component behaviour,
+// which must not change when the tournament data does.
+const t = makeTournament();
 
 describe("PosterTwo", () => {
   it("renders all six rule cards", () => {

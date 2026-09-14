@@ -31,11 +31,11 @@ export function GroupSchedule({
                 <td>{m.order}</td>
                 <td>{categoryName(m.category)}</td>
                 <td className={m.winnerTeamId === m.teamAId ? "is-winner" : ""}>
-                  {teamName(t, m.teamAId)}
+                  <span className="team">{teamName(t, m.teamAId)}</span>
                   {lineup(t, m, "A")}
                 </td>
                 <td className={m.winnerTeamId === m.teamBId ? "is-winner" : ""}>
-                  {teamName(t, m.teamBId)}
+                  <span className="team">{teamName(t, m.teamBId)}</span>
                   {lineup(t, m, "B")}
                 </td>
                 <td>{m.score ? `${m.score.a}–${m.score.b}` : "—"}</td>

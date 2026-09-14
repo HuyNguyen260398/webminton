@@ -726,10 +726,11 @@
   opacity: 0.75;
   white-space: nowrap;
 }
-td.is-winner {
+td.is-winner .team {
   font-weight: 800;
 }
-td.is-winner::after {
+/* The tick sits beside the team name, not after the lineup block. */
+td.is-winner .team::after {
   content: " ✓";
   color: var(--green);
 }

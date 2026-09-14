@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
 import { applyDraw } from "../draw-teams";
-import { makeRoster } from "../../packages/domain/src/testing/fixtures";
+import {
+  makeRoster,
+  makeTournament,
+} from "../../packages/domain/src/testing/fixtures";
 import { PublicTournamentSchema } from "../../packages/domain/src/schema";
 
-const shipped = PublicTournamentSchema.parse(
-  JSON.parse(readFileSync("frontend/public/tournament.json", "utf8")),
-);
+// The empty fixture, not the shipped file: applyDraw refuses a tournament
+// whose matches have been played.
+const shipped = makeTournament();
 
 describe("applyDraw", () => {
   const roster = makeRoster(24);

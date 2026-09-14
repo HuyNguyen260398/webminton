@@ -25,18 +25,40 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
     await expect(page.getByText(pill, { exact: true })).toBeVisible();
 });
 
-test("hides the live sections while the tournament is empty", async ({
+// The show/hide rules themselves are covered by frontend/test/live-sections
+// against an empty fixture. This asserts the file that actually ships renders
+// the sections its data calls for.
+test("renders the live sections the shipped data calls for", async ({
   page,
 }) => {
   await page.goto("/");
-  for (const id of [
-    "#van-dong-vien",
-    "#boc-tham",
-    "#lich-thi-dau",
-    "#bang-xep-hang",
-    "#thu-chi",
-  ])
-    await expect(page.locator(id)).toHaveCount(0);
+  await expect(page.locator("#van-dong-vien")).toBeVisible();
+  await expect(page.locator("#boc-tham")).toBeVisible();
+  await expect(page.locator("#lich-thi-dau")).toBeVisible();
+  await expect(page.locator("#bang-xep-hang")).toBeVisible();
+  await expect(page.locator("#thu-chi")).toBeVisible();
+});
+
+test("lists every athlete, all 24 matches and the four placings", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator("#van-dong-vien tbody tr")).toHaveCount(24);
+  await expect(page.locator("#lich-thi-dau tbody tr")).toHaveCount(18);
+  await expect(page.locator("#lich-thi-dau .placement-list > li")).toHaveCount(
+    6,
+  );
+  await expect(page.locator("#bang-xep-hang tbody tr")).toHaveCount(4);
+});
+
+test("names the sponsors under their tiers", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.locator('[data-testid="tier-diamond"] .poster-three__names li'),
+  ).toHaveCount(1);
+  await expect(page.locator("#nha-tai-tro .poster-three__names li")).toHaveCount(
+    4,
+  );
 });
 
 test("tournament.json exposes no private field and is served no-cache", async ({
