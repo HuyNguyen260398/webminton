@@ -1,15 +1,33 @@
 # Checklist nghiệm thu giải 2026
 
-- [ ] Xác nhận ngày, lệ phí, liên hệ BTC, QR người nhận, số sân và roster thật.
-- [ ] Bootstrap state bucket private/versioned, configure OIDC roles và GitHub environments.
-- [ ] Seed create-only trên dev; kiểm tra public projection không có phone, note, phí cá nhân hoặc lineup kín.
-- [ ] Nhập 24 VĐV với skillBand 1–3; bốc thăm, reload, xác nhận mỗi người đúng một đội.
-- [ ] Xếp lịch nhiều sân, kiểm tra conflict, nhập 18 trận vòng bảng và xử tie bằng lý do.
-- [ ] Xác nhận 6 trận tranh hạng, nhập đủ điểm, kiểm tra champion/runner-up/third.
-- [ ] Đối soát 1.000.000 BTC + 500.000 tài trợ − 300.000 đã chi = 1.200.000; publish finance.
-- [ ] Test hai admin với ETag conflict, retry cùng requestId và restore một version.
-- [ ] Chạy `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`, actionlint và Terraform checks.
-- [ ] Review 390px/1440px, keyboard focus, reduced motion, route refresh và smoke production.
+## Nội dung
 
-Production release requires explicit AWS account/environment approval. Until then,
-the application is safe to validate locally and on a disposable dev stack.
+- [ ] Xác nhận ngày thi đấu, lệ phí, tên và số điện thoại liên hệ BTC, link nhóm
+      Zalo, số sân — cập nhật vào `info` trong `frontend/public/tournament.json`.
+- [ ] Xác nhận mã QR quỹ giải đúng người nhận (`/qr/momo.jpg`, `qrPublished`).
+- [ ] So trang với ba file trong `assets/poster_designs/` ở 1440px và 390px.
+
+## Dữ liệu
+
+- [ ] Điền 24 VĐV kèm `skillBand` 1–3 vào `.private/roster.json`.
+- [ ] `pnpm draw <seed>` → bốn đội chia đều, mỗi đội ≥2 nam và ≥2 nữ.
+- [ ] `grep -E '"(phone|skillBand)"' frontend/public/tournament.json` không ra
+      kết quả nào trong `athletes`.
+- [ ] Nhập 18 trận vòng loại; `pnpm validate` không báo trùng sân/trùng VĐV.
+- [ ] Xác nhận 6 trận tranh hạng, nhập đủ điểm, kiểm tra hạng nhất/nhì/ba/khuyến khích.
+- [ ] Đối soát thu chi rồi đặt `finance.published: true`.
+
+## Kỹ thuật
+
+- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm --filter @webminton/frontend typecheck`,
+      `pnpm test`, `pnpm validate`, `pnpm build`, `pnpm test:e2e` đều xanh.
+- [ ] `terraform fmt -check -recursive infra` và `terraform -chdir=infra validate`.
+- [ ] Bootstrap state bucket, cấu hình OIDC role và GitHub environment `prod`.
+- [ ] Đọc `infra/README.md` và xử lý xong hai bước chuyển đổi state nếu tài
+      khoản từng chạy stack cũ.
+- [ ] `terraform -chdir=infra plan` không xoá bucket hay distribution ngoài dự kiến.
+- [ ] Kiểm tra keyboard focus, skip link, và `prefers-reduced-motion`.
+- [ ] `node --import tsx scripts/smoke-deployment.ts` sau khi triển khai.
+
+Production release requires explicit AWS account/environment approval. Until
+then, the application is safe to validate locally.

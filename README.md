@@ -1,37 +1,79 @@
 # Webminton
 
-Ứng dụng web tiếng Việt cho giải cầu lông nội bộ Hội lông thủ CN1416. Frontend
-là Next.js static export; backend là TypeScript Lambda/API Gateway; toàn bộ dữ
-liệu giải nằm trong một JSON document versioned trên S3 và được ghi bằng ETag
-CAS. Terraform trong `infra/` tạo CloudFront, S3 private/OAC, API Gateway,
-Lambda và Cognito.
+Trang thông tin **Giải cầu lông nội bộ 2026** — Hội lông thủ CN1416.
 
-## Local development
+Một trang tĩnh duy nhất, dựng lại đúng ba trang poster trong
+`assets/poster_designs/`, chạy tại
+[giaicaulong2026.nghuy.link](https://giaicaulong2026.nghuy.link).
+
+Không có backend, không có cơ sở dữ liệu, không có trang quản trị. Toàn bộ giải
+nằm trong một file JSON đi kèm ứng dụng.
+
+## Bắt đầu
 
 ```bash
 pnpm install
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm test:e2e
+pnpm dev        # http://localhost:3000
 ```
 
-`pnpm test:e2e` builds the static frontend and starts `scripts/serve-preview.ts`.
-The local-only bearer `local-test-token` simulates a BTC session. It is not a
-production credential. The seed is intentionally empty; use
-`pnpm roster -- validate --file .private/roster.json` and the documented
-preview/apply workflow in `docs/runbooks/roster-config.md` to manage athletes.
+Sửa `frontend/public/tournament.json` rồi tải lại trang — không cần build lại.
 
-## Operations
+## Quy trình
 
-Use Cognito Authorization Code + PKCE for BTC. The public site exposes only the
-filtered tournament projection; phone, notes, personal payments, audit data and
-unpublished lineups remain private. Finance is hidden until BTC publishes it.
-The draw requires at least eight active men and eight active women and keeps the
-default men’s, women’s and mixed doubles categories. A walkover is recorded as
-21–0 for the present side.
+| Việc | Lệnh |
+| --- | --- |
+| Sửa thông tin giải, tỉ số, thu chi | mở `frontend/public/tournament.json` |
+| Kiểm tra file có hợp lệ không | `pnpm validate` |
+| Bốc thăm chia đội | `pnpm draw <seed>` |
+| Build bản tĩnh | `pnpm build` |
+| Triển khai | `pnpm run deploy` |
 
-Bootstrap and deploy instructions are in `docs/runbooks/bootstrap.md`,
-`docs/runbooks/operations.md`, and `docs/runbooks/rollback.md`. Deployment needs
-Huy’s AWS account, state bucket, repository-scoped OIDC roles, and confirmed
-date/fee/contact/QR values; no real account values are committed here.
+`pnpm validate` phân tích file theo schema, tính lại kết quả, và kiểm tra lịch
+thi đấu có trùng sân hay trùng VĐV không. Nó chạy trong CI, nên một file hỏng
+sẽ không lên được production.
+
+> Dùng `pnpm run deploy`, **không phải** `pnpm deploy` — pnpm có lệnh `deploy`
+> riêng và sẽ không gọi tới script.
+
+## Bốc thăm
+
+Danh sách VĐV đầy đủ (có số điện thoại và trình độ) nằm trong
+`.private/roster.json` — file này **không** được commit và **không** được triển
+khai.
+
+```bash
+cp .private/roster.example.json .private/roster.json
+# điền VĐV, mỗi người cần skillBand 1–3
+pnpm draw mua-2026
+pnpm validate
+```
+
+`pnpm draw` chia đều bốn đội theo giới tính, rồi theo trình độ, rồi theo sĩ số,
+và chỉ ghi phần công khai — tên, giới tính, đội — vào `tournament.json`. Số điện
+thoại và trình độ không bao giờ rời khỏi máy của bạn.
+
+Cần tối thiểu 8 nam và 8 nữ đang thi đấu.
+
+## Hiển thị dần
+
+Các mục dữ liệu tự ẩn khi chưa có gì:
+
+- chưa có VĐV → không hiện `DANH SÁCH VĐV`
+- chưa bốc thăm → không hiện `BỐN ĐỘI` và `LỊCH THI ĐẤU`
+- chưa đánh trận nào → không hiện `BẢNG XẾP HẠNG`
+- `finance.published: false` → không hiện `THU CHI`
+
+Nên hôm nay trang chỉ là ba trang poster, và tự đầy lên khi giải diễn ra.
+
+## Kiểm thử
+
+```bash
+pnpm test        # domain, scripts, frontend, infra
+pnpm build && pnpm test:e2e
+```
+
+## Tài liệu
+
+- `CLAUDE.md` — kiến trúc và các quy tắc cần biết trước khi sửa code
+- `docs/runbooks/` — bootstrap, vận hành, rollback
+- `infra/README.md` — hạ tầng và các bước chuyển đổi state

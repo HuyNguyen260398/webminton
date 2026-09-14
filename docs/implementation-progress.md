@@ -101,3 +101,25 @@ Task 6 CLI smoke: fixed root ESM declaration and invoked via node --import tsx; 
 - Added README, Vietnamese acceptance checklist, full static-route/privacy E2E coverage, and operational handoff docs.
 - Live AWS apply and real 24-player dev rehearsal remain intentionally pending Huy's AWS account/environment approval; local domain/API/recovery flows are verified.
 - Task 14 commit: `bc99afa`.
+
+## 2026-09-14 — Chuyển sang trang landing một trang
+
+Dựng lại Webminton thành một trang tĩnh duy nhất theo đúng ba trang poster
+trong `assets/poster_designs/`, bỏ toàn bộ backend.
+
+- Spec: `docs/superpowers/specs/2026-09-14-webminton-landing-redesign-design.md`
+- Plan: `docs/superpowers/plans/2026-09-14-webminton-landing-redesign.md`
+
+Tóm tắt thay đổi:
+
+- Xoá `backend/` (Lambda, router, auth, commands, projections, storage), trang
+  quản trị, bốn route còn lại, và các script chạy qua API.
+- Tách schema: `PublicTournamentSchema` cho `frontend/public/tournament.json`,
+  `PrivateRosterSchema` cho `.private/roster.json` (số điện thoại, trình độ).
+- Kết quả không còn được lưu — `deriveTournament` tính lại trong trình duyệt.
+  `packages/domain` phải chạy được trên trình duyệt, nên `node:crypto` được
+  thay bằng `hash.ts` (SHA-256 thuần TS, digest giống hệt).
+- Script mới: `pnpm validate`, `pnpm draw`, `pnpm run deploy`.
+- Terraform gộp về một root: S3 riêng tư/versioned/mã hoá, CloudFront, ACM ở
+  `us-east-1`, bản ghi Route53 cho `giaicaulong2026.nghuy.link`. Bỏ Cognito,
+  API Gateway, Lambda và data bucket.

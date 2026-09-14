@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
   PublicTournamentSchema,
   type TournamentDocument,
@@ -42,15 +42,35 @@ export function applyDraw(
   });
 }
 
+const messages: Record<string, string> = {
+  MISSING_SKILL: "Còn VĐV đang thi đấu chưa có skillBand (1–3).",
+  INSUFFICIENT_ROSTER: "Cần tối thiểu 8 nam và 8 nữ đang thi đấu.",
+  DRAW_LOCKED: "Đã có trận được đánh — đặt mọi trận về pending trước khi bốc lại.",
+  DRAW_NOT_FOUND: "Không tìm được cách chia đều sau 100 lần thử. Đổi seed khác.",
+};
+
 if (import.meta.filename === process.argv[1]) {
   const seed = process.argv[2] ?? String(Date.now());
+  if (!existsSync(PRIVATE)) {
+    console.error(`✗ Chưa có ${PRIVATE}.`);
+    console.error(`  Chạy: cp .private/roster.example.json ${PRIVATE}`);
+    console.error("  rồi điền danh sách VĐV (mỗi người cần skillBand 1–3).");
+    process.exit(1);
+  }
   const t = PublicTournamentSchema.parse(
     JSON.parse(readFileSync(PUBLIC, "utf8")),
   );
   const roster = PrivateRosterSchema.parse(
     JSON.parse(readFileSync(PRIVATE, "utf8")),
   );
-  const next = applyDraw(t, roster, seed);
+  let next;
+  try {
+    next = applyDraw(t, roster, seed);
+  } catch (e) {
+    const code = e instanceof Error ? e.message : "UNKNOWN";
+    console.error(`✗ Không bốc thăm được: ${messages[code] ?? code}`);
+    process.exit(1);
+  }
   writeFileSync(PUBLIC, `${JSON.stringify(next, null, 2)}\n`);
   console.log(
     `✓ Đã bốc thăm với seed "${seed}" — ${next.athletes.length} VĐV, ${next.matches.length} trận vòng loại.`,
