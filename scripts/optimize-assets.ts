@@ -16,6 +16,9 @@ type Job = {
   quality: number;
   fit: "cover" | "inside";
   gravity?: "north" | "centre";
+  /** Fraction of the leftover height to skip before a "north" crop.
+      0 keeps the very top, 1 the very bottom. Tuned against the poster. */
+  offset?: number;
 };
 
 const jobs: Job[] = [
@@ -37,6 +40,7 @@ const jobs: Job[] = [
     quality: 78,
     fit: "cover",
     gravity: "north",
+    offset: 0.18,
   },
   {
     from: "assets/images/20231217_142514521_iOS.jpg",
@@ -58,10 +62,25 @@ const jobs: Job[] = [
   },
 ];
 
-for (const { from, to, width, height, quality, fit, gravity } of jobs) {
+for (const { from, to, width, height, quality, fit, gravity, offset } of jobs) {
   await mkdir(to.slice(0, to.lastIndexOf("/")), { recursive: true });
-  const info = await sharp(from)
-    .rotate()
+  let pipeline = sharp(from).rotate();
+
+  if (offset !== undefined) {
+    // Pre-extract the exact band to keep, so the crop is explicit rather
+    // than whatever a gravity keyword happens to choose.
+    const meta = await sharp(from).rotate().metadata();
+    const bandHeight = Math.round((meta.width! * height) / width);
+    const top = Math.round((meta.height! - bandHeight) * offset);
+    pipeline = pipeline.extract({
+      left: 0,
+      top,
+      width: meta.width!,
+      height: bandHeight,
+    });
+  }
+
+  const info = await pipeline
     .resize({
       width,
       height,
