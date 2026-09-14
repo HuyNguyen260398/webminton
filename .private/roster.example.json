@@ -1,0 +1,22 @@
+{
+  "athletes": [
+    {
+      "id": "a01",
+      "name": "Nguyễn Văn A",
+      "gender": "male",
+      "skillBand": 1,
+      "phone": "0900000000",
+      "note": "",
+      "active": true
+    },
+    {
+      "id": "a02",
+      "name": "Trần Thị B",
+      "gender": "female",
+      "skillBand": 2,
+      "phone": null,
+      "note": "",
+      "active": true
+    }
+  ]
+}

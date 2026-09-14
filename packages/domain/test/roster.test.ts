@@ -28,8 +28,9 @@ describe("PrivateRosterSchema", () => {
 
   it("rejects a skill band outside 1..3", () => {
     expect(
-      PrivateRosterSchema.safeParse({ athletes: [{ ...athlete, skillBand: 4 }] })
-        .success,
+      PrivateRosterSchema.safeParse({
+        athletes: [{ ...athlete, skillBand: 4 }],
+      }).success,
     ).toBe(false);
   });
 

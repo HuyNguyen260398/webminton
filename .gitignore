@@ -13,5 +13,6 @@ playwright-report/
 *.tfplan
 *.tfvars
 !*.tfvars.example
-.private/
+.private/*
+!.private/roster.example.json
 .worktrees/

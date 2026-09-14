@@ -8,8 +8,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "prettier --check packages data *.json *.yaml",
-    "format": "prettier --write packages data *.json *.yaml",
+    "lint": "prettier --check packages frontend/public/tournament.json *.json *.yaml",
+    "format": "prettier --write packages frontend/public/tournament.json *.json *.yaml",
     "build": "pnpm -r build",
     "test:e2e": "playwright test",
     "dev": "pnpm --filter @webminton/frontend dev"

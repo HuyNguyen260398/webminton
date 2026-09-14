@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
-import { makeCompletedGroup, makePublicAthletes } from "../src/testing/fixtures";
+import {
+  makeCompletedGroup,
+  makePublicAthletes,
+} from "../src/testing/fixtures";
 import {
   findScheduleConflicts,
   reorderMatches,

@@ -18,7 +18,9 @@ export const PrivateAthleteSchema = z.strictObject({
 export const PrivateRosterSchema = z
   .strictObject({ athletes: z.array(PrivateAthleteSchema) })
   .superRefine((roster, ctx) => {
-    if (new Set(roster.athletes.map((a) => a.id)).size !== roster.athletes.length)
+    if (
+      new Set(roster.athletes.map((a) => a.id)).size !== roster.athletes.length
+    )
       ctx.addIssue({ code: "custom", message: "Mã định danh bị trùng" });
   });
 

@@ -68,7 +68,8 @@ test("rosterHash tracks skill, gender and membership but not name", () => {
   expect(rosterHash(renamed)).toBe(before);
 
   const reskilled = makeRoster(16);
-  reskilled.athletes[0].skillBand = reskilled.athletes[0].skillBand === 3 ? 1 : 3;
+  reskilled.athletes[0].skillBand =
+    reskilled.athletes[0].skillBand === 3 ? 1 : 3;
   expect(rosterHash(reskilled)).not.toBe(before);
 
   const shorter = makeRoster(16);
