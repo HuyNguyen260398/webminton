@@ -194,11 +194,6 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
         </div>
 
         <footer className="poster-two__foot">
-          <span>
-            Đăng ký &amp; thắc mắc: nhóm Zalo hội
-            {info.contactName ? ` · ${info.contactName}` : ""}
-            {info.contactPhone ? ` · ${info.contactPhone}` : ""}
-          </span>
           <span>Nhà tài trợ xem bên dưới · {info.location}</span>
         </footer>
       </div>

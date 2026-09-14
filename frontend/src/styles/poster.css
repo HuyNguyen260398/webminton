@@ -640,11 +640,6 @@
   margin: 0;
   max-width: 80ch;
 }
-.poster-three__contact {
-  margin-top: 18px !important;
-  font-weight: 700;
-}
-
 .poster-three__foot {
   display: flex;
   flex-wrap: wrap;

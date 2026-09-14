@@ -35,7 +35,7 @@ export function calculateFinance(t: TournamentDocument) {
 }
 export function rankSponsors(
   t: TournamentDocument,
-): Array<{ id: string; tier: "diamond" | "gold" | "friendly" }> {
+): Array<{ id: string; tier: "diamond" | "platinum" | "gold" }> {
   const amounts = [
     ...new Set(
       t.sponsorships.filter((s) => s.amountVnd > 0).map((s) => s.amountVnd),
@@ -48,7 +48,7 @@ export function rankSponsors(
       (s.amountVnd === amounts[0]
         ? "diamond"
         : s.amountVnd === amounts[1]
-          ? "gold"
-          : "friendly"),
+          ? "platinum"
+          : "gold"),
   }));
 }

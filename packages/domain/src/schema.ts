@@ -77,7 +77,7 @@ export const SponsorSchema = z.strictObject({
   amountVnd: Money,
   received: z.boolean(),
   note,
-  tierOverride: z.enum(["diamond", "gold", "friendly"]).nullable(),
+  tierOverride: z.enum(["diamond", "platinum", "gold"]).nullable(),
 });
 export const IncomeSchema = z.strictObject({
   id: Id,

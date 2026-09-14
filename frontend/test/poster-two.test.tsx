@@ -64,4 +64,22 @@ describe("PosterTwo", () => {
     expect(screen.queryByText("???")).toBeNull();
     expect(screen.getAllByText(/150\.000/).length).toBeGreaterThan(0);
   });
+
+  it("keeps the contact details out of the footer", () => {
+    const { container } = render(
+      <PosterTwo
+        t={{
+          ...t,
+          info: {
+            ...t.info,
+            contactName: "Anh Huy",
+            contactPhone: "0900000000",
+          },
+        }}
+      />,
+    );
+    expect(container.textContent).not.toMatch(
+      /Đăng ký|thắc mắc|Zalo|Anh Huy|0900/i,
+    );
+  });
 });

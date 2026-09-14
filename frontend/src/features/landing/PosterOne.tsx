@@ -24,15 +24,15 @@ const PHOTOS = [
   },
 ] as const;
 
-function deadlineLabel(iso: string | null) {
-  if (!iso) return "ĐĂNG KÝ SỚM NHÉ";
+function matchDayLabel(iso: string | null) {
+  if (!iso) return "NGÀY THI ĐẤU CHỐT SAU";
   const d = new Intl.DateTimeFormat("vi-VN", {
-    day: "numeric",
-    month: "numeric",
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
     timeZone: "Asia/Ho_Chi_Minh",
   }).format(new Date(iso));
-  return `ĐĂNG KÝ TRƯỚC ${d}`;
+  return `THI ĐẤU NGÀY ${d}`;
 }
 
 export function PosterOne({ t }: { t: TournamentDocument }) {
@@ -130,32 +130,8 @@ export function PosterOne({ t }: { t: TournamentDocument }) {
 
         <div className="poster-one__cta">
           <div>
-            <h2>{deadlineLabel(info.registrationDeadline)}</h2>
-            <p>
-              Nhắn vào nhóm Zalo hội
-              {info.zaloUrl && (
-                <>
-                  {" "}
-                  (
-                  <a href={info.zaloUrl}>đến nhóm Zalo ↗</a>)
-                </>
-              )}
-              {info.contactName || info.contactPhone ? (
-                <>
-                  , hoặc liên hệ{" "}
-                  <strong>
-                    {[info.contactName, info.contactPhone]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </strong>
-                </>
-              ) : (
-                ", hoặc nhắn thẳng cho BTC"
-              )}
-              .
-              <br />
-              Thể lệ ở ngay bên dưới · Chuyện tài trợ ở cuối trang.
-            </p>
+            <h2>{matchDayLabel(info.startsAt)}</h2>
+            <p>Thể lệ ở ngay bên dưới · Chuyện tài trợ ở cuối trang.</p>
           </div>
           <p className="poster-one__disclaimer">
             BTC không chịu trách nhiệm với các pha smash bay ra ngoài sân, và

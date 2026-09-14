@@ -20,7 +20,7 @@ const sponsor = (over: Record<string, unknown> = {}) => ({
 describe("PosterThree", () => {
   it("renders the three sponsor tiers", () => {
     render(<PosterThree t={t} />);
-    for (const tier of ["KIM CƯƠNG", "VÀNG", "THÂN THIỆN"])
+    for (const tier of ["KIM CƯƠNG", "BẠCH KIM", "VÀNG"])
       expect(screen.getByText(tier)).toBeDefined();
   });
 
@@ -62,7 +62,7 @@ describe("PosterThree", () => {
     expect(screen.getByText(/CẢM ƠN NHÀ TÀI TRỢ KIM CƯƠNG/i)).toBeDefined();
   });
 
-  it("ranks two sponsors into diamond and gold", () => {
+  it("ranks two sponsors into diamond and platinum", () => {
     render(
       <PosterThree
         t={{
@@ -75,8 +75,27 @@ describe("PosterThree", () => {
       />,
     );
     const diamond = screen.getByTestId("tier-diamond");
-    const gold = screen.getByTestId("tier-gold");
+    const platinum = screen.getByTestId("tier-platinum");
     expect(diamond.textContent).toContain("Quán Gen Z");
-    expect(gold.textContent).toContain("Cà phê Gạch");
+    expect(platinum.textContent).toContain("Cà phê Gạch");
+  });
+
+  it("keeps the sponsorship contact and the tier footnote off the page", () => {
+    const { container } = render(
+      <PosterThree
+        t={{
+          ...t,
+          info: {
+            ...t.info,
+            contactName: "Anh Huy",
+            contactPhone: "0900000000",
+          },
+          sponsorships: [sponsor()],
+        }}
+      />,
+    );
+    expect(container.textContent).not.toMatch(
+      /Liên hệ tài trợ|Hạng tài trợ xét|Zalo|Anh Huy|0900/i,
+    );
   });
 });

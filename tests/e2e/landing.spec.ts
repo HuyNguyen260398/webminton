@@ -21,7 +21,7 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
   await expect(
     page.getByText("CHIA ĐỘI & THỂ THỨC", { exact: true }),
   ).toBeVisible();
-  for (const tier of ["KIM CƯƠNG", "VÀNG", "THÂN THIỆN"])
+  for (const tier of ["KIM CƯƠNG", "BẠCH KIM", "VÀNG"])
     await expect(page.getByText(tier, { exact: true })).toBeVisible();
   for (const pill of ["NHẤT", "NHÌ", "BA", "KHUYẾN KHÍCH"])
     await expect(page.getByText(pill, { exact: true })).toBeVisible();

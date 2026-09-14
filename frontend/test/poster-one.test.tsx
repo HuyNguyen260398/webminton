@@ -35,24 +35,43 @@ describe("PosterOne", () => {
     expect(screen.getAllByText(/150\.000/).length).toBeGreaterThan(0);
   });
 
-  it("falls back to ĐĂNG KÝ SỚM NHÉ when there is no deadline", () => {
+  it("falls back to a placeholder while the match day is unset", () => {
     render(<PosterOne t={t} />);
-    expect(screen.getByText(/ĐĂNG KÝ SỚM NHÉ/i)).toBeDefined();
+    expect(screen.getByText(/NGÀY THI ĐẤU CHỐT SAU/i)).toBeDefined();
   });
 
-  it("shows the deadline once registrationDeadline is set", () => {
+  it("shows the match day once startsAt is set", () => {
     render(
+      <PosterOne
+        t={{
+          ...t,
+          info: { ...t.info, startsAt: "2026-10-18T08:00:00+07:00" },
+        }}
+      />,
+    );
+    expect(screen.getByText(/THI ĐẤU NGÀY/i).textContent).toContain(
+      "18/10/2026",
+    );
+  });
+
+  it("never invites anyone to register or to message Zalo", () => {
+    const { container } = render(
       <PosterOne
         t={{
           ...t,
           info: {
             ...t.info,
-            registrationDeadline: "2026-10-15T23:59:00+07:00",
+            contactName: "Anh Huy",
+            contactPhone: "0900000000",
+            zaloUrl: "https://zalo.me/g/abcdef",
           },
         }}
       />,
     );
-    expect(screen.getByText(/ĐĂNG KÝ TRƯỚC/i).textContent).toContain("15");
+    expect(container.textContent).not.toMatch(
+      /ĐĂNG KÝ TRƯỚC|ĐĂNG KÝ SỚM|Zalo|Anh Huy|0900/i,
+    );
+    expect(container.querySelectorAll("a[href*=\"zalo\"]")).toHaveLength(0);
   });
 
   it("renders the three photo captions", () => {
@@ -74,23 +93,4 @@ describe("PosterOne", () => {
     }
   });
 
-  it("shows the contact and Zalo link when info carries them", () => {
-    render(
-      <PosterOne
-        t={{
-          ...t,
-          info: {
-            ...t.info,
-            contactName: "Anh Huy",
-            contactPhone: "0900000000",
-            zaloUrl: "https://zalo.me/g/abcdef",
-          },
-        }}
-      />,
-    );
-    expect(screen.getByText(/Anh Huy/)).toBeDefined();
-    expect(
-      screen.getByRole("link", { name: /Zalo/i }).getAttribute("href"),
-    ).toBe("https://zalo.me/g/abcdef");
-  });
 });

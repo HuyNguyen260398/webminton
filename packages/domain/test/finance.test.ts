@@ -66,7 +66,7 @@ test("additional contribution rounds up to thousands and handles zero athletes",
   t.athletes = makePublicAthletes(3);
   expect(calculateFinance(t).additionalPerAthleteVnd).toBe(4000);
 });
-test("equal sponsor amounts share tiers and next distinct amount is gold", () => {
+test("equal sponsor amounts share tiers and next distinct amount is platinum", () => {
   const t = makeTournament();
   t.sponsorships = [100, 100, 90, 80].map((amountVnd, i) => ({
     id: `s${i}`,
@@ -79,7 +79,7 @@ test("equal sponsor amounts share tiers and next distinct amount is gold", () =>
   expect(rankSponsors(t).map((x) => x.tier)).toEqual([
     "diamond",
     "diamond",
+    "platinum",
     "gold",
-    "friendly",
   ]);
 });

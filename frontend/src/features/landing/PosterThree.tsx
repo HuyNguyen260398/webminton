@@ -17,8 +17,8 @@ const TIERS = [
     ),
   },
   {
-    key: "gold",
-    name: "VÀNG",
+    key: "platinum",
+    name: "BẠCH KIM",
     tone: "red",
     body: (
       <>
@@ -28,8 +28,8 @@ const TIERS = [
     ),
   },
   {
-    key: "friendly",
-    name: "THÂN THIỆN",
+    key: "gold",
+    name: "VÀNG",
     tone: "green",
     body: (
       <>
@@ -172,17 +172,9 @@ export function PosterThree({ t }: { t: TournamentDocument }) {
               </p>
             </>
           )}
-          <p className="poster-three__contact">
-            Liên hệ tài trợ: nhóm Zalo hội
-            {info.contactName ? ` · ${info.contactName}` : ""}
-            {info.contactPhone ? ` · ${info.contactPhone}` : ""}
-          </p>
         </div>
 
         <footer className="poster-three__foot">
-          <span>
-            Hạng tài trợ xét theo số tiền đóng góp, BTC chốt trước ngày khai mạc
-          </span>
           <span>{info.name}</span>
         </footer>
       </div>
