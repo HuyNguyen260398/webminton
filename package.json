@@ -12,6 +12,7 @@
     "format": "prettier --write packages frontend/public/tournament.json *.json *.yaml",
     "build": "pnpm -r build",
     "test:e2e": "playwright test",
+    "validate": "node --import tsx scripts/validate-tournament.ts",
     "dev": "pnpm --filter @webminton/frontend dev"
   },
   "devDependencies": {
