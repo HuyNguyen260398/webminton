@@ -2,6 +2,7 @@
 import { useTournament } from "../lib/use-tournament";
 import { PosterOne } from "../features/landing/PosterOne";
 import { PosterTwo } from "../features/landing/PosterTwo";
+import { PosterThree } from "../features/landing/PosterThree";
 
 export default function Page() {
   const { view, error, reload } = useTournament();
@@ -26,6 +27,7 @@ export default function Page() {
         ĐÔI NAM <b>✦</b> ĐÔI NỮ <b>✦</b> ĐÔI NAM NỮ <b>✦</b> HẾT MÌNH TỪNG ĐIỂM
       </div>
       <PosterTwo t={view.t} />
+      <PosterThree t={view.t} />
     </main>
   );
 }

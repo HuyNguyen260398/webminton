@@ -14,6 +14,17 @@ const page = await browser.newPage({
   deviceScaleFactor: 2,
 });
 await page.goto(url, { waitUntil: "networkidle" });
+// Scroll the whole page so loading="lazy" images decode before capture —
+// a fullPage screenshot alone leaves them blank.
+await page.evaluate(async () => {
+  const step = window.innerHeight;
+  for (let y = 0; y < document.body.scrollHeight; y += step) {
+    window.scrollTo(0, y);
+    await new Promise((r) => setTimeout(r, 120));
+  }
+  window.scrollTo(0, 0);
+});
+await page.waitForLoadState("networkidle");
 await page.waitForTimeout(700);
 await page.screenshot({ path: out, fullPage: mode === "full" });
 await browser.close();
