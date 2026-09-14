@@ -71,7 +71,7 @@ describe("PosterOne", () => {
     expect(container.textContent).not.toMatch(
       /ĐĂNG KÝ TRƯỚC|ĐĂNG KÝ SỚM|Zalo|Anh Huy|0900/i,
     );
-    expect(container.querySelectorAll("a[href*=\"zalo\"]")).toHaveLength(0);
+    expect(container.querySelectorAll('a[href*="zalo"]')).toHaveLength(0);
   });
 
   it("renders the three photo captions", () => {
@@ -88,9 +88,9 @@ describe("PosterOne", () => {
     for (const img of imgs) {
       const alt = img.getAttribute("alt") ?? "";
       expect(alt.length).toBeGreaterThan(10);
-      expect(alt).not.toBe(img.closest("figure")?.querySelector("figcaption")
-        ?.textContent);
+      expect(alt).not.toBe(
+        img.closest("figure")?.querySelector("figcaption")?.textContent,
+      );
     }
   });
-
 });

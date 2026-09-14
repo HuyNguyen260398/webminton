@@ -82,4 +82,10 @@ describe("PosterTwo", () => {
       /Đăng ký|thắc mắc|Zalo|Anh Huy|0900/i,
     );
   });
+
+  it("ends on the cards, with no footer rule", () => {
+    const { container } = render(<PosterTwo t={t} />);
+    expect(container.querySelector(".poster-two__foot")).toBeNull();
+    expect(container.textContent).not.toMatch(/Nhà tài trợ xem bên dưới/);
+  });
 });

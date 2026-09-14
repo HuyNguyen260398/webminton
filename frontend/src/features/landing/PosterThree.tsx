@@ -173,10 +173,6 @@ export function PosterThree({ t }: { t: TournamentDocument }) {
             </>
           )}
         </div>
-
-        <footer className="poster-three__foot">
-          <span>{info.name}</span>
-        </footer>
       </div>
     </section>
   );

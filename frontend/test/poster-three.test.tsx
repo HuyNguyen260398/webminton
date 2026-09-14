@@ -98,4 +98,9 @@ describe("PosterThree", () => {
       /Liên hệ tài trợ|Hạng tài trợ xét|Zalo|Anh Huy|0900/i,
     );
   });
+
+  it("ends on the fund panel, with no footer rule", () => {
+    const { container } = render(<PosterThree t={t} />);
+    expect(container.querySelector(".poster-three__foot")).toBeNull();
+  });
 });

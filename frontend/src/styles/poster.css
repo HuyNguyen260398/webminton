@@ -513,18 +513,6 @@
   text-transform: uppercase;
 }
 
-.poster-two__foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 28px;
-  justify-content: space-between;
-  margin-top: clamp(28px, 4vw, 48px);
-  padding-top: 20px;
-  border-top: var(--border);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
 @media (max-width: 720px) {
   .poster-two__meta {
     text-align: left;
@@ -640,18 +628,6 @@
   margin: 0;
   max-width: 80ch;
 }
-.poster-three__foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 28px;
-  justify-content: space-between;
-  margin-top: clamp(28px, 4vw, 48px);
-  padding-top: 20px;
-  border-top: var(--border);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
 @media (max-width: 860px) {
   .poster-three__tiers {
     grid-template-columns: 1fr;

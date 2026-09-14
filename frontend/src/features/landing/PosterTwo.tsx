@@ -193,9 +193,6 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
           </Card>
         </div>
 
-        <footer className="poster-two__foot">
-          <span>Nhà tài trợ xem bên dưới · {info.location}</span>
-        </footer>
       </div>
     </section>
   );
