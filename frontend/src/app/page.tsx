@@ -30,6 +30,24 @@ export default function Page() {
       <PosterTwo t={view.t} />
       <PosterThree t={view.t} />
       <LiveSections view={view} />
+      <footer className="container section">
+        <details>
+          <summary>Xem thông báo và thể lệ gốc</summary>
+          <div className="poster-grid">
+            {[1, 2, 3].map((i) => (
+              <a href={`/posters/thong-bao-trang-${i}.jpg`} key={i}>
+                <img
+                  src={`/posters/thong-bao-trang-${i}.jpg`}
+                  width={1333}
+                  height={1888}
+                  loading="lazy"
+                  alt={`Thông báo gốc trang ${i}: ${["giới thiệu giải", "thể lệ", "tài trợ"][i - 1]}`}
+                />
+              </a>
+            ))}
+          </div>
+        </details>
+      </footer>
     </main>
   );
 }
