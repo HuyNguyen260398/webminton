@@ -12,5 +12,5 @@ export function lineup(t: TournamentDocument, m: Match, side: "A" | "B") {
   const names = pair.map(
     (id) => t.athletes.find((a) => a.id === id)?.name ?? "?",
   );
-  return <small className="lineup">{names.join(" · ")}</small>;
+  return <small className="draw-row__pair">{names.join(" · ")}</small>;
 }

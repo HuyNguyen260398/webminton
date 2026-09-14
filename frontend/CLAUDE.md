@@ -24,6 +24,7 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 | `.bullets` / `.steps` | red bullet discs / numbered rows |
 | `.leaders` | dotted-leader row, as on the QUỸ GIẢI table |
 | `.bubble` / `.badge-circle` | the speech bubble and green sticker |
+| `.draw-*` | the LỊCH THI ĐẤU draw sheet — block, tie, row, bracket |
 
 ## Conventions
 
@@ -41,6 +42,14 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
   frame is the only way to show more of that scene. Keep `poster.css`'s
   `aspect-ratio`, the `PhotoFrame` width/height attributes and
   `scripts/optimize-assets.ts` in agreement.
+- LỊCH THI ĐẤU follows `assets/images/bwf.jpeg`, not the poster JPGs: a
+  `.draw-block` per encounter, three `.draw-tie`s inside it, two stacked
+  `.draw-row`s per tie with the team colour where BWF puts the flag and the
+  score where it puts the seed. Bracket lines belong to `.draw-bracket` alone —
+  a round robin has nothing to converge on, so the group stage gets none.
+- Grid tracks that hold a whole panel use `minmax(min(330px, 100%), 1fr)`. A
+  bare `minmax(330px, 1fr)` keeps the 330px floor below that width and scrolls
+  the page sideways on a phone.
 - Everything must survive 390px wide with no horizontal scroll; tables go
   inside `.table-scroll`.
 - Files here are outside `pnpm lint`, so `pnpm format` will not reformat them.

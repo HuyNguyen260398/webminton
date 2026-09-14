@@ -671,8 +671,7 @@
 
 /* ================= Live data sections ================= */
 .team-grid,
-.finance-grid,
-.placement-grid {
+.finance-grid {
   display: grid;
   gap: clamp(18px, 2.6vw, 28px);
   align-items: start;
@@ -680,9 +679,8 @@
 .team-grid {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
-.finance-grid,
-.placement-grid {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.finance-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 }
 .team-grid__name {
   display: flex;
@@ -703,37 +701,180 @@
   margin: 0 0 14px;
   padding-left: 20px;
 }
-.placement-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+
+/* ---- The draw sheet ----
+   LỊCH THI ĐẤU borrows the BWF draw's anatomy (assets/images/bwf.jpeg): a
+   block per encounter, two stacked sides per tie, the team colour where the
+   flag sits and the score where the seed sits. The bracket lines stay off the
+   group stage — a round robin has nothing to converge on. */
+.draw-stage {
+  display: inline-block;
+  margin: 30px 0 18px;
+  padding: 0.16em 0.6em;
+  border: var(--border);
+  box-shadow: var(--shadow-hard-sm);
+  background: var(--red);
+  color: var(--paper);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.placement-list > li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  justify-content: space-between;
-  padding-block: 10px;
-  border-bottom: 2px dotted rgba(23, 21, 15, 0.25);
+.draw-stage:first-child {
+  margin-top: 0;
 }
-.placement-list > li:last-child {
-  border-bottom: 0;
+.draw-grid,
+.draw-bracket {
+  display: grid;
+  gap: clamp(18px, 2.6vw, 28px);
+  align-items: start;
 }
-.lineup {
+.draw-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+}
+.draw-bracket {
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+}
+.draw-block,
+.draw-bracket__panel {
+  background: var(--paper);
+  border: var(--border);
+  box-shadow: var(--shadow-hard);
+}
+
+/* Header: the encounter and its running tally. */
+.draw-block__head {
+  padding: 11px 16px 13px;
+  background: var(--ink);
+  color: var(--yellow);
+}
+.draw-block__no {
   display: block;
-  font-size: 0.78rem;
-  font-weight: 500;
-  opacity: 0.75;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.draw-block__versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-top: 3px;
+}
+.draw-block__side {
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.draw-block__side--b {
+  text-align: right;
+}
+.draw-block__tally {
+  padding: 1px 12px;
+  border-radius: 999px;
+  background: var(--red);
+  color: var(--paper);
+  font-weight: 900;
   white-space: nowrap;
 }
-td.is-winner .team {
+
+/* One tie: the category, then the two sides stacked. */
+.draw-tie {
+  padding: 11px 16px 13px;
+  border-top: 2px dashed rgba(23, 21, 15, 0.22);
+}
+.draw-tie:first-child {
+  border-top: 0;
+}
+.draw-tie__label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--red);
+  font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
-/* The tick sits beside the team name, not after the lineup block. */
-td.is-winner .team::after {
-  content: " ✓";
-  color: var(--green);
+.draw-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 4px 11px;
 }
-.placement-grid + .pill-row {
-  margin-top: 22px;
+/* The red edge marks the side that took the tie, as the BWF sheet bolds the
+   name that advances. */
+.draw-row.is-winner::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 4px;
+  background: var(--red);
+}
+.draw-row__flag {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
+.draw-row__who {
+  min-width: 0;
+}
+.draw-row__team {
+  font-weight: 600;
+}
+.draw-row.is-winner .draw-row__team {
+  font-weight: 900;
+}
+.draw-row__pair {
+  display: block;
+  overflow: hidden;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.45;
+  opacity: 0.72;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.draw-row__score {
+  min-width: 2.6em;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  font-weight: 900;
+  text-align: center;
+}
+.draw-row.is-winner .draw-row__score {
+  background: var(--ink);
+  color: var(--yellow);
+}
+
+/* Placement only: three ties converging on one placement. */
+.draw-bracket__elbow {
+  position: relative;
+  height: 16px;
+  margin: 0 clamp(28px, 16%, 70px);
+  border-top: 3px solid var(--ink);
+}
+.draw-bracket__elbow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 16px;
+  margin-left: -1.5px;
+  background: var(--ink);
+}
+.draw-bracket__result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 4px 16px 18px;
 }

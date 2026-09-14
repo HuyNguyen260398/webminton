@@ -18,7 +18,9 @@ test("renders all three poster sections", async ({ page }) => {
 test("renders the rule cards and sponsor tiers", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#the-le .card > h3")).toHaveCount(6);
-  await expect(page.getByText("CHIA ĐỘI & THỂ THỨC", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("CHIA ĐỘI & THỂ THỨC", { exact: true }),
+  ).toBeVisible();
   for (const tier of ["KIM CƯƠNG", "VÀNG", "THÂN THIỆN"])
     await expect(page.getByText(tier, { exact: true })).toBeVisible();
   for (const pill of ["NHẤT", "NHÌ", "BA", "KHUYẾN KHÍCH"])
@@ -44,10 +46,15 @@ test("lists every athlete, all 24 matches and the four placings", async ({
 }) => {
   await page.goto("/");
   await expect(page.locator("#van-dong-vien tbody tr")).toHaveCount(24);
-  await expect(page.locator("#lich-thi-dau tbody tr")).toHaveCount(18);
-  await expect(page.locator("#lich-thi-dau .placement-list > li")).toHaveCount(
-    6,
+  await expect(
+    page.locator("#lich-thi-dau .draw-grid .draw-block"),
+  ).toHaveCount(6);
+  await expect(page.locator("#lich-thi-dau .draw-grid .draw-tie")).toHaveCount(
+    18,
   );
+  await expect(
+    page.locator("#lich-thi-dau .draw-bracket .draw-tie"),
+  ).toHaveCount(6);
   await expect(page.locator("#bang-xep-hang tbody tr")).toHaveCount(4);
 });
 
@@ -56,9 +63,9 @@ test("names the sponsors under their tiers", async ({ page }) => {
   await expect(
     page.locator('[data-testid="tier-diamond"] .poster-three__names li'),
   ).toHaveCount(1);
-  await expect(page.locator("#nha-tai-tro .poster-three__names li")).toHaveCount(
-    4,
-  );
+  await expect(
+    page.locator("#nha-tai-tro .poster-three__names li"),
+  ).toHaveCount(4);
 });
 
 test("tournament.json exposes no private field and is served no-cache", async ({
