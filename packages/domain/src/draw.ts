@@ -1,19 +1,17 @@
 import type { TournamentDocument, Athlete } from "./schema";
-import { createHash } from "node:crypto";
+import { sha256Hex, sha256Uint32LE } from "./hash";
 export function rosterHash(t: TournamentDocument) {
-  return createHash("sha256")
-    .update(
-      JSON.stringify(
-        t.athletes
-          .filter((a) => a.active)
-          .map((a) => ({ id: a.id, gender: a.gender, skillBand: a.skillBand }))
-          .sort((a, b) => a.id.localeCompare(b.id)),
-      ),
-    )
-    .digest("hex");
+  return sha256Hex(
+    JSON.stringify(
+      t.athletes
+        .filter((a) => a.active)
+        .map((a) => ({ id: a.id, gender: a.gender, skillBand: a.skillBand }))
+        .sort((a, b) => a.id.localeCompare(b.id)),
+    ),
+  );
 }
 function random(seed: string) {
-  let n = createHash("sha256").update(seed).digest().readUInt32LE();
+  let n = sha256Uint32LE(seed);
   return () => {
     n += 0x6d2b79f5;
     let x = n;

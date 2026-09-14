@@ -1,17 +1,15 @@
 import type { TournamentDocument } from "./schema";
-import { createHash } from "node:crypto";
 import { isFinalScore } from "./score";
+import { sha256Hex } from "./hash";
 export function resultsHash(t: TournamentDocument): string {
-  return createHash("sha256")
-    .update(
-      JSON.stringify(
-        t.matches
-          .filter((m) => m.phase === "group")
-          .map((m) => ({ id: m.id, score: m.score, status: m.status }))
-          .sort((a, b) => a.id.localeCompare(b.id)),
-      ),
-    )
-    .digest("hex");
+  return sha256Hex(
+    JSON.stringify(
+      t.matches
+        .filter((m) => m.phase === "group")
+        .map((m) => ({ id: m.id, score: m.score, status: m.status }))
+        .sort((a, b) => a.id.localeCompare(b.id)),
+    ),
+  );
 }
 export function calculateStandings(
   t: TournamentDocument,
