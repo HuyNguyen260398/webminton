@@ -36,9 +36,7 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
       <div className="container">
         <header className="poster-two__head">
           <Slab tone="red" rotate={-1.5} className="poster-two__title">
-            THỂ LỆ
-            <br />
-            THI ĐẤU
+            THỂ LỆ THI ĐẤU
           </Slab>
           <p className="poster-two__meta">
             {info.name}

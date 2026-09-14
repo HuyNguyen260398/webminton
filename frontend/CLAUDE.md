@@ -16,7 +16,7 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 | Piece | Use |
 | --- | --- |
 | `.poster-ground` | yellow ground with the poster's dot grid, set on `<body>` |
-| `<Section id title>` | live-data section; `title` is the two slab lines |
+| `<Section id title>` | live-data section wearing the poster's title slab |
 | `<Slab tone rotate as>` | reversed-out title block, hard offset shadow |
 | `<Card title dashed>` | cream panel, 3px border, hard offset shadow |
 | `<Pill tone>` | rounded label — red/green/yellow/outline |
@@ -29,10 +29,15 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 
 ## Conventions
 
-- Every section title is the same red `Slab` rotated -1.5°, split across two
-  lines (`THỂ LỆ / THI ĐẤU`, `BẢNG / XẾP HẠNG`). The posters add a right-aligned
-  name/club meta beside it; the live sections deliberately do not, since five
-  more repetitions down one page read as noise.
+- Every section title is the same red `Slab` rotated -1.5°, on **one line**
+  with `white-space: nowrap`. This is a deliberate departure from the poster
+  JPGs, which break `THỂ LỆ / THI ĐẤU` and `NHÀ / TÀI TRỢ` over two lines. The
+  longest title clears 390px at the font-size clamp's 1.8rem floor with room to
+  spare; `landing.spec.ts` measures every slab's line count at 1280/768/390, so
+  raise that floor or add a longer title only with that test green.
+- The posters set a right-aligned name/club meta beside the title slab; the
+  live sections deliberately do not, since five more repetitions down one page
+  read as noise.
 - Shadows are **hard and un-blurred**: `--shadow-hard` (9px) and
   `--shadow-hard-sm` (5px), never a blur radius.
 - Rotations go through the `rot` class plus a `--rot` custom property, so

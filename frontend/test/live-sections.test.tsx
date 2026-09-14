@@ -141,14 +141,13 @@ describe("LiveSections", () => {
     const titles = [
       ...container.querySelectorAll(".section > .container > h2"),
     ];
-    // Two balanced lines in a rotated red slab, as on THỂ LỆ THI ĐẤU and
-    // NHÀ TÀI TRỢ.
+    // One line in a rotated red slab, as on THỂ LỆ THI ĐẤU and NHÀ TÀI TRỢ.
     expect(titles.map((h) => h.innerHTML)).toEqual([
-      "DANH SÁCH<br>VĐV",
-      "BỐN<br>ĐỘI",
-      "LỊCH<br>THI ĐẤU",
-      "BẢNG<br>XẾP HẠNG",
-      "THU<br>CHI",
+      "DANH SÁCH VĐV",
+      "BỐN ĐỘI",
+      "LỊCH THI ĐẤU",
+      "BẢNG XẾP HẠNG",
+      "THU CHI",
     ]);
     for (const h of titles) {
       expect(h.className).toContain("slab");

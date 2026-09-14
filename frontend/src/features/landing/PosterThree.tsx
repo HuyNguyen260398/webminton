@@ -55,9 +55,7 @@ export function PosterThree({ t }: { t: TournamentDocument }) {
       <div className="container">
         <header className="poster-three__head">
           <Slab tone="red" rotate={-1.5} className="poster-three__title">
-            NHÀ
-            <br />
-            TÀI TRỢ
+            NHÀ TÀI TRỢ
           </Slab>
           <p className="poster-three__meta">
             {info.name}

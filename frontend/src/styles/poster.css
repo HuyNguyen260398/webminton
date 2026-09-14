@@ -464,6 +464,7 @@
   font-size: clamp(1.8rem, 4.5vw, 3rem);
   letter-spacing: -0.01em;
   padding: 0.3em 0.55em;
+  white-space: nowrap;
 }
 .poster-two__meta {
   margin: 8px 0 0;
@@ -542,6 +543,7 @@
   font-size: clamp(1.8rem, 4.5vw, 3rem);
   letter-spacing: -0.01em;
   padding: 0.3em 0.55em;
+  white-space: nowrap;
 }
 .poster-three__meta {
   margin: 8px 0 0;
@@ -894,4 +896,5 @@
   padding: 0.3em 0.55em;
   font-size: clamp(1.8rem, 4.5vw, 3rem);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }

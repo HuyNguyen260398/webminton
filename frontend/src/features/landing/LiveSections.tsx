@@ -17,28 +17,28 @@ export function LiveSections({ view }: { view: TournamentView }) {
   return (
     <>
       {t.athletes.length > 0 && (
-        <Section id="van-dong-vien" title={["DANH SÁCH", "VĐV"]}>
+        <Section id="van-dong-vien" title="DANH SÁCH VĐV">
           <AthleteTable t={t} />
         </Section>
       )}
       {drawn && (
-        <Section id="boc-tham" title={["BỐN", "ĐỘI"]}>
+        <Section id="boc-tham" title="BỐN ĐỘI">
           <TeamPreview t={t} />
         </Section>
       )}
       {drawn && derived.matches.length > 0 && (
-        <Section id="lich-thi-dau" title={["LỊCH", "THI ĐẤU"]}>
+        <Section id="lich-thi-dau" title="LỊCH THI ĐẤU">
           <GroupSchedule t={t} derived={derived} />
           <PlacementBracket t={t} derived={derived} />
         </Section>
       )}
       {played && (
-        <Section id="bang-xep-hang" title={["BẢNG", "XẾP HẠNG"]}>
+        <Section id="bang-xep-hang" title="BẢNG XẾP HẠNG">
           <Standings t={t} derived={derived} />
         </Section>
       )}
       {t.finance.published && (
-        <Section id="thu-chi" title={["THU", "CHI"]}>
+        <Section id="thu-chi" title="THU CHI">
           <FinanceDashboard t={t} />
         </Section>
       )}

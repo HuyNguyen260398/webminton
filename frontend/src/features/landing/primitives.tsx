@@ -2,24 +2,21 @@ import type { CSSProperties, ReactNode } from "react";
 
 const rot = (deg: number) => ({ "--rot": `${deg}deg` }) as CSSProperties;
 
-// The title is two balanced lines so the slab matches THỂ LỆ THI ĐẤU and
-// NHÀ TÀI TRỢ on the posters.
+// One line in a red slab, as on the posters' THỂ LỆ THI ĐẤU and NHÀ TÀI TRỢ.
 export function Section({
   id,
   title,
   children,
 }: {
   id: string;
-  title: [string, string];
+  title: string;
   children: ReactNode;
 }) {
   return (
     <section id={id} className="section">
       <div className="container">
         <Slab as="h2" tone="red" rotate={-1.5} className="section-title">
-          {title[0]}
-          <br />
-          {title[1]}
+          {title}
         </Slab>
         {children}
       </div>

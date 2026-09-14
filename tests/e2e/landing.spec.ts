@@ -120,3 +120,26 @@ test("the page is a single route", async ({ request }) => {
   for (const path of ["/quan-tri/", "/van-dong-vien/", "/lich-thi-dau/"])
     expect((await request.get(path)).status()).toBe(404);
 });
+
+// One line means one line: a slab that wraps at a narrow width is the failure
+// this guards, and only a real browser measures it.
+test("every title slab stays on a single line, down to 390px", async ({
+  page,
+}) => {
+  for (const width of [1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const slabs = page.locator(
+      ".section-title, .poster-two__title, .poster-three__title",
+    );
+    await expect(slabs).toHaveCount(7);
+    for (let i = 0; i < 7; i++) {
+      const lines = await slabs.nth(i).evaluate((el) => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return range.getClientRects().length;
+      });
+      expect(lines).toBe(1);
+    }
+  }
+});
