@@ -22,14 +22,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm --filter @webminton/frontend typecheck
       - run: pnpm test
+      - run: pnpm validate
       - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+      - uses: hashicorp/setup-terraform@v3
       - run: terraform fmt -check -recursive infra
-      - run: terraform -chdir=infra/envs/dev init -backend=false
-      - run: terraform -chdir=infra/envs/dev validate
-      - run: terraform -chdir=infra/envs/prod init -backend=false
-      - run: terraform -chdir=infra/envs/prod validate
+      - run: terraform -chdir=infra init -backend=false
+      - run: terraform -chdir=infra validate
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4

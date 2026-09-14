@@ -14,6 +14,7 @@
     "test:e2e": "playwright test",
     "validate": "node --import tsx scripts/validate-tournament.ts",
     "draw": "node --import tsx scripts/draw-teams.ts",
+    "deploy": "./scripts/deploy.sh",
     "dev": "pnpm --filter @webminton/frontend dev"
   },
   "devDependencies": {

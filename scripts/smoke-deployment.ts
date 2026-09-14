@@ -1,12 +1,40 @@
-export {};
-const base = (process.argv[2] ?? '').replace(/\/$/, '');
-if (!base) throw new Error('SITE_URL is required');
-for (const path of ['/', '/van-dong-vien/', '/boc-tham/', '/lich-thi-dau/', '/thu-chi/']) {
-  const response = await fetch(`${base}${path}`);
-  if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+import { PublicTournamentSchema } from "../packages/domain/src/schema";
+
+const base = (
+  process.argv[2] ??
+  process.env.SITE_URL ??
+  "https://giaicaulong2026.nghuy.link"
+).replace(/\/$/, "");
+
+const problems: string[] = [];
+
+const page = await fetch(base);
+if (!page.ok) problems.push(`Trang chủ trả về ${page.status}`);
+const html = await page.text();
+if (!html.includes("GIẢI CẦU LÔNG"))
+  problems.push("Trang chủ thiếu tiêu đề giải");
+
+const data = await fetch(`${base}/tournament.json`);
+if (!data.ok) problems.push(`tournament.json trả về ${data.status}`);
+
+const cache = data.headers.get("cache-control") ?? "";
+if (!cache.includes("no-cache"))
+  problems.push(`tournament.json phải có no-cache, đang là "${cache}"`);
+
+const body = await data.text();
+for (const key of ["phone", "skillBand", "feePayments"])
+  if (body.includes(`"${key}"`))
+    problems.push(`tournament.json lộ trường "${key}"`);
+
+try {
+  if (!PublicTournamentSchema.safeParse(JSON.parse(body)).success)
+    problems.push("tournament.json không khớp schema");
+} catch {
+  problems.push("tournament.json không phải JSON hợp lệ");
 }
-const publicResponse = await fetch(`${base}/api/public/tournament`);
-if (!publicResponse.ok || !(await publicResponse.headers.get('content-type') ?? '').includes('application/json')) throw new Error('Public API smoke failed');
-const unauthorized = await fetch(`${base}/api/admin/tournament`);
-if (![401, 403].includes(unauthorized.status)) throw new Error(`Admin API returned ${unauthorized.status} without credentials`);
-console.log(`Smoke passed for ${base}`);
+
+if (problems.length) {
+  for (const p of problems) console.error(`✗ ${p}`);
+  process.exit(1);
+}
+console.log(`✓ ${base} hoạt động bình thường.`);
