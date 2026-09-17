@@ -77,9 +77,13 @@ resource "aws_iam_role" "github_deploy" {
       Principal = { Federated = var.oidc_provider_arn }
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:environment:prod"
+        StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
+        # GitHub may send the immutable form, owner@id/repo@id, instead of the name.
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = compact([
+            "repo:${var.github_repository}:environment:prod",
+            var.github_repository_immutable == null ? null : "repo:${var.github_repository_immutable}:environment:prod",
+          ])
         }
       }
     }]

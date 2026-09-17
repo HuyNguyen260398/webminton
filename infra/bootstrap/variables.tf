@@ -15,3 +15,9 @@ variable "hosted_zone_id" {
   description = "Route53 zone nghuy.link."
   default     = null
 }
+
+variable "github_repository_immutable" {
+  type        = string
+  description = "Dạng owner@id/repo@id của repo, như GitHub gửi trong OIDC sub (sub_claim_prefix bỏ \"repo:\")."
+  default     = null
+}
