@@ -52,5 +52,8 @@ phục vụ `no-cache`, và không lộ trường riêng tư nào.
 
 ## Biến repo cần có
 
-`AWS_DEPLOY_ROLE_ARN`, `AWS_PLAN_ROLE_ARN`, `AWS_REGION`, `STATE_BUCKET_NAME`.
+`AWS_DEPLOY_ROLE_ARN`, `AWS_PLAN_ROLE_ARN`, `AWS_REGION`, `STATE_BUCKET_NAME`,
+`SITE_BUCKET_NAME`, đặt trong environment `prod`. `AWS_DEPLOY_ROLE_ARN` là output
+`github_deploy_role_arn` của `infra/bootstrap`, chỉ có sau khi điền
+`oidc_provider_arn`, `site_bucket_name`, `distribution_id` và `hosted_zone_id`.
 Không còn biến Cognito nào — bản build không đọc output Terraform nữa.

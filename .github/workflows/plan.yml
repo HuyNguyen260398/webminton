@@ -11,6 +11,8 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      TF_VAR_site_bucket_name: ${{ vars.SITE_BUCKET_NAME }}
     steps:
       - uses: actions/checkout@v4
         with:

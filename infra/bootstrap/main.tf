@@ -54,3 +54,127 @@ resource "aws_iam_role" "github_plan" {
   assume_role_policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Principal = { Federated = var.oidc_provider_arn }, Action = "sts:AssumeRoleWithWebIdentity", Condition = { StringLike = { "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:environment:*" }, StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" } } }] })
 }
 output "github_plan_role_arn" { value = try(aws_iam_role.github_plan[0].arn, null) }
+
+# ------------------------------------------------------------- deploy role
+# Assumed by deploy.yml (environment: prod). It may converge the existing site
+# stack and publish the build, but cannot create or delete a distribution or a
+# certificate: first creation and teardown stay a local, deliberate apply.
+data "aws_caller_identity" "current" {}
+
+locals {
+  state_key      = "webminton/prod/terraform.tfstate"
+  distribution   = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${coalesce(var.distribution_id, "none")}"
+  deploy_enabled = var.oidc_provider_arn != null && var.site_bucket_name != null && var.distribution_id != null && var.hosted_zone_id != null
+}
+
+resource "aws_iam_role" "github_deploy" {
+  count = local.deploy_enabled ? 1 : 0
+  name  = "webminton-github-deploy"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Federated = var.oidc_provider_arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:environment:prod"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "github_deploy" {
+  count = local.deploy_enabled ? 1 : 0
+  name  = "webminton-deploy"
+  role  = aws_iam_role.github_deploy[0].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StateBucketList"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = aws_s3_bucket.state.arn
+      },
+      {
+        Sid    = "StateObject"
+        Effect = "Allow"
+        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = [
+          "${aws_s3_bucket.state.arn}/${local.state_key}",
+          "${aws_s3_bucket.state.arn}/${local.state_key}.tflock",
+        ]
+      },
+      {
+        Sid      = "SiteBucket"
+        Effect   = "Allow"
+        Action   = ["s3:Get*", "s3:List*", "s3:PutBucket*", "s3:PutEncryptionConfiguration"]
+        Resource = "arn:aws:s3:::${var.site_bucket_name}"
+      },
+      {
+        Sid      = "SiteObjects"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::${var.site_bucket_name}/*"
+      },
+      {
+        Sid      = "CloudFrontRead"
+        Effect   = "Allow"
+        Action   = ["cloudfront:Get*", "cloudfront:List*", "cloudfront:Describe*"]
+        Resource = "*"
+      },
+      {
+        Sid    = "CloudFrontSite"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:UpdateDistribution",
+          "cloudfront:CreateInvalidation",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource",
+        ]
+        Resource = local.distribution
+      },
+      {
+        Sid    = "CloudFrontSiteParts"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:UpdateFunction",
+          "cloudfront:PublishFunction",
+          "cloudfront:UpdateOriginAccessControl",
+        ]
+        Resource = [
+          "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:function/webminton-*",
+          "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:origin-access-control/*",
+        ]
+      },
+      {
+        Sid      = "CertificateRead"
+        Effect   = "Allow"
+        Action   = ["acm:DescribeCertificate", "acm:ListCertificates", "acm:ListTagsForCertificate", "acm:GetCertificate"]
+        Resource = "*"
+      },
+      {
+        Sid      = "DnsRead"
+        Effect   = "Allow"
+        Action   = ["route53:ListHostedZones", "route53:ListHostedZonesByName", "route53:GetChange"]
+        Resource = "*"
+      },
+      {
+        Sid    = "DnsZone"
+        Effect = "Allow"
+        Action = [
+          "route53:GetHostedZone",
+          "route53:ListResourceRecordSets",
+          "route53:ChangeResourceRecordSets",
+          "route53:ListTagsForResource",
+        ]
+        Resource = "arn:aws:route53:::hostedzone/${coalesce(var.hosted_zone_id, "none")}"
+      },
+    ]
+  })
+}
+
+output "github_deploy_role_arn" { value = try(aws_iam_role.github_deploy[0].arn, null) }
