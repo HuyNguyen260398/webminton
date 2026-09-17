@@ -1,4 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { expect, test, type Page } from "@playwright/test";
+
+// A tournament played to the end. The shipped file is pre-registration and
+// renders no live sections, so layout checks on those sections load this.
+const full = readFileSync(
+  new URL("./fixtures/full-tournament.json", import.meta.url),
+  "utf8",
+);
+const gotoFull = async (page: Page) => {
+  await page.route("**/tournament.json", (route) =>
+    route.fulfill({ contentType: "application/json", body: full }),
+  );
+  await page.goto("/");
+};
 
 // getByText is case-insensitive substring matching, and the tournament name
 // appears in several places, so these assertions use section ids and exact
@@ -29,22 +43,22 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
 
 // The show/hide rules themselves are covered by frontend/test/live-sections
 // against an empty fixture. This asserts the file that actually ships renders
-// the sections its data calls for.
+// the sections its data calls for: nobody has registered yet, so only THU CHI.
 test("renders the live sections the shipped data calls for", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.locator("#van-dong-vien")).toBeVisible();
-  await expect(page.locator("#boc-tham")).toBeVisible();
-  await expect(page.locator("#lich-thi-dau")).toBeVisible();
-  await expect(page.locator("#bang-xep-hang")).toBeVisible();
   await expect(page.locator("#thu-chi")).toBeVisible();
+  await expect(page.locator("#van-dong-vien")).toHaveCount(0);
+  await expect(page.locator("#boc-tham")).toHaveCount(0);
+  await expect(page.locator("#lich-thi-dau")).toHaveCount(0);
+  await expect(page.locator("#bang-xep-hang")).toHaveCount(0);
 });
 
 test("lists every athlete, all 24 matches and the four placings", async ({
   page,
 }) => {
-  await page.goto("/");
+  await gotoFull(page);
   await expect(page.locator("#van-dong-vien tbody tr")).toHaveCount(24);
   await expect(
     page.locator("#lich-thi-dau .draw-grid .draw-block"),
@@ -64,7 +78,7 @@ test("lists every athlete, all 24 matches and the four placings", async ({
 test("each stage label sits below its section title, never beside it", async ({
   page,
 }) => {
-  await page.goto("/");
+  await gotoFull(page);
   const title = await page
     .locator("#lich-thi-dau > .container > h2")
     .boundingBox();
@@ -83,7 +97,7 @@ test("names the sponsors under their tiers", async ({ page }) => {
   ).toHaveCount(1);
   await expect(
     page.locator("#nha-tai-tro .poster-three__names li"),
-  ).toHaveCount(4);
+  ).toHaveCount(1);
 });
 
 test("tournament.json exposes no private field and is served no-cache", async ({
@@ -103,7 +117,7 @@ test("shows the MoMo QR and the fund table", async ({ page }) => {
   await qr.scrollIntoViewIfNeeded();
   await expect(qr).toBeVisible();
   await expect(
-    page.getByText("Ban tổ chức đóng góp", { exact: true }),
+    page.getByText("Nhà tài trợ — Ban tổ chức", { exact: true }),
   ).toBeVisible();
 });
 
@@ -128,7 +142,7 @@ test("every title slab stays on a single line, down to 390px", async ({
 }) => {
   for (const width of [1280, 768, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/");
+    await gotoFull(page);
     const slabs = page.locator(
       ".section-title, .poster-two__title, .poster-three__title",
     );
