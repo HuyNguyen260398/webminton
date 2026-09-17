@@ -51,7 +51,7 @@ describe("infrastructure", () => {
   it("serves the data file uncached so content edits go live", () => {
     expect(main).toMatch(/path_pattern\s+=\s+"\/tournament\.json"/);
     // Managed-CachingDisabled
-    expect(main).toContain("4135ea2d-6df8-44a3-9df3-4b5a84f5d6f3");
+    expect(main).toContain("4135ea2d-6df8-44a3-9df3-4b5a84be39ad");
   });
 
   it("has no backend left", () => {

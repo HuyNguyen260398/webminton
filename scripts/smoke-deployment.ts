@@ -11,7 +11,9 @@ const problems: string[] = [];
 const page = await fetch(base);
 if (!page.ok) problems.push(`Trang chủ trả về ${page.status}`);
 const html = await page.text();
-if (!html.includes("GIẢI CẦU LÔNG"))
+// The posters render client-side after tournament.json loads, so the static
+// HTML carries only the <title>, not the on-page heading.
+if (!html.includes("<title>Giải cầu lông nội bộ 2026"))
   problems.push("Trang chủ thiếu tiêu đề giải");
 
 const data = await fetch(`${base}/tournament.json`);
