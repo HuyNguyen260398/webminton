@@ -161,6 +161,32 @@ test("does not scroll horizontally on a phone", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
+// The stickers are poster furniture: they belong ON a photo frame, at every
+// width. Stacked to one column they used to drop out of the overlap and land
+// as two stray rows under the last photo, which only a real layout catches.
+test("the stickers stay on their photo frames, at 1280 and at 390", async ({
+  page,
+}) => {
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const frames = page.locator(".poster-one__photo");
+    for (const [sticker, frame] of [
+      [".poster-one__bubble", 1],
+      [".poster-one__badge", 2],
+    ] as const) {
+      const a = (await page.locator(sticker).boundingBox())!;
+      const b = (await frames.nth(frame).boundingBox())!;
+      const overlapX =
+        Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+      const overlapY =
+        Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+      expect(overlapX, `${sticker} at ${width}px`).toBeGreaterThan(0);
+      expect(overlapY, `${sticker} at ${width}px`).toBeGreaterThan(0);
+    }
+  }
+});
+
 test("the page is a single route", async ({ request }) => {
   for (const path of ["/quan-tri/", "/van-dong-vien/", "/lich-thi-dau/"])
     expect((await request.get(path)).status()).toBe(404);

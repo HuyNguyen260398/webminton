@@ -24,7 +24,7 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
 | `<PhotoFrame>` | rotated photo with an italic caption |
 | `.bullets` / `.steps` | red bullet discs / numbered rows |
 | `.leaders` | dotted-leader row, as on the QUỸ GIẢI table |
-| `.bubble` / `.badge-circle` | the speech bubble and green sticker |
+| `.bubble` / `.badge-circle` | the speech bubble and green sticker, both with a hard offset shadow |
 | `.draw-*` | the LỊCH THI ĐẤU draw sheet — block, tie, row, bracket |
 
 ## Conventions
@@ -58,6 +58,14 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
   `.draw-row`s per tie with the team colour where BWF puts the flag and the
   score where it puts the seed. Bracket lines belong to `.draw-bracket` alone —
   a round robin has nothing to converge on, so the group stage gets none.
+- The two poster-1 stickers overlap a photo frame at every width: absolutely
+  positioned over the three-column strip, and stacked to one column, placed
+  into the same grid cell as their frame (`.bubble` on photo 2, `.badge-circle`
+  on photo 3, as on the JPG). That placement needs every photo pinned to
+  `grid-column: 1` with an explicit `grid-row` — otherwise auto-placement skips
+  the cells the stickers hold and pushes each frame down a row or into an
+  implicit second column. `landing.spec.ts` measures the overlap at 1280 and
+  390.
 - Grid tracks that hold a whole panel use `minmax(min(330px, 100%), 1fr)`. A
   bare `minmax(330px, 1fr)` keeps the 330px floor below that width and scrolls
   the page sideways on a phone.

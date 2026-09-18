@@ -226,6 +226,7 @@
   padding: 12px;
   border-radius: 50%;
   background: var(--green);
+  box-shadow: var(--shadow-hard-sm);
   color: var(--paper);
   font-weight: 800;
   font-size: 0.9rem;
@@ -435,12 +436,45 @@
   .poster-one__photos {
     grid-template-columns: 1fr;
   }
-  /* The stickers stop overlapping and join the flow. */
+  /* Stacked, the stickers stay on the frames they belong to — the bubble on
+     the second photo, the badge on the third, as on the poster. Placing them
+     in the same grid cell keeps them attached without absolute offsets
+     measured against a column three photos tall; `position: static` would
+     also strand the bubble's ::after tail. The frames need explicit rows as
+     well — auto-placement otherwise skips the cells the stickers hold, and
+     a frame with no column of its own lands in an implicit second one. */
+  .poster-one__photo {
+    grid-column: 1;
+  }
+  .poster-one__photo:nth-child(1) {
+    grid-row: 1;
+  }
+  .poster-one__photo:nth-child(2) {
+    grid-row: 2;
+  }
+  .poster-one__photo:nth-child(3) {
+    grid-row: 3;
+  }
   .poster-one__bubble,
   .poster-one__badge {
-    position: static;
-    transform: none;
-    justify-self: start;
+    position: relative;
+    grid-column: 1;
+    align-self: start;
+    z-index: 2;
+  }
+  .poster-one__bubble {
+    grid-row: 2;
+    top: auto;
+    left: auto;
+    justify-self: center;
+    margin-top: -20px;
+  }
+  .poster-one__badge {
+    grid-row: 3;
+    top: auto;
+    right: auto;
+    justify-self: end;
+    margin: -38px -6px 0 0;
   }
   .poster-one__facts dl > div {
     grid-template-columns: 1fr;
