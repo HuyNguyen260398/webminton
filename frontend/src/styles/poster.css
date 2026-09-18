@@ -514,11 +514,6 @@
 
 /* ================= Poster 2 — thể lệ thi đấu ================= */
 .poster-two__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px 32px;
-  align-items: flex-start;
-  justify-content: space-between;
   margin-bottom: clamp(32px, 4.5vw, 56px);
 }
 .poster-two__title {
@@ -526,11 +521,6 @@
   letter-spacing: -0.01em;
   padding: 0.3em 0.55em;
   white-space: nowrap;
-}
-.poster-two__meta {
-  margin: 8px 0 0;
-  font-weight: 700;
-  text-align: right;
 }
 
 /* Exactly two columns, as on the poster — auto-fit would give three at
@@ -574,30 +564,12 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 720px) {
-  .poster-two__meta {
-    text-align: left;
-  }
-}
-
 /* ================= Poster 3 — nhà tài trợ ================= */
-.poster-three__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px 32px;
-  align-items: flex-start;
-  justify-content: space-between;
-}
 .poster-three__title {
   font-size: clamp(1.8rem, 4.5vw, 3rem);
   letter-spacing: -0.01em;
   padding: 0.3em 0.55em;
   white-space: nowrap;
-}
-.poster-three__meta {
-  margin: 8px 0 0;
-  font-weight: 700;
-  text-align: right;
 }
 
 .poster-three__intro {
@@ -697,12 +669,6 @@
     grid-template-columns: 1fr;
   }
 }
-@media (max-width: 720px) {
-  .poster-three__meta {
-    text-align: left;
-  }
-}
-
 /* ================= Live data sections ================= */
 .team-grid,
 .finance-grid {

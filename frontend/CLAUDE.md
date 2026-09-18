@@ -35,9 +35,10 @@ http://127.0.0.1:3100/ /tmp/out.png 1280 900 full` renders the served page.
   longest title clears 390px at the font-size clamp's 1.8rem floor with room to
   spare; `landing.spec.ts` measures every slab's line count at 1280/768/390, so
   raise that floor or add a longer title only with that test green.
-- The posters set a right-aligned name/club meta beside the title slab; the
-  live sections deliberately do not, since five more repetitions down one page
-  read as noise.
+- No section repeats the tournament name and club beside its title slab. The
+  poster JPGs do, and posters 2 and 3 used to, but the pair already appears in
+  poster 1's badge bar, the `<title>` and the page footer — four more
+  repetitions down one page read as noise. Section titles stand alone.
 - Shadows are **hard and un-blurred**: `--shadow-hard` (9px) and
   `--shadow-hard-sm` (5px), never a blur radius.
 - Rotations go through the `rot` class plus a `--rot` custom property, so

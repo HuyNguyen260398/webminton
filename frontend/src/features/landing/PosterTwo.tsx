@@ -38,11 +38,6 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
           <Slab tone="red" rotate={-1.5} className="poster-two__title">
             THỂ LỆ THI ĐẤU
           </Slab>
-          <p className="poster-two__meta">
-            {info.name}
-            <br />
-            {info.clubName}
-          </p>
         </header>
 
         <div className="poster-two__grid">
@@ -180,9 +175,7 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
                   Có mặt trước giờ đánh <b>{rules.lateMinutes} phút</b>. Quá{" "}
                   {rules.lateMinutes} phút kể từ lúc gọi tên là xử thua.
                 </>,
-                <>
-                  Giày đế không đen kẻo sân bắt đền. Cầu BTC lo, vợt tự lo.
-                </>,
+                <>Giày đế không đen kẻo sân bắt đền. Cầu BTC lo, vợt tự lo.</>,
                 <>Khiếu nại giải quyết ngay tại sân, BTC nói gì nghe nấy.</>,
                 <>
                   Thua thì cười. Thắng thì cũng đừng cười to quá — tuần sau còn
@@ -192,7 +185,6 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             />
           </Card>
         </div>
-
       </div>
     </section>
   );
