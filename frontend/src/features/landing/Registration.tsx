@@ -4,7 +4,7 @@ import { Card, Section } from "./primitives";
 // Not on the poster JPGs: registration moved to a Microsoft Form, and the
 // link has to live somewhere people actually look — right under poster 1.
 function deadlineLabel(iso: string | null) {
-  if (!iso) return "Chưa chốt hạn — nhưng đừng để BTC phải đi nhắc từng người.";
+  if (!iso) return "Chưa chốt hạn — nhưng đừng đợi BTC vô nhóm réo tên nhé!";
   const d = new Intl.DateTimeFormat("vi-VN", {
     day: "2-digit",
     month: "2-digit",
@@ -25,8 +25,8 @@ export function Registration({ t }: { t: TournamentDocument }) {
       <Card className="registration">
         <div className="registration__body">
           <p className="registration__lead">
-            Điền form một phút là có tên trong danh sách. Đăng ký sớm để BTC còn
-            bốc thăm chia đội cho đều — sát ngày mới ới thì đội nào cũng lẻ.
+            Điền form nhanh hơn một pha giao cầu. Xong là có tên trong danh
+            sách, có suất trong đội, và có phần trong chầu chốt sổ.
           </p>
           <p className="registration__deadline">
             {deadlineLabel(info.registrationDeadline)}
@@ -41,7 +41,9 @@ export function Registration({ t }: { t: TournamentDocument }) {
           >
             MỞ FORM ĐĂNG KÝ <span aria-hidden="true">→</span>
           </a>
-          <p className="registration__note">Form mở ở tab mới.</p>
+          <p className="registration__note">
+            Form mở ở tab mới — điền xong nhớ bấm Gửi.
+          </p>
         </div>
       </Card>
     </Section>
