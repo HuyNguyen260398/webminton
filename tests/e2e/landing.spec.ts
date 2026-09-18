@@ -187,6 +187,15 @@ test("the stickers stay on their photo frames, at 1280 and at 390", async ({
   }
 });
 
+test("the tab wears the shuttlecock icon", async ({ page, request }) => {
+  await page.goto("/");
+  const href = await page.locator('link[rel="icon"]').getAttribute("href");
+  expect(href).toMatch(/^\/icon\.svg/);
+  const res = await request.get(href!);
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("image/svg+xml");
+});
+
 test("the page is a single route", async ({ request }) => {
   for (const path of ["/quan-tri/", "/van-dong-vien/", "/lich-thi-dau/"])
     expect((await request.get(path)).status()).toBe(404);
