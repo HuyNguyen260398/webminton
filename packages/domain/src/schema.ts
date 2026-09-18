@@ -60,6 +60,7 @@ export const InfoSchema = z.strictObject({
   startsAt: time.nullable(),
   dateLabel: text,
   registrationDeadline: time.nullable(),
+  registrationFormUrl: z.url().nullable(),
   timezone: z.literal("Asia/Ho_Chi_Minh"),
   feeVnd: Money.nullable(),
   contactName: text.nullable(),

@@ -451,6 +451,67 @@
   }
 }
 
+/* ================= Đăng ký — Microsoft Form ================= */
+.registration {
+  display: grid;
+  grid-template-columns: minmax(min(330px, 100%), 1fr) auto;
+  gap: clamp(22px, 3.2vw, 40px);
+  align-items: center;
+}
+.registration__lead {
+  margin: 0 0 14px;
+  max-width: 60ch;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+}
+.registration__deadline {
+  margin: 0;
+  font-weight: 800;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.registration__action {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+.registration__cta {
+  display: inline-block;
+  padding: 0.55em 1.1em;
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-hard);
+  background: var(--red);
+  color: var(--paper);
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.registration__cta:hover,
+.registration__cta:focus-visible {
+  background: var(--ink);
+  color: var(--yellow);
+}
+.registration__note {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  opacity: 0.75;
+}
+@media (max-width: 720px) {
+  .registration {
+    grid-template-columns: 1fr;
+  }
+  .registration__action {
+    justify-items: start;
+  }
+  .registration__cta {
+    white-space: normal;
+  }
+}
+
 /* ================= Poster 2 — thể lệ thi đấu ================= */
 .poster-two__head {
   display: flex;

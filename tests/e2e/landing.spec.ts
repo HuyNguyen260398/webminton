@@ -29,6 +29,37 @@ test("renders all three poster sections", async ({ page }) => {
   await expect(page.locator("#nha-tai-tro")).toBeVisible();
 });
 
+// The form link is the one CTA on a pre-registration page, so it has to
+// survive the build and point at the URL tournament.json actually carries.
+test("links to the Microsoft registration form", async ({ page }) => {
+  await page.goto("/");
+  const section = page.locator("#dang-ky");
+  await expect(section).toBeVisible();
+  const cta = section.getByRole("link", { name: /MỞ FORM ĐĂNG KÝ/ });
+  await expect(cta).toHaveAttribute(
+    "href",
+    /^https:\/\/forms\.cloud\.microsoft\/Pages\/ResponsePage\.aspx\?id=/,
+  );
+  await expect(cta).toHaveAttribute("target", "_blank");
+  await expect(cta).toHaveAttribute("rel", "noopener noreferrer");
+});
+
+test("hides the registration section when no form is published", async ({
+  page,
+}) => {
+  await page.route("**/tournament.json", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        ...JSON.parse(full),
+        info: { ...JSON.parse(full).info, registrationFormUrl: null },
+      }),
+    }),
+  );
+  await page.goto("/");
+  await expect(page.locator("#dang-ky")).toHaveCount(0);
+});
+
 test("renders the rule cards and sponsor tiers", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#the-le .card > h3")).toHaveCount(6);
@@ -146,8 +177,8 @@ test("every title slab stays on a single line, down to 390px", async ({
     const slabs = page.locator(
       ".section-title, .poster-two__title, .poster-three__title",
     );
-    await expect(slabs).toHaveCount(7);
-    for (let i = 0; i < 7; i++) {
+    await expect(slabs).toHaveCount(8);
+    for (let i = 0; i < 8; i++) {
       const lines = await slabs.nth(i).evaluate((el) => {
         const range = document.createRange();
         range.selectNodeContents(el);

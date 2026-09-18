@@ -3,6 +3,7 @@ import { useTournament } from "../lib/use-tournament";
 import { PosterOne } from "../features/landing/PosterOne";
 import { PosterTwo } from "../features/landing/PosterTwo";
 import { PosterThree } from "../features/landing/PosterThree";
+import { Registration } from "../features/landing/Registration";
 import { LiveSections } from "../features/landing/LiveSections";
 
 export default function Page() {
@@ -24,6 +25,7 @@ export default function Page() {
   return (
     <main id="main">
       <PosterOne t={view.t} />
+      <Registration t={view.t} />
       <div className="marquee" aria-hidden="true">
         ĐÔI NAM <b>✦</b> ĐÔI NỮ <b>✦</b> ĐÔI NAM NỮ <b>✦</b> HẾT MÌNH TỪNG ĐIỂM
       </div>

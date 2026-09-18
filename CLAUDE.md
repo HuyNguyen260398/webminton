@@ -104,8 +104,14 @@ keeps stored `sourceResultsHash` values matching.
 
 ### The page
 
-One route, `frontend/src/app/page.tsx`: poster 1 → marquee → poster 2 →
-poster 3 → the live data sections → a `<details>` linking the original JPGs.
+One route, `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI ĐẤU` → marquee
+→ poster 2 → poster 3 → the live data sections → a `<details>` linking the
+original JPGs.
+
+`features/landing/Registration.tsx` is the one section with no poster behind
+it: a link to the Microsoft Form in `info.registrationFormUrl`. It **renders
+nothing when that field is null**, so registration closes with a one-field edit
+to `tournament.json` and an invalidation — no rebuild.
 
 `features/landing/LiveSections.tsx` renders `DANH SÁCH VĐV`, `BỐN ĐỘI`,
 `LỊCH THI ĐẤU`, `BẢNG XẾP HẠNG` and `THU CHI` — each **hides itself when its

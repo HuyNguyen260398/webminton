@@ -17,6 +17,7 @@ const seed = {
     startsAt: null,
     dateLabel: "Cuối tháng 10.2026 — ngày cụ thể chốt sau khi đủ quân",
     registrationDeadline: null,
+    registrationFormUrl: null,
     timezone: "Asia/Ho_Chi_Minh",
     feeVnd: null,
     contactName: null,
