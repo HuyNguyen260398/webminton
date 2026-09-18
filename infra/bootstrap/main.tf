@@ -48,11 +48,80 @@ resource "aws_s3_bucket_policy" "state" {
   })
 }
 output "state_bucket_name" { value = aws_s3_bucket.state.id }
-resource "aws_iam_role" "github_plan" {
-  count              = var.oidc_provider_arn == null ? 0 : 1
-  name               = "webminton-github-plan"
-  assume_role_policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Principal = { Federated = var.oidc_provider_arn }, Action = "sts:AssumeRoleWithWebIdentity", Condition = { StringLike = { "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:environment:*" }, StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" } } }] })
+locals {
+  plan_subs = compact([
+    "repo:${var.github_repository}:environment:*",
+    var.github_repository_immutable == null ? null : "repo:${var.github_repository_immutable}:environment:*",
+  ])
 }
+
+resource "aws_iam_role" "github_plan" {
+  count = var.oidc_provider_arn == null ? 0 : 1
+  name  = "webminton-github-plan"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Federated = var.oidc_provider_arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
+        StringLike   = { "token.actions.githubusercontent.com:sub" = local.plan_subs }
+      }
+    }]
+  })
+}
+
+# plan.yml only reads: it refreshes state and prints a plan, so nothing here
+# grants a write. A drift it reports is applied by deploy.yml or by hand.
+resource "aws_iam_role_policy" "github_plan" {
+  count = local.deploy_enabled ? 1 : 0
+  name  = "webminton-plan"
+  role  = aws_iam_role.github_plan[0].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StateBucketList"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = aws_s3_bucket.state.arn
+      },
+      {
+        Sid      = "StateObjectRead"
+        Effect   = "Allow"
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.state.arn}/${local.state_key}"
+      },
+      {
+        Sid    = "SiteRead"
+        Effect = "Allow"
+        Action = ["s3:Get*", "s3:List*"]
+        Resource = [
+          "arn:aws:s3:::${var.site_bucket_name}",
+          "arn:aws:s3:::${var.site_bucket_name}/*",
+        ]
+      },
+      {
+        Sid    = "EdgeAndDnsRead"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:Get*",
+          "cloudfront:List*",
+          "cloudfront:Describe*",
+          "acm:DescribeCertificate",
+          "acm:ListCertificates",
+          "acm:ListTagsForCertificate",
+          "acm:GetCertificate",
+          "route53:Get*",
+          "route53:List*",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
+}
+
 output "github_plan_role_arn" { value = try(aws_iam_role.github_plan[0].arn, null) }
 
 # ------------------------------------------------------------- deploy role
