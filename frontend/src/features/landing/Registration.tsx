@@ -4,7 +4,8 @@ import { Card, Section } from "./primitives";
 // Not on the poster JPGs: registration moved to a Microsoft Form, and the
 // link has to live somewhere people actually look — right under poster 1.
 function deadlineLabel(iso: string | null) {
-  if (!iso) return "Chưa chốt hạn — nhưng đừng đợi BTC vô nhóm réo tên nhé!";
+  if (!iso)
+    return "Chưa chốt hạn — ghi tên sớm cho chắc suất, cả hội đang đợi bạn!";
   const d = new Intl.DateTimeFormat("vi-VN", {
     day: "2-digit",
     month: "2-digit",
