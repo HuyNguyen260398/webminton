@@ -16,3 +16,4 @@ playwright-report/
 .private/*
 !.private/roster.example.json
 .worktrees/
+infra/.build/

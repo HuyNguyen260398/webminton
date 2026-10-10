@@ -14,8 +14,8 @@ data "aws_route53_zone" "root" {
 }
 
 # ---------------------------------------------------------------- site bucket
-# Versioned so a previous tournament.json stays retrievable: that is the
-# rollback mechanism now that there is no database.
+# Versioned so a previous tournament.json stays retrievable even though the
+# database is now the source of truth: it is the fallback if the API is down.
 resource "aws_s3_bucket" "site" {
   bucket = var.site_bucket_name
   lifecycle {
@@ -106,6 +106,17 @@ resource "aws_cloudfront_distribution" "site" {
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
   }
 
+  origin {
+    origin_id   = "api"
+    domain_name = replace(aws_apigatewayv2_api.api.api_endpoint, "https://", "")
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
   default_cache_behavior {
     target_origin_id       = "site"
     viewer_protocol_policy = "redirect-to-https"
@@ -129,6 +140,19 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     # Managed-CachingDisabled
     cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+  }
+
+  # The admin API. Never cached, and the Authorization header must reach it.
+  ordered_cache_behavior {
+    path_pattern           = "/api/*"
+    target_origin_id       = "api"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods         = ["GET", "HEAD"]
+    # Managed-CachingDisabled
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+    # Managed-AllViewerExceptHostHeader
+    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac"
   }
 
   restrictions {
