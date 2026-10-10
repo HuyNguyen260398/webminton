@@ -74,13 +74,14 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
 
 // The show/hide rules themselves are covered by frontend/test/live-sections
 // against an empty fixture. This asserts the file that actually ships renders
-// the sections its data calls for: nobody has registered yet, so only THU CHI.
+// the sections its data calls for: athletes have registered and finance is
+// published, but there has been no draw, so no teams, schedule or standings.
 test("renders the live sections the shipped data calls for", async ({
   page,
 }) => {
   await page.goto("/");
   await expect(page.locator("#thu-chi")).toBeVisible();
-  await expect(page.locator("#van-dong-vien")).toHaveCount(0);
+  await expect(page.locator("#van-dong-vien")).toBeVisible();
   await expect(page.locator("#boc-tham")).toHaveCount(0);
   await expect(page.locator("#lich-thi-dau")).toHaveCount(0);
   await expect(page.locator("#bang-xep-hang")).toHaveCount(0);
