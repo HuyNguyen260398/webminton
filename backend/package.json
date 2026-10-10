@@ -5,5 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs"
+  },
+  "dependencies": {
+    "zod": "4.6.2"
   }
 }
