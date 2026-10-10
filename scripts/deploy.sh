@@ -2,7 +2,11 @@
 # Invoke as `pnpm run deploy` — a bare `pnpm deploy` hits pnpm's own
 # workspace-deploy command instead of this script.
 # Build must already exist. Uploads in two passes so fingerprinted assets are
-# cached forever while the HTML and the data file stay revalidated.
+# cached forever while the HTML stays revalidated.
+#
+# tournament.json is NOT uploaded: the database owns it and the API rewrites
+# it on every save. Uploading the repo copy here would overwrite live scores.
+# To push the repo copy on purpose, run `pnpm seed --force`.
 set -euo pipefail
 
 BUCKET="${SITE_BUCKET:-$(terraform -chdir=infra output -raw site_bucket_name)}"
@@ -19,7 +23,7 @@ aws s3 sync "$OUT" "s3://$BUCKET" --delete \
 # Pass 2: the mutable entry points.
 aws s3 sync "$OUT" "s3://$BUCKET" \
   --cache-control "no-cache" \
-  --exclude "*" --include "*.html" --include "tournament.json"
+  --exclude "*" --exclude "tournament.json" --include "*.html"
 
 aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*" >/dev/null
 echo "✓ Đã triển khai lên s3://$BUCKET và làm mới CloudFront."

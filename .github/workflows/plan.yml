@@ -13,10 +13,23 @@ jobs:
     environment: prod
     env:
       TF_VAR_site_bucket_name: ${{ vars.SITE_BUCKET_NAME }}
+      TF_VAR_google_client_id: ${{ vars.GOOGLE_CLIENT_ID }}
+      TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      # A JSON list, e.g. ["ban@gmail.com"]
+      TF_VAR_admin_emails: ${{ vars.ADMIN_EMAILS }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: '${{ github.sha }}'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @webminton/backend build
       - uses: hashicorp/setup-terraform@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
