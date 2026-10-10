@@ -415,7 +415,9 @@ export function applyCommand(
         tiedTeamIds,
         orderedTeamIds,
         reason,
-        decidedBy: actor,
+        // Published with the document, so a role, never the signed-in
+        // email. Who made the call is in the history entry.
+        decidedBy: "BTC",
         sourceResultsHash: resultsHash(t),
       });
       t = seedPlacement(t);

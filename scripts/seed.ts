@@ -2,7 +2,10 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { PublicTournamentSchema } from "../packages/domain/src/schema";
 import { PrivateRosterSchema } from "../packages/domain/src/roster";
-import type { AdminState } from "../packages/domain/src/commands";
+import type {
+  AdminState,
+  PrivateMap,
+} from "../packages/domain/src/commands";
 import { awsPublisher, awsStore } from "../backend/src/aws";
 import { renderSnapshot, type Publisher } from "../backend/src/publish";
 import type { TournamentStore } from "../backend/src/store";
@@ -11,9 +14,13 @@ import { validateTournament } from "./validate-tournament";
 const PUBLIC = "frontend/public/tournament.json";
 const PRIVATE = ".private/roster.json";
 
+// Private fields come from the roster file where it names the athlete,
+// otherwise from what the table already holds: a --force re-seed must not
+// blank skill bands and phone numbers that were entered online.
 export function buildSeed(
   rawDocument: unknown,
   rawRoster: unknown | null,
+  existing: PrivateMap = {},
 ): AdminState {
   const problems = validateTournament(rawDocument);
   if (problems.length)
@@ -27,11 +34,9 @@ export function buildSeed(
         const p = roster?.athletes.find((x) => x.id === a.id);
         return [
           a.id,
-          {
-            skillBand: p?.skillBand ?? null,
-            phone: p?.phone ?? null,
-            note: p?.note ?? "",
-          },
+          p
+            ? { skillBand: p.skillBand, phone: p.phone, note: p.note }
+            : (existing[a.id] ?? { skillBand: null, phone: null, note: "" }),
         ];
       }),
     ),
@@ -65,13 +70,15 @@ const output = (name: string) =>
 if (import.meta.filename === process.argv[1]) {
   const force = process.argv.includes("--force");
   try {
+    const table = process.env.TABLE_NAME ?? output("table_name");
+    const bucket = process.env.SITE_BUCKET ?? output("site_bucket_name");
+    const store = awsStore(table);
     const state = buildSeed(
       JSON.parse(readFileSync(PUBLIC, "utf8")),
       existsSync(PRIVATE) ? JSON.parse(readFileSync(PRIVATE, "utf8")) : null,
+      (await store.read())?.private,
     );
-    const table = process.env.TABLE_NAME ?? output("table_name");
-    const bucket = process.env.SITE_BUCKET ?? output("site_bucket_name");
-    const version = await seed(awsStore(table), awsPublisher(bucket), state, {
+    const version = await seed(store, awsPublisher(bucket), state, {
       force,
       now: new Date().toISOString(),
     });

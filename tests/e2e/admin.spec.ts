@@ -257,3 +257,14 @@ test("lists every change and restores an earlier version", async ({ page }) => {
     "Khôi phục phiên bản 1",
   );
 });
+
+test("a match called by mistake can be un-called", async ({ page }) => {
+  await signIn(page);
+  const item = page.locator(`[data-match-id="${MENS}"]`);
+  await item.click();
+  await page.getByRole("button", { name: "Gọi trận" }).click();
+  await expect(item).toContainText("Đang gọi");
+  await page.getByRole("button", { name: "Huỷ gọi" }).click();
+  await expect(item).toContainText("Chờ");
+  await expect(page.getByRole("button", { name: "Gọi trận" })).toBeVisible();
+});

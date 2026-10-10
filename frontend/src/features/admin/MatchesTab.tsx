@@ -325,6 +325,18 @@ function MatchEditor({
               Gọi trận
             </button>
           )}
+          {match.status === "called" && (
+            <button
+              type="button"
+              className="button--ghost"
+              disabled={busy}
+              onClick={() =>
+                send({ type: "clearResult", payload: id }, "Đã huỷ gọi trận.")
+              }
+            >
+              Huỷ gọi
+            </button>
+          )}
           {!done &&
             (["a", "b"] as const).map((side) => (
               <ConfirmButton

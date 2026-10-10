@@ -117,22 +117,39 @@ export class DynamoStore implements TournamentStore {
   }
 
   async history(): Promise<HistoryEntry[]> {
-    const { Items = [] } = await this.db.send(
-      new QueryCommand({
-        TableName: this.table,
-        KeyConditionExpression: "pk = :pk AND begins_with(sk, :v)",
-        ExpressionAttributeValues: { ":pk": PK, ":v": "V#" },
-        ScanIndexForward: false,
-        Limit: 200,
-      }),
-    );
-    return Items.map((i) => ({
-      version: i.version,
-      at: i.at,
-      actorEmail: i.actorEmail,
-      commandType: i.commandType,
-      requestId: i.requestId,
-    }));
+    const entries: HistoryEntry[] = [];
+    let from: Record<string, unknown> | undefined;
+    // A page stops at 1 MB of items read, and each version item carries the
+    // whole tournament. So project the metadata only, and follow the pages.
+    do {
+      const page = await this.db.send(
+        new QueryCommand({
+          TableName: this.table,
+          KeyConditionExpression: "pk = :pk AND begins_with(sk, :v)",
+          ExpressionAttributeValues: { ":pk": PK, ":v": "V#" },
+          ProjectionExpression: "#version, #at, #actor, #type, #request",
+          ExpressionAttributeNames: {
+            "#version": "version",
+            "#at": "at",
+            "#actor": "actorEmail",
+            "#type": "commandType",
+            "#request": "requestId",
+          },
+          ScanIndexForward: false,
+          ExclusiveStartKey: from,
+        }),
+      );
+      for (const i of page.Items ?? [])
+        entries.push({
+          version: i.version,
+          at: i.at,
+          actorEmail: i.actorEmail,
+          commandType: i.commandType,
+          requestId: i.requestId,
+        });
+      from = page.LastEvaluatedKey;
+    } while (from);
+    return entries;
   }
 
   async snapshot(version: number): Promise<AdminState | null> {

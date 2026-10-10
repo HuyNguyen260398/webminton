@@ -111,4 +111,27 @@ describe("DynamoStore", () => {
     expect(db.sent[0].input).toMatchObject({ ScanIndexForward: false });
     await expect(store.markPublished(1)).resolves.toBeUndefined();
   });
+
+  it("lists the whole history across pages, without loading each version's state", async () => {
+    const pages = [
+      { Items: [{ version: 3, ...entry }], LastEvaluatedKey: { pk: "p", sk: "V#000003" } },
+      { Items: [{ version: 2, ...entry }, { version: 1, ...entry }] },
+    ];
+    const db = fakeDb(() => pages.shift());
+    const history = await new DynamoStore(db as never, "t").history();
+    expect(history.map((h) => h.version)).toEqual([3, 2, 1]);
+    expect(db.sent).toHaveLength(2);
+    expect(db.sent[1].input.ExclusiveStartKey).toEqual({ pk: "p", sk: "V#000003" });
+    for (const { input } of db.sent) {
+      expect(input.Limit).toBeUndefined();
+      // Only the five metadata fields: a page is capped at 1 MB of items read.
+      expect(Object.values(input.ExpressionAttributeNames).sort()).toEqual([
+        "actorEmail",
+        "at",
+        "commandType",
+        "requestId",
+        "version",
+      ]);
+    }
+  });
 });

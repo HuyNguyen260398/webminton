@@ -285,7 +285,9 @@ describe("applyCommand — ties", () => {
         reason: "Đối đầu trực tiếp",
       },
     });
-    expect(next.document.tieDecisions[0].decidedBy).toBe("btc@example.com");
+    // tieDecisions is part of the public file: the organiser's email is not.
+    expect(next.document.tieDecisions[0].decidedBy).toBe("BTC");
+    expect(JSON.stringify(next.document)).not.toContain("btc@example.com");
     const first = next.document.matches.filter(
       (m) => m.phase === "first_place",
     );

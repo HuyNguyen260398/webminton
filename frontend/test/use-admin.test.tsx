@@ -140,8 +140,32 @@ describe("useAdmin", () => {
     expect(result.current.phase).toBe("signed-out");
     expect(JSON.parse(sessionStorage.getItem("wm.pending")!)).toMatchObject({
       path: "/api/admin/commands",
-      body: { command: cmd },
+      body: { command: cmd, baseVersion: 4 },
     });
     expect(sessionStorage.getItem("wm.token")).toBeNull();
+  });
+
+  it("resumes an interrupted save against the version it was made on", async () => {
+    // Signed in again; meanwhile another device moved the tournament to 7.
+    sessionStorage.setItem(
+      "wm.pending",
+      JSON.stringify({
+        path: "/api/admin/commands",
+        body: { requestId: "req-old", baseVersion: 4, command: cmd },
+      }),
+    );
+    handler = (url) =>
+      url.endsWith("/commands")
+        ? json(409, { code: "CONFLICT", message: "Dữ liệu vừa thay đổi — kiểm tra rồi lưu lại." })
+        : json(200, state(7));
+    const { result } = await ready();
+    await waitFor(() => expect(result.current.notice?.tone).toBe("warn"));
+    const sent = calls.find((c) => c.url.endsWith("/commands"))!;
+    expect(JSON.parse(sent.init!.body as string)).toMatchObject({
+      baseVersion: 4,
+      requestId: "req-old",
+      command: cmd,
+    });
+    expect(sessionStorage.getItem("wm.pending")).toBeNull();
   });
 });

@@ -93,7 +93,8 @@ export function useAdmin(): Admin {
       path: string,
       extra: Record<string, unknown>,
       saved: string,
-      requestId?: string,
+      // Set only when resuming a save interrupted by an expired token.
+      resumed?: { requestId: string; baseVersion: number },
     ): Promise<boolean> => {
       const base = current.current;
       if (!base) return false;
@@ -101,11 +102,14 @@ export function useAdmin(): Admin {
       // first attempt did land the server answers "already done".
       const key = JSON.stringify([path, extra]);
       const id =
-        requestId ??
+        resumed?.requestId ??
         (retry.current?.key === key
           ? retry.current.requestId
           : crypto.randomUUID());
-      const body = { baseVersion: base.version, requestId: id, ...extra };
+      // A resumed save keeps the version it was made on: if another device has
+      // saved since, it must conflict, not land on top.
+      const baseVersion = resumed?.baseVersion ?? base.version;
+      const body = { baseVersion, requestId: id, ...extra };
       setBusy(true);
       try {
         const next = await api<AdminView>(path, body);
@@ -129,7 +133,7 @@ export function useAdmin(): Admin {
           await reload();
           setNotice({ tone: "warn", text: e.message });
         } else if (e instanceof ApiError && e.status === 401) {
-          const pending: Pending = { path, body: { requestId: id, ...extra } };
+          const pending: Pending = { path, body };
           sessionStorage.setItem(PENDING, JSON.stringify(pending));
           fail(e);
         } else fail(e);
@@ -147,13 +151,11 @@ export function useAdmin(): Admin {
     if (!raw) return;
     sessionStorage.removeItem(PENDING);
     const { path, body } = JSON.parse(raw) as Pending;
-    const { requestId, ...extra } = body;
-    await post(
-      path,
-      extra,
-      "Đã đăng nhập lại và lưu thao tác còn dang dở.",
-      requestId as string,
-    );
+    const { requestId, baseVersion, ...extra } = body;
+    await post(path, extra, "Đã đăng nhập lại và lưu thao tác còn dang dở.", {
+      requestId: requestId as string,
+      baseVersion: baseVersion as number,
+    });
   }, [post]);
 
   useEffect(() => {

@@ -79,4 +79,14 @@ describe("seed", () => {
       await seed(store, publish, buildSeed(doc(), null), { force: true, now }),
     ).toBe(2);
   });
+
+  it("keeps private fields already in the table unless the roster file overrides them", async () => {
+    const existing = {
+      a01: { skillBand: 3 as const, phone: "0111", note: "cũ" },
+      a02: { skillBand: 1 as const, phone: "0222", note: "nhập trên web" },
+    };
+    const state = buildSeed(doc(), roster, existing);
+    expect(state.private.a01).toEqual({ skillBand: 2, phone: "0901", note: "" });
+    expect(state.private.a02).toEqual(existing.a02);
+  });
 });
