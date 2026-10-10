@@ -26,10 +26,34 @@ Nếu tài khoản đã từng chạy layout `infra/envs/{dev,prod}` + `infra/mo
 Nếu bắt đầu từ state trống thì đơn giản hơn: chọn `site_bucket_name` mới và dỡ
 stack cũ riêng.
 
-## 3. Apply
+## 3. Đăng nhập Google cho trang quản trị
+
+1. Lấy trước địa chỉ redirect — nó chỉ phụ thuộc vào số tài khoản AWS:
+
+   ```bash
+   echo "https://webminton-$(aws sts get-caller-identity --query Account --output text).auth.ap-southeast-1.amazoncognito.com/oauth2/idpresponse"
+   ```
+
+2. Vào Google Cloud Console → **APIs & Services → Credentials → Create
+   credentials → OAuth client ID**, loại **Web application**. Dán địa chỉ trên
+   vào **Authorized redirect URIs**. Nếu được hỏi, cấu hình OAuth consent
+   screen ở chế độ External và thêm email BTC làm test user.
+3. Điền vào `infra/terraform.tfvars`:
+
+   ```hcl
+   google_client_id     = "….apps.googleusercontent.com"
+   google_client_secret = "…"
+   admin_emails         = ["email-btc@gmail.com"]
+   ```
+
+`admin_emails` là danh sách duy nhất quyết định ai được sửa giải. Thêm người:
+sửa biến này rồi apply lại.
+
+## 4. Apply
 
 ```bash
-cp infra/terraform.tfvars.example infra/terraform.tfvars   # đặt tên bucket
+pnpm install && pnpm build                                 # tạo backend/dist cho Lambda
+cp infra/terraform.tfvars.example infra/terraform.tfvars   # đặt tên bucket + Google
 terraform -chdir=infra init \
   -backend-config="bucket=<state-bucket>" \
   -backend-config="region=<region>"
@@ -38,17 +62,37 @@ terraform -chdir=infra apply
 ```
 
 Lần apply đầu chờ ACM xác thực qua DNS, thường vài phút. CloudFront mất thêm
-5–15 phút để lan truyền.
+5–15 phút để lan truyền. Role deploy của GitHub chỉ cập nhật được tài nguyên đã
+có, nên lần tạo mới (bảng, Lambda, API, Cognito) luôn là apply từ máy này.
 
-## 4. Triển khai lần đầu
+Kiểm tra `terraform -chdir=infra output google_redirect_uri` khớp với địa chỉ
+đã nhập ở Google.
+
+## 5. Nạp dữ liệu và triển khai lần đầu
 
 ```bash
-pnpm install && pnpm validate && pnpm build && pnpm run deploy
+pnpm seed                                    # nạp frontend/public/tournament.json vào bảng
+pnpm validate && pnpm run deploy
 node --import tsx scripts/smoke-deployment.ts
 ```
 
+`pnpm seed` từ chối chạy nếu bảng đã có dữ liệu. `--force` ghi đè bằng nội
+dung trong repo; bản cũ vẫn còn trong mục Lịch sử. Nếu có
+`.private/roster.json`, trình độ, số điện thoại và ghi chú trong đó được nạp
+kèm.
+
 Smoke check xác nhận trang trả về 200, `tournament.json` khớp schema, được
-phục vụ `no-cache`, và không lộ trường riêng tư nào.
+phục vụ `no-cache`, không lộ trường riêng tư nào, `/api/config` trả lời và
+`/api/admin/state` từ chối khi không có token.
+
+## 6. Mở quyền cho GitHub
+
+```bash
+terraform -chdir=infra/bootstrap apply       # cấp thêm quyền Lambda/DynamoDB/API/Cognito cho role deploy
+```
+
+Nếu workflow Deploy báo `AccessDenied` cho một action, thêm action đó vào
+statement tương ứng trong `infra/bootstrap/main.tf` rồi apply lại.
 
 ## Biến repo cần có
 
@@ -56,4 +100,7 @@ phục vụ `no-cache`, và không lộ trường riêng tư nào.
 `SITE_BUCKET_NAME`, đặt trong environment `prod`. `AWS_DEPLOY_ROLE_ARN` là output
 `github_deploy_role_arn` của `infra/bootstrap`, chỉ có sau khi điền
 `oidc_provider_arn`, `site_bucket_name`, `distribution_id` và `hosted_zone_id`.
-Không còn biến Cognito nào — bản build không đọc output Terraform nữa.
+Thêm cho trang quản trị: biến `GOOGLE_CLIENT_ID` và `ADMIN_EMAILS` (dạng JSON,
+ví dụ `["email-btc@gmail.com"]`), và secret `GOOGLE_CLIENT_SECRET`. Bản build
+vẫn không đọc output Terraform — trang quản trị lấy cấu hình đăng nhập từ
+`/api/config`.
