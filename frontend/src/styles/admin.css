@@ -151,10 +151,17 @@
   overflow-wrap: anywhere;
 }
 
+/* One team per row on a phone: side by side, the number field is left about
+   38px wide between its two stepper buttons. */
 .score-entry {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 480px) {
+  .score-entry {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .stepper {
   display: grid;

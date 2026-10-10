@@ -65,3 +65,74 @@ for (const width of [390, 768, 1280])
     await signIn(page);
     expect(await overflow(page)).toBeLessThanOrEqual(1);
   });
+const MENS = "group-red-blue-mens_doubles";
+const enterScore = async (page: Page, id: string, a: number, b: number) => {
+  await page.locator(`[data-match-id="${id}"]`).click();
+  await page.getByLabel("Điểm Đội Đỏ", { exact: true }).fill(String(a));
+  await page.getByLabel("Điểm Đội Xanh", { exact: true }).fill(String(b));
+  await page.getByRole("button", { name: "Lưu tỉ số" }).click();
+};
+
+test("a score entered on a phone reaches an open public page by itself", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(60_000);
+  const visitor = await context.newPage();
+  await visitor.goto("/");
+  await expect(visitor.locator("#thong-bao")).toBeVisible();
+  await expect(visitor.locator("#bang-xep-hang")).toHaveCount(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  await enterScore(page, MENS, 21, 15);
+  await expect(page.getByRole("status")).toContainText("Đã lưu tỉ số.");
+  await expect(page.locator(`[data-match-id="${MENS}"]`)).toContainText("21–15");
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+
+  // No reload and no navigation on the visitor's page: the 20-second poll
+  // alone has to bring the leaderboard in.
+  await expect(visitor.locator("#bang-xep-hang")).toBeVisible({
+    timeout: 30_000,
+  });
+});
+
+test("an impossible score cannot be saved", async ({ page }) => {
+  await signIn(page);
+  await page.locator(`[data-match-id="${MENS}"]`).click();
+  await page.getByLabel("Điểm Đội Đỏ", { exact: true }).fill("21");
+  await page.getByLabel("Điểm Đội Xanh", { exact: true }).fill("20");
+  await expect(page.getByRole("button", { name: "Lưu tỉ số" })).toBeDisabled();
+  await expect(page.getByText("Chưa hợp lệ")).toBeVisible();
+});
+
+test("a stale screen is told to check again instead of overwriting", async ({
+  page,
+  context,
+}) => {
+  const other = await context.newPage();
+  await signIn(page);
+  await signIn(other);
+  await enterScore(page, MENS, 21, 15);
+  await expect(page.getByRole("status")).toContainText("Đã lưu tỉ số.");
+
+  await enterScore(other, MENS, 21, 10);
+  await expect(other.getByRole("status")).toContainText(
+    "Dữ liệu vừa thay đổi — kiểm tra rồi lưu lại.",
+  );
+  // It now shows what the first device saved, and that is what is stored.
+  await expect(other.locator(`[data-match-id="${MENS}"]`)).toContainText("21–15");
+  const stored = await (await page.request.get("/tournament.json")).json();
+  expect(stored.matches[0].score).toEqual({ a: 21, b: 15 });
+});
+
+test("a walkover takes two taps and is recorded as 21–0", async ({ page }) => {
+  await signIn(page);
+  await page.locator(`[data-match-id="${MENS}"]`).click();
+  await page.getByRole("button", { name: "Xử thắng: Đội Xanh vắng" }).click();
+  await expect(page.locator(`[data-match-id="${MENS}"]`)).toContainText("Chờ");
+  await page.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.locator(`[data-match-id="${MENS}"]`)).toContainText(
+    "Xử thắng 21–0",
+  );
+});

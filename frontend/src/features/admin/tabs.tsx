@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ReadyAdmin } from "../../lib/use-admin";
+import { MatchesTab } from "./MatchesTab";
 
 export interface AdminTab {
   id: string;
@@ -8,4 +9,6 @@ export interface AdminTab {
 }
 
 // Order here is the order on screen. The first entry is the default tab.
-export const TABS: AdminTab[] = [];
+export const TABS: AdminTab[] = [
+  { id: "tran-dau", label: "Trận", render: (a) => <MatchesTab admin={a} /> },
+];
