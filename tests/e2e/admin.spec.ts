@@ -195,3 +195,65 @@ test("removes an athlete who is in no lineup", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("Đã xoá VĐV.");
   await expect(page.locator(".pick-list")).not.toContainText("VĐV thử 16");
 });
+const publicData = async (page: Page) =>
+  (await page.request.get("/tournament.json")).json();
+
+test("edits tournament info and the public file follows", async ({ page }) => {
+  await signIn(page, "#giai");
+  await page.getByLabel("Địa điểm").fill("Sân cầu lông Tấn Phúc 2");
+  await page.getByLabel("Lệ phí (đồng)").fill("150000");
+  await page.getByRole("button", { name: "Lưu thông tin" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu thông tin giải.");
+  const data = await publicData(page);
+  expect(data.info.location).toBe("Sân cầu lông Tấn Phúc 2");
+  expect(data.info.feeVnd).toBe(150000);
+});
+
+test("adds an expense and publishes the finance section", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, "#thu-chi");
+  await page.getByRole("button", { name: "Thêm khoản chi" }).click();
+  await page.getByLabel("Khoản chi").fill("Thuê sân");
+  await page.getByLabel("Số lượng").fill("4");
+  await page.getByLabel("Đơn giá (đồng)").fill("120000");
+  await page.getByRole("button", { name: "Lưu khoản chi" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu.");
+  // click(), not check(): the box is controlled and only flips once the save
+  // returns, which check() would report as "did not change its state".
+  await page.getByLabel("Công bố thu chi trên trang giải").click();
+  await expect(page.getByRole("status")).toContainText("Đã công bố thu chi.");
+  await expect(page.getByLabel("Công bố thu chi trên trang giải")).toBeChecked();
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+
+  const data = await publicData(page);
+  expect(data.finance.published).toBe(true);
+  expect(data.finance.expenses[0]).toMatchObject({
+    label: "Thuê sân",
+    quantity: 4,
+    unitPriceVnd: 120000,
+  });
+});
+
+test("lists every change and restores an earlier version", async ({ page }) => {
+  await signIn(page, "#giai");
+  await page.getByLabel("Lệ phí (đồng)").fill("999000");
+  await page.getByRole("button", { name: "Lưu thông tin" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu thông tin giải.");
+  expect((await publicData(page)).info.feeVnd).toBe(999000);
+
+  await page.getByRole("button", { name: "Lịch sử", exact: true }).click();
+  const latest = page.locator('[data-version="2"]');
+  await expect(latest).toContainText("Sửa thông tin giải");
+  await expect(latest).toContainText("admin@example.com");
+
+  const first = page.locator('[data-version="1"]');
+  await first.getByRole("button", { name: "Khôi phục" }).click();
+  await first.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Đã khôi phục phiên bản 1.",
+  );
+  expect((await publicData(page)).info.feeVnd).toBeNull();
+  await expect(page.locator('[data-version="3"]')).toContainText(
+    "Khôi phục phiên bản 1",
+  );
+});

@@ -204,3 +204,19 @@
 .pick-list > li.field-row {
   align-items: center;
 }
+/* The team picker in a member row sits outside a .field. */
+.pick-list select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+}
+/* Keep the site footer clear of the fixed tab bar. */
+@media (max-width: 1023.98px) {
+  body:has(.admin) > .footer {
+    margin-bottom: 58px;
+  }
+}
