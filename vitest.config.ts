@@ -5,6 +5,7 @@ export default defineConfig({
     setupFiles: ["frontend/test/setup.ts"],
     include: [
       "packages/**/test/**/*.test.ts",
+      "backend/test/**/*.test.ts",
       "scripts/test/**/*.test.ts",
       "frontend/test/**/*.test.ts",
       "frontend/test/**/*.test.tsx",
