@@ -14,6 +14,10 @@ import { deriveTournament } from "./derive";
 import type { PrivateRoster } from "./roster";
 import { generateDraw } from "./draw";
 import { generateGroupMatches } from "./round-robin";
+import { seedPlacement } from "./advancement";
+import { validateLineup } from "./schedule";
+import { isFinalScore, walkoverScore } from "./score";
+import { calculateStandings, resultsHash } from "./standings";
 
 const text = z.string().trim().min(1).max(500);
 const time = z.iso.datetime({ offset: true });
@@ -192,6 +196,13 @@ export function applyCommand(
     t.teams.forEach((team) => {
       if (team.captainId === id) team.captainId = null;
     });
+  const match = (id: string) => {
+    const m = t.matches.find((x) => x.id === id);
+    if (!m) throw new Error("MATCH_NOT_FOUND");
+    return m;
+  };
+  const finished = (status: string) =>
+    status === "completed" || status === "walkover";
 
   switch (c.type) {
     case "updateInfo":
@@ -323,10 +334,93 @@ export function applyCommand(
       t.matches = [];
       t.tieDecisions = [];
       break;
-    default:
-      // Athlete, draw and match commands arrive in Tasks 2 and 3.
-      throw new Error("INVALID_COMMAND");
+    case "setLineup": {
+      const m = match(c.payload.matchId);
+      if (finished(m.status)) throw new Error("MATCH_LOCKED");
+      m.pairA = c.payload.pairA;
+      m.pairB = c.payload.pairB;
+      validateLineup(t, m);
+      break;
+    }
+    case "publishLineup": {
+      const m = match(c.payload.matchId);
+      if (c.payload.published) validateLineup(t, m);
+      m.lineupPublished = c.payload.published;
+      break;
+    }
+    case "setSchedule": {
+      const m = match(c.payload.matchId);
+      const { courtId, startsAt, endsAt } = c.payload;
+      if (courtId !== null && !t.courts.some((x) => x.id === courtId))
+        throw new Error("INVALID_COURT");
+      Object.assign(m, { courtId, startsAt, endsAt });
+      break;
+    }
+    case "callMatch": {
+      const m = match(c.payload.matchId);
+      if (m.status !== "pending") throw new Error("INVALID_STATUS");
+      m.status = "called";
+      break;
+    }
+    case "setScore": {
+      if (!isFinalScore(c.payload.score)) throw new Error("INVALID_SCORE");
+      const m = match(c.payload.matchId);
+      if (!m.teamAId || !m.teamBId) throw new Error("INVALID_TEAM");
+      m.score = c.payload.score;
+      m.status = "completed";
+      t = seedPlacement(t);
+      break;
+    }
+    case "setWalkover": {
+      const m = match(c.payload.matchId);
+      if (!m.teamAId || !m.teamBId) throw new Error("INVALID_TEAM");
+      m.score = walkoverScore(c.payload.absentSide);
+      m.status = "walkover";
+      t = seedPlacement(t);
+      break;
+    }
+    case "clearResult": {
+      const m = match(c.payload.matchId);
+      m.score = null;
+      m.status = "pending";
+      t = seedPlacement(t);
+      break;
+    }
+    case "resolveTie": {
+      const { tiedTeamIds, orderedTeamIds, reason } = c.payload;
+      const key = (ids: string[]) => [...ids].sort().join();
+      const all = calculateStandings({ ...t, tieDecisions: [] });
+      const first = all.find((r) => r.teamId === tiedTeamIds[0]);
+      // The decision must name the whole level group, or it never applies.
+      const level = first
+        ? all.filter(
+            (r) =>
+              r.pointsFor === first.pointsFor &&
+              r.wins === first.wins &&
+              r.difference === first.difference,
+          )
+        : [];
+      if (
+        !first ||
+        first.played === 0 ||
+        new Set(tiedTeamIds).size !== tiedTeamIds.length ||
+        key(level.map((r) => r.teamId)) !== key(tiedTeamIds) ||
+        key(orderedTeamIds) !== key(tiedTeamIds)
+      )
+        throw new Error("INVALID_TIE");
+      t.tieDecisions = t.tieDecisions.filter(
+        (d) => key(d.tiedTeamIds) !== key(tiedTeamIds),
+      );
+      t.tieDecisions.push({
+        tiedTeamIds,
+        orderedTeamIds,
+        reason,
+        decidedBy: actor,
+        sourceResultsHash: resultsHash(t),
+      });
+      t = seedPlacement(t);
+      break;
+    }
   }
-  void actor;
   return finalize(t, priv, now);
 }
