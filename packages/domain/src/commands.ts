@@ -11,6 +11,9 @@ import {
   type TournamentDocument,
 } from "./schema";
 import { deriveTournament } from "./derive";
+import type { PrivateRoster } from "./roster";
+import { generateDraw } from "./draw";
+import { generateGroupMatches } from "./round-robin";
 
 const text = z.string().trim().min(1).max(500);
 const time = z.iso.datetime({ offset: true });
@@ -142,6 +145,33 @@ function finalize(
   return { document: parsed.data, private: PrivateMapSchema.parse(priv) };
 }
 
+export function toRoster(state: AdminState): PrivateRoster {
+  return {
+    athletes: state.document.athletes.map((a) => ({
+      id: a.id,
+      name: a.name,
+      gender: a.gender,
+      active: a.active,
+      skillBand: state.private[a.id]?.skillBand ?? null,
+      phone: state.private[a.id]?.phone ?? null,
+      note: state.private[a.id]?.note ?? "",
+    })),
+  };
+}
+
+const started = (t: TournamentDocument) =>
+  t.matches.some((m) => m.status !== "pending");
+
+// Computed and shown to the organiser only. confirmDraw re-runs the same
+// seed, and the PRNG is seeded, so what was previewed is what gets saved.
+export function previewDraw(
+  state: AdminState,
+  seed: string,
+): Record<string, string> {
+  if (started(state.document)) throw new Error("DRAW_LOCKED");
+  return generateDraw(toRoster(state), state.document.teams, seed).assignment;
+}
+
 export function applyCommand(
   state: AdminState,
   input: unknown,
@@ -154,6 +184,14 @@ export function applyCommand(
   // `let`: the match commands added in Task 3 replace the document wholesale.
   let t = structuredClone(state.document);
   const priv = structuredClone(state.private);
+  const inLineup = (id: string) =>
+    t.matches.some((m) =>
+      [...(m.pairA ?? []), ...(m.pairB ?? [])].includes(id),
+    );
+  const dropCaptain = (id: string) =>
+    t.teams.forEach((team) => {
+      if (team.captainId === id) team.captainId = null;
+    });
 
   switch (c.type) {
     case "updateInfo":
@@ -204,6 +242,86 @@ export function applyCommand(
       break;
     case "setFinancePublished":
       t.finance.published = c.payload.published;
+      break;
+    case "upsertAthlete": {
+      const { id, skillBand, phone, note, ...pub } = c.payload;
+      if (id === null) {
+        const n =
+          Math.max(
+            0,
+            ...t.athletes.map((a) => Number(/^a(\d+)$/.exec(a.id)?.[1] ?? 0)),
+          ) + 1;
+        const newId = `a${String(n).padStart(2, "0")}`;
+        t.athletes.push({ id: newId, ...pub, teamId: null });
+        priv[newId] = { skillBand, phone, note };
+        break;
+      }
+      const a = t.athletes.find((x) => x.id === id);
+      if (!a) throw new Error("ATHLETE_NOT_FOUND");
+      // A lineup was validated against this gender and active flag.
+      if (
+        (a.gender !== pub.gender || (a.active && !pub.active)) &&
+        inLineup(id)
+      )
+        throw new Error("ATHLETE_IN_LINEUP");
+      Object.assign(a, pub);
+      priv[id] = { skillBand, phone, note };
+      break;
+    }
+    case "removeAthlete": {
+      const { id } = c.payload;
+      if (!t.athletes.some((a) => a.id === id))
+        throw new Error("ATHLETE_NOT_FOUND");
+      if (inLineup(id)) throw new Error("ATHLETE_IN_LINEUP");
+      t.athletes = t.athletes.filter((a) => a.id !== id);
+      delete priv[id];
+      delete t.draw.assignment[id];
+      dropCaptain(id);
+      break;
+    }
+    case "setAthleteTeam": {
+      const { athleteId, teamId } = c.payload;
+      const a = t.athletes.find((x) => x.id === athleteId);
+      if (!a) throw new Error("ATHLETE_NOT_FOUND");
+      if (teamId !== null && !t.teams.some((x) => x.id === teamId))
+        throw new Error("INVALID_TEAM");
+      if (a.teamId === teamId) break;
+      if (inLineup(athleteId)) throw new Error("ATHLETE_IN_LINEUP");
+      dropCaptain(athleteId);
+      a.teamId = teamId;
+      if (t.draw.status === "confirmed") {
+        if (teamId) t.draw.assignment[athleteId] = teamId;
+        else delete t.draw.assignment[athleteId];
+      }
+      break;
+    }
+    case "confirmDraw": {
+      if (started(t)) throw new Error("DRAW_LOCKED");
+      const draw = generateDraw(
+        toRoster({ document: t, private: priv }),
+        t.teams,
+        c.payload.seed,
+      );
+      t.draw = draw;
+      t.athletes.forEach(
+        (a) => (a.teamId = a.active ? (draw.assignment[a.id] ?? null) : null),
+      );
+      t.teams.forEach((team) => (team.captainId = null));
+      t.matches = generateGroupMatches(t.teams, t.rules.categories);
+      t.tieDecisions = [];
+      break;
+    }
+    case "resetDraw":
+      if (started(t)) throw new Error("DRAW_LOCKED");
+      t.draw = {
+        status: "not_started",
+        algorithmVersion: "balanced-v1",
+        assignment: {},
+      };
+      t.athletes.forEach((a) => (a.teamId = null));
+      t.teams.forEach((team) => (team.captainId = null));
+      t.matches = [];
+      t.tieDecisions = [];
       break;
     default:
       // Athlete, draw and match commands arrive in Tasks 2 and 3.

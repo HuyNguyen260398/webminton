@@ -2,6 +2,7 @@ import { generateGroupMatches } from "../round-robin";
 import { deriveTournament } from "../derive";
 import { PublicTournamentSchema, type TournamentDocument } from "../schema";
 import type { PrivateRoster } from "../roster";
+import type { AdminState } from "../commands";
 
 // Inlined rather than read from a seed file: the domain package must stay
 // importable from the browser, where there is no filesystem.
@@ -108,4 +109,19 @@ export function makeCompletedGroup(): TournamentDocument {
     score: { a: 21, b: 18 },
   }));
   return { ...t, matches: deriveTournament(t).matches };
+}
+
+/** 16 by default: 8 men, 8 women, enough for the draw to run. */
+export function makeAdminState(count = 16): AdminState {
+  const document = makeTournament();
+  document.athletes = makePublicAthletes(count);
+  return {
+    document,
+    private: Object.fromEntries(
+      makeRoster(count).athletes.map((a) => [
+        a.id,
+        { skillBand: a.skillBand, phone: "0900000000", note: "ghi chú riêng" },
+      ]),
+    ),
+  };
 }
