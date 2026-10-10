@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PublicTournamentSchema,
   type TournamentDocument,
@@ -29,25 +29,55 @@ const messages: Record<string, string> = {
   FETCH_FAILED: "Không tải được thông tin giải.",
 };
 
+// How often an open page re-reads the snapshot the admin API publishes.
+export const POLL_MS = 20_000;
+
 export function useTournament() {
   const [view, setView] = useState<TournamentView | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The last body rendered, so an unchanged poll does not re-render the page.
+  const last = useRef<string | null>(null);
 
   const load = useCallback(() => {
-    setError(null);
     // Absolute: this path is what the CloudFront no-cache behaviour matches.
     fetch("/tournament.json", { cache: "no-cache" })
       .then((r) => {
         if (!r.ok) throw new Error("FETCH_FAILED");
         return r.json();
       })
-      .then((raw) => setView(parseTournament(raw)))
+      .then((raw) => {
+        const body = JSON.stringify(raw);
+        if (body === last.current) return;
+        const next = parseTournament(raw);
+        last.current = body;
+        setError(null);
+        setView(next);
+      })
       .catch((e: unknown) => {
+        // Mid-tournament a failed poll must not blank a page that works.
+        if (last.current !== null) return;
         const code = e instanceof Error ? e.message : "FETCH_FAILED";
         setError(messages[code] ?? messages.FETCH_FAILED);
       });
   }, []);
 
-  useEffect(load, [load]);
-  return { view, error, reload: load };
+  const reload = useCallback(() => {
+    setError(null);
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    load();
+    const tick = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    const id = setInterval(tick, POLL_MS);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [load]);
+
+  return { view, error, reload };
 }

@@ -1,6 +1,10 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
+import { createLocalApi } from "./local-api";
+
+const api = createLocalApi();
+await api.reset();
 
 const ROOT = "frontend/out";
 const PORT = Number(process.env.PORT ?? 3100);
@@ -21,6 +25,34 @@ const types: Record<string, string> = {
 
 createServer(async (req, res) => {
   const url = (req.url ?? "/").split("?")[0];
+
+  if (url.startsWith("/api/")) {
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(chunk as Buffer);
+    const result = await api.handle(
+      req.method ?? "GET",
+      url,
+      chunks.length ? Buffer.concat(chunks).toString("utf8") : null,
+      req.headers.authorization,
+    );
+    res.writeHead(result.status, {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+    });
+    return res.end(JSON.stringify(result.body));
+  }
+
+  // Once an admin save has published, that snapshot replaces the built file —
+  // the same thing the Lambda does to the bucket.
+  const snapshot = api.snapshot();
+  if (url === "/tournament.json" && snapshot !== null) {
+    res.writeHead(200, {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-cache",
+    });
+    return res.end(snapshot);
+  }
+
   const rel = normalize(decodeURIComponent(url)).replace(/^(\.\.[/\\])+/, "");
   for (const candidate of [rel, join(rel, "index.html"), `${rel}.html`]) {
     try {

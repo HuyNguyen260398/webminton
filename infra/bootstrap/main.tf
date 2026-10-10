@@ -118,6 +118,35 @@ resource "aws_iam_role_policy" "github_plan" {
         ]
         Resource = "*"
       },
+      {
+        Sid    = "BackendRead"
+        Effect = "Allow"
+        Action = [
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:GetFunctionCodeSigningConfig",
+          "lambda:GetPolicy",
+          "lambda:ListVersionsByFunction",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "dynamodb:DescribeTable",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:ListTagsOfResource",
+          "apigateway:GET",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:DescribeUserPoolDomain",
+          "cognito-idp:DescribeIdentityProvider",
+          "cognito-idp:GetUserPoolMfaConfig",
+          "logs:DescribeLogGroups",
+          "logs:ListTagsForResource",
+          "sts:GetCallerIdentity",
+        ]
+        Resource = "*"
+      },
     ]
   })
 }
@@ -245,6 +274,85 @@ resource "aws_iam_role_policy" "github_deploy" {
           "route53:ListTagsForResource",
         ]
         Resource = "arn:aws:route53:::hostedzone/${coalesce(var.hosted_zone_id, "none")}"
+      },
+      {
+        Sid    = "ApiFunction"
+        Effect = "Allow"
+        Action = [
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:GetFunctionCodeSigningConfig",
+          "lambda:GetPolicy",
+          "lambda:ListVersionsByFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:TagResource",
+          "lambda:UntagResource",
+        ]
+        Resource = "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:webminton-*"
+      },
+      {
+        Sid    = "ApiRole"
+        Effect = "Allow"
+        Action = [
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:PutRolePolicy",
+          "iam:PassRole",
+        ]
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/webminton-api"
+      },
+      {
+        Sid    = "TournamentTable"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:DescribeTable",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:ListTagsOfResource",
+          "dynamodb:UpdateTable",
+          "dynamodb:UpdateContinuousBackups",
+        ]
+        Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/webminton-*"
+      },
+      {
+        Sid      = "HttpApi"
+        Effect   = "Allow"
+        Action   = ["apigateway:GET", "apigateway:PATCH", "apigateway:PUT", "apigateway:POST"]
+        Resource = "arn:aws:apigateway:${var.region}::/apis*"
+      },
+      {
+        Sid    = "AdminPool"
+        Effect = "Allow"
+        Action = [
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:DescribeUserPoolDomain",
+          "cognito-idp:DescribeIdentityProvider",
+          "cognito-idp:GetUserPoolMfaConfig",
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:UpdateUserPoolClient",
+          "cognito-idp:UpdateIdentityProvider",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ApiLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "logs:ListTagsForResource",
+          "logs:PutRetentionPolicy",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid      = "Identity"
+        Effect   = "Allow"
+        Action   = "sts:GetCallerIdentity"
+        Resource = "*"
       },
     ]
   })

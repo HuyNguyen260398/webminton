@@ -1,13 +1,16 @@
 # Webminton AWS infrastructure
 
 Terraform provisions a private, versioned, encrypted S3 bucket holding the
-static export, CloudFront in front of it with an origin access control and a
-trailing-slash rewrite function, a DNS-validated ACM certificate in
-`us-east-1`, and the Route53 alias records for
-`giaicaulong2026.nghuy.link` in the existing `nghuy.link` hosted zone.
+static export; CloudFront in front of it; a DNS-validated ACM certificate in
+`us-east-1`; the Route53 alias records for `giaicaulong2026.nghuy.link`; a
+DynamoDB table holding the tournament and its history; one Lambda behind an
+HTTP API, reached through CloudFront at `/api/*`; and a Cognito user pool
+whose only identity provider is Google.
 
-There is one environment. There is no Lambda, no API Gateway, no Cognito user
-pool and no data bucket — the tournament is a JSON file inside the build.
+There is one environment. Nothing here has a fixed monthly fee.
+
+`terraform plan` and `apply` need `backend/dist/index.mjs`, so run
+`pnpm --filter @webminton/backend build` (or `pnpm build`) first.
 
 ```bash
 terraform -chdir=infra init -backend=false   # local validation
@@ -16,7 +19,8 @@ terraform -chdir=infra validate
 
 For a real deployment, supply the state bucket and region with
 `-backend-config`, copy `terraform.tfvars.example` to `terraform.tfvars` and
-set a globally unique `site_bucket_name`, then `terraform -chdir=infra apply`.
+set a globally unique `site_bucket_name` plus the Google OAuth client and
+`admin_emails` (see `docs/runbooks/bootstrap.md`), then `terraform -chdir=infra apply`.
 
 The first apply waits on ACM DNS validation, which usually takes a few minutes.
 CloudFront distribution changes take a further 5–15 minutes to propagate.

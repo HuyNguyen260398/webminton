@@ -17,6 +17,10 @@ jobs:
     environment: prod
     env:
       TF_VAR_site_bucket_name: ${{ vars.SITE_BUCKET_NAME }}
+      TF_VAR_google_client_id: ${{ vars.GOOGLE_CLIENT_ID }}
+      TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      # A JSON list, e.g. ["ban@gmail.com"]
+      TF_VAR_admin_emails: ${{ vars.ADMIN_EMAILS }}
     permissions:
       contents: read
       id-token: write
@@ -32,6 +36,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Before Terraform: the Lambda zip is made from backend/dist. The static
+      # build still needs no Terraform output.
+      - run: pnpm build
       - uses: hashicorp/setup-terraform@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -52,8 +59,6 @@ jobs:
             echo "distribution_id=$(terraform output -raw distribution_id)"
             echo "site_url=$(terraform output -raw site_url)"
           } >> "$GITHUB_OUTPUT"
-      # The build needs no Terraform output: there are no NEXT_PUBLIC_* values.
-      - run: pnpm build
       - name: Upload and invalidate
         env:
           SITE_BUCKET: ${{ steps.outputs.outputs.site_bucket }}

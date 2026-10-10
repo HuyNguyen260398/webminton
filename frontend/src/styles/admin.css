@@ -1,0 +1,222 @@
+/* The admin screen. Phone first: one column and a tab bar fixed to the
+   bottom; two panes and a tab strip from 1024px. Shadows stay hard. */
+.admin {
+  padding-bottom: 104px;
+}
+.admin-title {
+  margin: 28px 0 8px;
+}
+.admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+.admin-bar > .spacer {
+  flex: 1 1 0;
+}
+.admin-bar small {
+  overflow-wrap: anywhere;
+}
+.admin button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.button--ghost {
+  background: var(--paper);
+  color: var(--ink);
+}
+.button--danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.notice {
+  margin: 12px 0;
+  padding: 12px 16px;
+  border: var(--border);
+  border-left-width: 12px;
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-sm);
+  font-weight: 700;
+}
+.notice--ok {
+  border-left-color: var(--green);
+}
+.notice--warn {
+  border-left-color: var(--ink);
+}
+.notice--error {
+  border-left-color: var(--red);
+}
+
+.admin-tabs {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 20;
+  display: flex;
+  overflow-x: auto;
+  border-top: var(--border);
+  background: var(--ink);
+}
+.admin-tabs button {
+  flex: 1 0 auto;
+  min-height: 56px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--paper);
+  white-space: nowrap;
+}
+.admin-tabs button[aria-current="page"] {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.admin-split,
+.admin-stack {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+.admin-stack {
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-weight: 700;
+}
+.field > span {
+  font-size: 13px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+}
+.field input[type="checkbox"] {
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+}
+.field input[type="color"] {
+  padding: 2px;
+}
+.field-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+}
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.pick-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pick-item {
+  width: 100%;
+  min-height: 56px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+.pick-item[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.pick-item > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* One team per row on a phone: side by side, the number field is left about
+   38px wide between its two stepper buttons. */
+.score-entry {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 480px) {
+  .score-entry {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.stepper {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+}
+.stepper input {
+  min-height: 56px;
+  font-size: 28px;
+  font-weight: 900;
+  text-align: center;
+}
+.stepper button {
+  min-height: 56px;
+  padding: 0;
+  font-size: 24px;
+}
+
+@media (min-width: 1024px) {
+  .admin {
+    padding-bottom: 56px;
+  }
+  .admin-tabs {
+    position: static;
+    margin: 0 0 24px;
+    border: var(--border);
+    box-shadow: var(--shadow-hard-sm);
+  }
+  .admin-split {
+    grid-template-columns: minmax(320px, 2fr) minmax(0, 3fr);
+  }
+}
+.draw-preview {
+  margin-top: 14px;
+}
+.draw-preview ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.pick-list > li.field-row {
+  align-items: center;
+}
+/* The team picker in a member row sits outside a .field. */
+.pick-list select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+}
+/* Keep the site footer clear of the fixed tab bar. */
+@media (max-width: 1023.98px) {
+  body:has(.admin) > .footer {
+    margin-bottom: 58px;
+  }
+}

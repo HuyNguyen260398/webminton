@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "noi-bo-2026",
-  "updatedAt": "2026-09-17T09:00:00+07:00",
+  "updatedAt": "2026-10-10T19:25:00+07:00",
   "info": {
     "name": "Giải cầu lông nội bộ 2026",
     "clubName": "Hội lông thủ CN1416",
@@ -34,7 +34,106 @@
       "loser": 0
     }
   },
-  "athletes": [],
+  "athletes": [
+    {
+      "id": "a01",
+      "name": "Võ Khánh Tân",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a02",
+      "name": "Nhật",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a03",
+      "name": "Duy",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a05",
+      "name": "Hiếu",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a06",
+      "name": "Trinh",
+      "gender": "female",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a07",
+      "name": "Lâm Sanh Hoàng",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a08",
+      "name": "Triệu Thảo",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a09",
+      "name": "Nguyễn Hoàng Hân",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a10",
+      "name": "Lee Chong Vinh",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a11",
+      "name": "Nguyễn Ngọc Trung",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a12",
+      "name": "Đỗ Thái Đãm",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a13",
+      "name": "Dương Bích Vân",
+      "gender": "female",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a14",
+      "name": "Nguyễn Gia Huy",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    },
+    {
+      "id": "a15",
+      "name": "Nhâm",
+      "gender": "male",
+      "teamId": null,
+      "active": true
+    }
+  ],
   "teams": [
     {
       "id": "red",

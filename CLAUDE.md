@@ -13,8 +13,10 @@ The page is a faithful web rendition of the three posters in
 `assets/poster_designs/`. **Those JPGs are the design reference**: compare any
 visual change against them before committing.
 
-There is no backend, no database and no admin UI. Editing the tournament means
-editing `frontend/public/tournament.json`.
+The public page is static. The organiser edits the tournament at `/quan-tri`
+(Google sign-in, allow-listed emails); a Lambda stores it in DynamoDB and
+rewrites `tournament.json` in the site bucket after every save. The public
+page reads only that file and re-reads it every 20 seconds.
 
 Node 24 (`.nvmrc`), pnpm 10.32.1, ESM everywhere (`"type": "module"`).
 
@@ -28,6 +30,7 @@ pnpm --filter @webminton/frontend typecheck   # the frontend is separate
 pnpm test             # vitest — domain, scripts, frontend, infra
 pnpm validate         # parse + re-derive frontend/public/tournament.json
 pnpm draw <seed>      # balanced draw from .private/roster.json
+pnpm seed [--force]   # load frontend/public/tournament.json into the table
 pnpm build            # domain tsc + next static export to frontend/out
 pnpm test:e2e         # playwright; boots scripts/serve-static.ts on :3100
 pnpm run deploy       # sync frontend/out to S3 + invalidate CloudFront
@@ -39,6 +42,14 @@ Single e2e: `pnpm exec playwright test tests/e2e/landing.spec.ts`.
 
 `pnpm test:e2e` needs a current `frontend/out` — run `pnpm build` first (CI does).
 
+Admin development has no `next dev` API: run `pnpm build`, then
+`node --import tsx scripts/serve-static.ts` and open
+`http://127.0.0.1:3100/quan-tri/`. That server runs the real router over an
+in-memory store and offers a "Đăng nhập thử" button instead of Google.
+
+`pnpm install` rewrites `pnpm-lock.yaml` in a style `pnpm lint` rejects; run
+`pnpm format` after adding a dependency.
+
 **`pnpm run deploy`, not `pnpm deploy`** — a bare `pnpm deploy` resolves to
 pnpm's own workspace-deploy command and never reaches `scripts/deploy.sh`.
 
@@ -48,23 +59,42 @@ page to a PNG for comparing sections against the poster JPGs.
 ### Lint caveat
 
 `pnpm lint` only covers `packages frontend/public/tournament.json *.json *.yaml`.
-`frontend/` and `scripts/` are outside it, so `pnpm format` will not touch them.
+`frontend/`, `backend/` and `scripts/` are outside it, so `pnpm format` will not touch them.
 
 ## Architecture
 
-### Two data files, one of them deployed
+### One source of truth, one published projection
 
-- **`frontend/public/tournament.json`** — the only data that ships. Fetched by
-  the browser, validated with zod, and rendered. Public fields only.
-- **`.private/roster.json`** — gitignored, holds `phone`, `note` and
-  `skillBand`. Only `pnpm draw` reads it; `roster.example.json` is the template.
+- **DynamoDB** (`webminton-tournament`) holds the tournament: one `CURRENT`
+  item with a version number, and one `V#…` item per version, which is the
+  history and the undo.
+- **`tournament.json` in the site bucket** is a projection the Lambda writes
+  after each save. It is the only thing the public page fetches.
+- **`frontend/public/tournament.json`** in the repo is the seed and the local
+  fixture. `scripts/deploy.sh` must never upload it — that would replace live
+  scores — and `scripts/test/deploy.test.ts` asserts it does not.
+- **`.private/roster.json`** is optional input to `pnpm seed`; after seeding,
+  private fields live in the table.
 
-Whatever is in the public file is readable by anyone. The old server-side
-privacy projection is gone, so private fields must be **absent from the file**,
-not filtered. `PublicTournamentSchema` is a `z.strictObject`, so an athlete
-carrying `phone` fails validation — and `tests/e2e/landing.spec.ts` asserts that
-`phone`, `skillBand` and `feePayments` never appear in the served JSON. Keep
-that true.
+Private fields (`phone`, `note`, `skillBand`) are stored beside the document,
+keyed by athlete id, never inside it. The snapshot is produced only by
+`renderSnapshot`, which parses through `PublicTournamentSchema` — a
+`z.strictObject` — so a private field makes the publish throw rather than
+leak. `tests/e2e/landing.spec.ts` and `tests/e2e/admin.spec.ts` both assert
+the served JSON carries none.
+
+### Every edit is a command
+
+`packages/domain/src/commands.ts::applyCommand(state, command, actor, now)` is
+pure and is the only way state changes. It ends in `finalize`, which re-parses
+the document and runs `deriveTournament`, so the table can never hold
+something the page cannot render. The router adds three things around it: the
+allow-list check, an optimistic version check (`409` on a stale screen), and
+request-id replay so a double tap applies once.
+
+Changing a group score after a placement match has been played is refused
+(`PLACEMENT_RESET_REQUIRED`) when it would change who plays whom; un-played
+placement matches are re-seeded automatically.
 
 ### Derived state is never stored
 
@@ -75,6 +105,8 @@ on every load. There is no stored standings table to disagree with a hand edit.
 
 `deriveTournament(t)` returns a `DerivedResults` object; it does not return a
 document. Components take `{ t, derived }` and read results from `derived`.
+
+`applyCommand` nulls every `winnerTeamId` before saving for the same reason.
 
 ### packages/domain must stay browser-safe
 
@@ -110,13 +142,22 @@ original JPGs.
 
 `features/landing/Registration.tsx` is the one section with no poster behind
 it: a link to the Microsoft Form in `info.registrationFormUrl`. It **renders
-nothing when that field is null**, so registration closes with a one-field edit
-to `tournament.json` and an invalidation — no rebuild.
+nothing when that field is null**, so registration closes by clearing the link
+in the admin screen's `Giải` tab — no rebuild.
 
 `features/landing/LiveSections.tsx` renders `DANH SÁCH VĐV`, `BỐN ĐỘI`,
 `LỊCH THI ĐẤU`, `BẢNG XẾP HẠNG` and `THU CHI` — each **hides itself when its
-data is empty**. With the shipped file the page is purely the posters, and it
-fills in as the tournament progresses with no code change.
+data is empty**, so the page fills in as the tournament progresses with no
+code change.
+
+### The admin screen
+
+`frontend/src/app/quan-tri/page.tsx` is the shell: sign-in, a status bar, and
+the tabs registered in `features/admin/tabs.tsx` (`Trận`, `Đội`, `VĐV`,
+`Thu chi`, `Giải`, `Lịch sử`). `lib/use-admin.ts` owns the state and is the
+only caller of the API; a tab receives `admin` and calls `admin.send(command)`.
+Phone first: one column with the tab bar fixed to the bottom, two panes from
+1024px, touch targets at least 44px. `noindex`, and not linked from the page.
 
 ## Layout
 
@@ -124,15 +165,26 @@ fills in as the tournament progresses with no code change.
   the Zod schema that is the source of truth for runtime validation and types.
   `src/testing/fixtures.ts` inlines a seed document (there is no seed file: the
   package must be importable from the browser, where there is no filesystem).
+- `backend` — the Lambda: `router.ts` (transport-neutral `route(req, deps)`),
+  `store.ts` (`TournamentStore` + `MemoryStore`), `dynamo-store.ts`,
+  `publish.ts`, `auth.ts`, `errors.ts` (code → status + Vietnamese message),
+  `handler.ts`. Bundled by `backend/build.mjs` to `backend/dist/index.mjs`.
+  Real AWS clients are constructed only in `aws.ts`.
 - `frontend` — Next.js App Router with `output: "export"`; **no server
-  runtime**. Types are imported across the workspace by relative path
-  (`../../../packages/domain/src/schema`). The design system lives in
+  runtime**. `/quan-tri` is a second static page whose tabs live in
+  `features/admin/` and whose styles are `src/styles/admin.css`. Types are
+  imported across the workspace by relative path
+  (`../../../packages/domain/src/schema`). The public design system lives in
   `src/styles/poster.css` and `features/landing/primitives.tsx`.
-- `infra` — one root Terraform configuration: private/versioned/encrypted S3
-  bucket, CloudFront, ACM in `us-east-1`, Route53 alias records.
-  `infra/test/architecture.test.ts` asserts those invariants against the HCL
-  text and that no Lambda/API Gateway/Cognito/DynamoDB resource returns.
-- `scripts` — `validate-tournament.ts`, `draw-teams.ts`, `serve-static.ts`,
+- `infra` — one root Terraform configuration: the site bucket, CloudFront,
+  ACM, Route53 (`main.tf`); the table, Lambda, its role and the HTTP API
+  (`backend.tf`); Cognito with Google as the only identity provider
+  (`auth.tf`). `infra/test/architecture.test.ts` asserts the invariants
+  against the HCL text: admin routes behind the JWT authorizer, the Lambda
+  able to write only `tournament.json`, PITR and deletion protection on the
+  table, and no resource with a fixed monthly fee.
+- `scripts` — `validate-tournament.ts`, `draw-teams.ts`, `seed.ts`,
+  `serve-static.ts` (with `local-api.ts`),
   `optimize-assets.ts`, `smoke-deployment.ts`, `deploy.sh`, `screenshot.mjs`.
 - `docs/runbooks` — bootstrap, operations, rollback.
 
@@ -140,10 +192,16 @@ fills in as the tournament progresses with no code change.
 
 `.github/workflows/quality.yml` (lint, both typechecks, test, validate, build,
 e2e, `terraform fmt`/`validate`) gates `deploy.yml`, which pins
-`ref: github.sha`, applies Terraform, builds, syncs in two passes and
-invalidates, then runs `scripts/smoke-deployment.ts`. The build needs no
-Terraform output — there are no `NEXT_PUBLIC_*` values any more.
+`ref: github.sha`, builds, applies Terraform, syncs in two passes and
+invalidates, then runs `scripts/smoke-deployment.ts`. `pnpm build` runs before
+Terraform because the Lambda zip is made from `backend/dist`. The static build
+still needs no Terraform output: the admin page fetches its Cognito domain and
+client id from `GET /api/config`.
+
+The deploy role can converge existing resources but not create them: the first
+apply of new infrastructure is a local one (`docs/runbooks/bootstrap.md`).
 
 Cache headers: `/_next/static/*`, `/photos/*`, `/qr/*` immutable for a year;
-`*.html` and `/tournament.json` `no-cache`. That last one is what lets a content
-edit go live by uploading one small file and invalidating, with no rebuild.
+`*.html` and `/tournament.json` `no-cache`. `/tournament.json` and `/api/*` are
+served with caching disabled, so an admin save is live as soon as the Lambda
+has written the file — no invalidation.

@@ -74,13 +74,14 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
 
 // The show/hide rules themselves are covered by frontend/test/live-sections
 // against an empty fixture. This asserts the file that actually ships renders
-// the sections its data calls for: nobody has registered yet, so only THU CHI.
+// the sections its data calls for: athletes have registered and finance is
+// published, but there has been no draw, so no teams, schedule or standings.
 test("renders the live sections the shipped data calls for", async ({
   page,
 }) => {
   await page.goto("/");
   await expect(page.locator("#thu-chi")).toBeVisible();
-  await expect(page.locator("#van-dong-vien")).toHaveCount(0);
+  await expect(page.locator("#van-dong-vien")).toBeVisible();
   await expect(page.locator("#boc-tham")).toHaveCount(0);
   await expect(page.locator("#lich-thi-dau")).toHaveCount(0);
   await expect(page.locator("#bang-xep-hang")).toHaveCount(0);
@@ -196,9 +197,14 @@ test("the tab wears the shuttlecock icon", async ({ page, request }) => {
   expect(res.headers()["content-type"]).toContain("image/svg+xml");
 });
 
-test("the page is a single route", async ({ request }) => {
-  for (const path of ["/quan-tri/", "/van-dong-vien/", "/lich-thi-dau/"])
+// The public site is one page. /quan-tri is the organiser's screen and the
+// only other route; the old per-section pages must stay gone.
+test("the only routes are the page and the admin screen", async ({
+  request,
+}) => {
+  for (const path of ["/van-dong-vien/", "/lich-thi-dau/", "/thu-chi/"])
     expect((await request.get(path)).status()).toBe(404);
+  expect((await request.get("/quan-tri/")).status()).toBe(200);
 });
 
 // One line means one line: a slab that wraps at a narrow width is the failure
