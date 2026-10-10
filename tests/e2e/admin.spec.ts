@@ -136,3 +136,62 @@ test("a walkover takes two taps and is recorded as 21–0", async ({ page }) => 
     "Xử thắng 21–0",
   );
 });
+test("re-draws the teams from a previewed seed", async ({ page }) => {
+  await signIn(page, "#doi");
+  await page.getByRole("button", { name: "Bốc lại từ đầu" }).click();
+  await page.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Đã xoá kết quả bốc thăm.",
+  );
+
+  await page.getByLabel("Mã bốc thăm").fill("mua-2026");
+  await page.getByRole("button", { name: "Xem trước" }).click();
+  await expect(page.locator(".draw-preview li")).toHaveCount(16);
+  // A preview is not a save: visitors still see no teams.
+  let data = await (await page.request.get("/tournament.json")).json();
+  expect(data.draw.status).toBe("not_started");
+
+  await page.getByRole("button", { name: "Xác nhận bốc thăm này" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã bốc thăm");
+  data = await (await page.request.get("/tournament.json")).json();
+  expect(data.draw.status).toBe("confirmed");
+  expect(data.matches).toHaveLength(18);
+});
+
+test("the draw is locked once a match has been played", async ({ page }) => {
+  await signIn(page);
+  await enterScore(page, MENS, 21, 15);
+  await expect(page.getByRole("status")).toContainText("Đã lưu tỉ số.");
+  await page.getByRole("button", { name: "Đội", exact: true }).click();
+  await expect(page.getByText("Đã có trận được gọi hoặc đánh")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bốc lại từ đầu" })).toHaveCount(0);
+});
+
+test("adds an athlete without leaking private fields", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, "#vdv");
+  await page.getByRole("button", { name: "Thêm VĐV" }).click();
+  await page.getByLabel("Họ và tên").fill("Nguyễn Thị Thử");
+  await page.getByLabel("Giới tính").selectOption("female");
+  await page.getByLabel("Trình độ").selectOption("2");
+  await page.getByLabel("Số điện thoại").fill("0909 111 222");
+  await page.getByLabel("Ghi chú riêng").fill("chỉ BTC đọc");
+  await page.getByRole("button", { name: "Lưu VĐV" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu VĐV.");
+  await expect(page.locator(".pick-list")).toContainText("Nguyễn Thị Thử");
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+
+  const body = await (await page.request.get("/tournament.json")).text();
+  expect(body).toContain("Nguyễn Thị Thử");
+  for (const leak of ["0909", "chỉ BTC đọc", '"skillBand"', '"phone"'])
+    expect(body).not.toContain(leak);
+});
+
+test("removes an athlete who is in no lineup", async ({ page }) => {
+  await signIn(page, "#vdv");
+  await page.getByRole("button", { name: /VĐV thử 16/ }).click();
+  await page.getByRole("button", { name: "Xoá VĐV" }).click();
+  await page.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã xoá VĐV.");
+  await expect(page.locator(".pick-list")).not.toContainText("VĐV thử 16");
+});

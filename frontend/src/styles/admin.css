@@ -194,3 +194,13 @@
     grid-template-columns: minmax(320px, 2fr) minmax(0, 3fr);
   }
 }
+.draw-preview {
+  margin-top: 14px;
+}
+.draw-preview ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.pick-list > li.field-row {
+  align-items: center;
+}
