@@ -166,12 +166,12 @@ function Lines<T extends { id: string }>({
 
 // One tick per athlete who has paid. Each tick saves at once; the domain
 // turns the count into the "Lệ phí tham gia" income line, so the totals above
-// move with it. Who paid stays private — the public page sees only the sum.
+// move with it. The tick is public: DANH SÁCH VĐV shows who has paid.
 function FeeCard({ admin }: { admin: ReadyAdmin }) {
   const { view, send, busy } = admin;
   const t = view.document;
   const fee = t.info.feeVnd;
-  const paid = t.athletes.filter((a) => view.private[a.id]?.feePaid).length;
+  const paid = t.athletes.filter((a) => a.feePaid).length;
   return (
     <Card title="Lệ phí tham gia">
       <div className="pill-row">
@@ -188,7 +188,7 @@ function FeeCard({ admin }: { admin: ReadyAdmin }) {
       {t.athletes.length === 0 && <p>Chưa có VĐV nào.</p>}
       <ul className="pick-list">
         {t.athletes.map((a) => {
-          const done = view.private[a.id]?.feePaid ?? false;
+          const done = a.feePaid ?? false;
           return (
             <li key={a.id}>
               <label className="fee-row">

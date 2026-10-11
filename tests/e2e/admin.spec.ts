@@ -296,11 +296,10 @@ test("ticks an athlete's lệ phí and the balance follows", async ({
   await expect(page.getByText("Đã thu 150.000")).toBeVisible();
   await expect(box).toBeChecked();
 
-  // Published as a total; who paid is not in the public file.
-  const res = await request.get("/tournament.json");
-  const raw = await res.text();
-  expect(raw).not.toContain("feePaid");
-  const fee = JSON.parse(raw).finance.income.find(
+  // Published: the total as an income line, and the tick on the athlete.
+  const data = await (await request.get("/tournament.json")).json();
+  expect(data.athletes[0].feePaid).toBe(true);
+  const fee = data.finance.income.find(
     (i: { id: string }) => i.id === "le-phi",
   );
   expect(fee).toMatchObject({ amountVnd: 150000, received: true });

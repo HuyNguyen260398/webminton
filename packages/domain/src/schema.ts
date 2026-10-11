@@ -27,6 +27,9 @@ export const AthleteSchema = z.strictObject({
   gender: z.enum(["male", "female"]),
   teamId: Id.nullable(),
   active: z.boolean(),
+  // Whether the lệ phí is in. Public on purpose: DANH SÁCH VĐV shows it.
+  // Absent on athletes saved before this existed, and means not yet paid.
+  feePaid: z.boolean().optional(),
 });
 export const TeamSchema = z.strictObject({
   id: Id,

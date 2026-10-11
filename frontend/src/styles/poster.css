@@ -1070,3 +1070,58 @@ button.team-draw__back {
   color: var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
 }
+
+/* ---- DANH SÁCH VĐV: team and lệ phí ---- */
+.athlete-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.athlete-team .team-grid__swatch {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+.athlete-fee {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 2px solid var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.athlete-fee--paid {
+  background: var(--green);
+  color: var(--paper);
+}
+.athlete-fee--due {
+  background: var(--paper);
+  color: var(--red);
+}
+.athlete-gender {
+  display: none;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+@media (max-width: 560px) {
+  /* Three columns have to fit 390px without the table scrolling. */
+  #van-dong-vien th,
+  #van-dong-vien td {
+    padding-inline: 6px;
+  }
+  #van-dong-vien td:first-child {
+    white-space: normal;
+  }
+  .athlete-fee {
+    padding-inline: 6px;
+  }
+  .athlete-col-gender {
+    display: none;
+  }
+  .athlete-gender {
+    display: block;
+  }
+}

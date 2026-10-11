@@ -35,13 +35,7 @@ export function buildSeed(
         return [
           a.id,
           p
-            ? {
-                skillBand: p.skillBand,
-                phone: p.phone,
-                note: p.note,
-                // The roster file knows nothing of fees; keep what was ticked.
-                feePaid: existing[a.id]?.feePaid,
-              }
+            ? { skillBand: p.skillBand, phone: p.phone, note: p.note }
             : (existing[a.id] ?? { skillBand: null, phone: null, note: "" }),
         ];
       }),

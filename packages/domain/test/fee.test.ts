@@ -58,12 +58,13 @@ describe("registration fee", () => {
     expect(feeLine(s)!.amountVnd).toBe(400000);
   });
 
-  it("keeps who paid private and out of the published document", () => {
+  it("records who paid on the public athlete, not among the private fields", () => {
     let s = withFee(150000);
-    const [a] = s.document.athletes;
+    const [a, b] = s.document.athletes;
     s = pay(s, a.id);
-    expect(s.private[a.id].feePaid).toBe(true);
-    expect(JSON.stringify(s.document)).not.toContain("feePaid");
+    expect(s.document.athletes[0].feePaid).toBe(true);
+    expect(s.document.athletes.find((x) => x.id === b.id)!.feePaid).toBeFalsy();
+    expect(JSON.stringify(s.private)).not.toContain("feePaid");
     expect(PublicTournamentSchema.safeParse(s.document).success).toBe(true);
   });
 
@@ -83,7 +84,7 @@ describe("registration fee", () => {
         note: "",
       },
     });
-    expect(s.private[a.id].feePaid).toBe(true);
+    expect(s.document.athletes[0].feePaid).toBe(true);
     expect(feeLine(s)!.amountVnd).toBe(150000);
 
     s = run(s, { type: "resetDraw", payload: {} });

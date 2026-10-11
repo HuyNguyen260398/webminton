@@ -22,21 +22,18 @@ import { calculateStandings, resultsHash } from "./standings";
 const text = z.string().trim().min(1).max(500);
 const time = z.iso.datetime({ offset: true });
 
-// The fields that must never reach tournament.json, keyed by athlete id.
+// The three fields that must never reach tournament.json, keyed by athlete id.
 export const PrivateFieldsSchema = z.strictObject({
   skillBand: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
   phone: z.string().max(30).nullable(),
   note: z.string().max(2000),
-  // Who has paid the lệ phí is the organiser's business; only the total is
-  // public. Absent on athletes saved before this existed, and means unpaid.
-  feePaid: z.boolean().optional(),
 });
 
 // The income line the fee checkboxes own. Its amount is always the number of
 // athletes ticked times info.feeVnd, rewritten on every save.
 export const FEE_INCOME_ID = "le-phi";
-function syncFeeIncome(t: TournamentDocument, priv: PrivateMap) {
-  const paid = t.athletes.filter((a) => priv[a.id]?.feePaid).length;
+function syncFeeIncome(t: TournamentDocument) {
+  const paid = t.athletes.filter((a) => a.feePaid).length;
   const i = t.finance.income.findIndex((x) => x.id === FEE_INCOME_ID);
   if (paid === 0) {
     if (i >= 0) t.finance.income.splice(i, 1);
@@ -92,7 +89,7 @@ export const CommandSchema = z.discriminatedUnion("type", [
       name: text,
       gender: z.enum(["male", "female"]),
       active: z.boolean(),
-      ...PrivateFieldsSchema.omit({ feePaid: true }).shape,
+      ...PrivateFieldsSchema.shape,
     }),
   ),
   command("removeAthlete", byId),
@@ -168,7 +165,7 @@ function finalize(
   t.matches.forEach((m) => (m.winnerTeamId = null));
   const ids = new Set(t.athletes.map((a) => a.id));
   for (const id of Object.keys(priv)) if (!ids.has(id)) delete priv[id];
-  syncFeeIncome(t, priv);
+  syncFeeIncome(t);
   const parsed = PublicTournamentSchema.safeParse(t);
   if (!parsed.success) throw new Error("INVALID_DOCUMENT");
   deriveTournament(parsed.data);
@@ -306,18 +303,13 @@ export function applyCommand(
       )
         throw new Error("ATHLETE_IN_LINEUP");
       Object.assign(a, pub);
-      // The form does not carry the fee tick; editing a name must not clear it.
-      priv[id] = { skillBand, phone, note, feePaid: priv[id]?.feePaid };
+      priv[id] = { skillBand, phone, note };
       break;
     }
     case "setFeePaid": {
-      const { athleteId, paid } = c.payload;
-      if (!t.athletes.some((a) => a.id === athleteId))
-        throw new Error("ATHLETE_NOT_FOUND");
-      priv[athleteId] = {
-        ...(priv[athleteId] ?? { skillBand: null, phone: null, note: "" }),
-        feePaid: paid,
-      };
+      const a = t.athletes.find((x) => x.id === c.payload.athleteId);
+      if (!a) throw new Error("ATHLETE_NOT_FOUND");
+      a.feePaid = c.payload.paid;
       break;
     }
     case "removeAthlete": {
