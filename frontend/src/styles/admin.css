@@ -278,3 +278,113 @@
     margin-bottom: 58px;
   }
 }
+
+/* ---- Bảng đấu 2 đội: the match editor ---- */
+.duel-total {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 10px;
+  border: 3px solid var(--ink);
+}
+.duel-total > div {
+  display: grid;
+  justify-items: center;
+  padding: 10px 6px;
+  color: var(--paper);
+  font-weight: 800;
+}
+.duel-total > div + div {
+  border-left: 3px solid var(--ink);
+}
+.duel-total strong {
+  font-size: 2.6rem;
+  line-height: 1;
+  text-shadow:
+    -1px -1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink);
+}
+.duel-side {
+  margin: 0;
+  padding: 10px 12px 12px;
+  border: 2px solid var(--ink);
+}
+.duel-side legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.duel-heading {
+  margin: 6px 0 0;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.duel-smash {
+  display: grid;
+  gap: 12px;
+}
+.duel-smash__player {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.duel-smash__player > strong {
+  grid-column: 1 / -1;
+}
+.duel-smash__player small {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+.duel-smash .stepper {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+.duel-smash .stepper input,
+.duel-smash .stepper button {
+  min-height: 48px;
+}
+.duel-smash .stepper input {
+  font-size: 22px;
+}
+.duel-count + .duel-count {
+  margin-top: 12px;
+}
+.duel-count ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.duel-count li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(23, 21, 15, 0.25);
+}
+/* One side of a match in the list: colour, the pair's given names, score. */
+.duel-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.duel-line .team-grid__swatch {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+.duel-line__names {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.duel-line b {
+  flex-shrink: 0;
+  font-weight: 900;
+}

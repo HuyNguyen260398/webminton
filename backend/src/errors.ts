@@ -37,6 +37,10 @@ const domain: Record<string, string> = {
   INVALID_TIE: "Các đội này không đồng hạng, hoặc thứ tự xếp chưa đủ đội.",
   PLACEMENT_RESET_REQUIRED:
     "Đã có trận tranh hạng được đánh — xoá kết quả tranh hạng trước khi sửa vòng loại.",
+  DUEL_EXISTS: "Bảng đấu đã được tạo rồi.",
+  DUEL_NEEDS_PAIRS: "Phải xếp đủ hai cặp trước khi gọi trận hoặc nhập tỉ số.",
+  DUEL_HAS_LINEUPS:
+    "Bảng đấu đang có cặp đã xếp — xoá bảng đấu trước khi xoá hết đội.",
   FEE_LINE_LOCKED:
     "Dòng lệ phí tự tính theo số VĐV đã tick — sửa ở mục Lệ phí tham gia.",
   MONEY_OVERFLOW: "Số tiền quá lớn.",

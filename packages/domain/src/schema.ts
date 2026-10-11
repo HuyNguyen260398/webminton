@@ -55,6 +55,30 @@ export const MatchSchema = z.strictObject({
   score: ScoreSchema.nullable(),
   winnerTeamId: Id.nullable(),
 });
+// The two-team format: Đội Đỏ against Đội Xanh over eleven matches. It
+// lives beside `matches`, which belongs to the four-team schedule engine.
+export const DuelScoreSchema = z.strictObject({
+  red: z.number().int().min(0).max(25),
+  blue: z.number().int().min(0).max(25),
+});
+export const SmashCountSchema = z.strictObject({
+  // Smash ăn điểm, and smash rúc lưới.
+  hit: z.number().int().min(0).max(99),
+  net: z.number().int().min(0).max(99),
+});
+export const DuelMatchSchema = z.strictObject({
+  id: Id,
+  stage: z.enum(["playoff", "final"]),
+  category: z.enum(["mens_doubles", "mixed_doubles"]),
+  order: z.number().int().positive(),
+  pairRed: PairSchema.nullable(),
+  pairBlue: PairSchema.nullable(),
+  // "live" is the organiser calling the match: from then the pairs are shown.
+  status: z.enum(["pending", "live", "done"]),
+  score: DuelScoreSchema.nullable(),
+  // Keyed by athlete id; only the four players of the match appear.
+  smashes: z.record(Id, SmashCountSchema),
+});
 export const InfoSchema = z.strictObject({
   name: text,
   clubName: text,
@@ -142,6 +166,8 @@ export const PublicTournamentSchema = z
       algorithmVersion: z.literal("balanced-v1"),
       assignment: z.record(Id, Id),
     }),
+    // Absent until the organiser creates the bảng đấu.
+    duel: z.strictObject({ matches: z.array(DuelMatchSchema) }).optional(),
     tieDecisions: z.array(
       z.strictObject({
         tiedTeamIds: z.array(Id).min(2),
@@ -209,10 +235,26 @@ export const PublicTournamentSchema = z
       )
         fail("Quyết định hòa phải xếp đủ các đội");
     });
+    if (t.duel) {
+      unique(t.duel.matches);
+      t.duel.matches.forEach((m) => {
+        const players = [...(m.pairRed ?? []), ...(m.pairBlue ?? [])];
+        players.forEach((id) => ref(id, athletes));
+        if (new Set(players).size !== players.length)
+          fail("Một VĐV không thể đứng hai chỗ trong cùng một trận");
+        if (Object.keys(m.smashes).some((id) => !players.includes(id)))
+          fail("Chỉ đếm smash cho VĐV của trận");
+        if ((m.status === "done") !== (m.score !== null))
+          fail("Trận đã xong phải có tỉ số, trận chưa xong thì không");
+        if (m.status !== "pending" && !(m.pairRed && m.pairBlue))
+          fail("Trận đã gọi phải có đủ hai cặp");
+      });
+    }
     if (t.info.qrPublished && !t.info.qrAssetPath)
       fail("Chưa có mã QR được xác nhận");
   });
 export type TournamentDocument = z.infer<typeof PublicTournamentSchema>;
+export type DuelMatch = z.infer<typeof DuelMatchSchema>;
 export type Athlete = z.infer<typeof AthleteSchema>;
 export type Team = z.infer<typeof TeamSchema>;
 export type Match = z.infer<typeof MatchSchema>;

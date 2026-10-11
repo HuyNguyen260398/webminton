@@ -3,6 +3,8 @@ import {
   Id,
   InfoSchema,
   PairSchema,
+  DuelScoreSchema,
+  SmashCountSchema,
   ScoreSchema,
   SponsorSchema,
   IncomeSchema,
@@ -11,6 +13,7 @@ import {
   type TournamentDocument,
 } from "./schema";
 import { deriveTournament } from "./derive";
+import { createDuelMatches, playersOf, validateDuelMatch } from "./duel";
 import type { PrivateRoster } from "./roster";
 import { generateDraw } from "./draw";
 import { generateGroupMatches } from "./round-robin";
@@ -133,6 +136,20 @@ export const CommandSchema = z.discriminatedUnion("type", [
       reason: text,
     }),
   ),
+  command("createDuel", z.strictObject({})),
+  command("resetDuel", z.strictObject({})),
+  // One save carries the whole match: pairs, status, score and smash counts.
+  command(
+    "saveDuelMatch",
+    z.strictObject({
+      matchId: Id,
+      pairRed: PairSchema.nullable(),
+      pairBlue: PairSchema.nullable(),
+      status: z.enum(["pending", "live", "done"]),
+      score: DuelScoreSchema.nullable(),
+      smashes: z.record(Id, SmashCountSchema),
+    }),
+  ),
   command("upsertSponsor", SponsorSchema),
   command("removeSponsor", byId),
   command("upsertIncome", IncomeSchema),
@@ -166,6 +183,9 @@ function finalize(
   const ids = new Set(t.athletes.map((a) => a.id));
   for (const id of Object.keys(priv)) if (!ids.has(id)) delete priv[id];
   syncFeeIncome(t);
+  // Every bảng đấu lineup is re-checked on every save, so moving or resting
+  // an athlete can never leave a match with a player who may not play it.
+  t.duel?.matches.forEach((m) => validateDuelMatch(t, m));
   const parsed = PublicTournamentSchema.safeParse(t);
   if (!parsed.success) throw new Error("INVALID_DOCUMENT");
   deriveTournament(parsed.data);
@@ -214,7 +234,8 @@ export function applyCommand(
   const inLineup = (id: string) =>
     t.matches.some((m) =>
       [...(m.pairA ?? []), ...(m.pairB ?? [])].includes(id),
-    );
+    ) ||
+    (t.duel?.matches.some((m) => playersOf(m).includes(id)) ?? false);
   const dropCaptain = (id: string) =>
     t.teams.forEach((team) => {
       if (team.captainId === id) team.captainId = null;
@@ -254,6 +275,29 @@ export function applyCommand(
           throw new Error("INVALID_CAPTAIN");
         team.captainId = captainId;
       }
+      break;
+    }
+    case "createDuel":
+      if (t.duel && t.duel.matches.length > 0) throw new Error("DUEL_EXISTS");
+      t.duel = { matches: createDuelMatches() };
+      break;
+    case "resetDuel":
+      delete t.duel;
+      break;
+    case "saveDuelMatch": {
+      const { matchId, smashes, ...rest } = c.payload;
+      const m = t.duel?.matches.find((x) => x.id === matchId);
+      if (!m) throw new Error("MATCH_NOT_FOUND");
+      // A zero is the same as no entry; keeping only real counts means a
+      // swapped-out player leaves nothing behind.
+      const players = [...(rest.pairRed ?? []), ...(rest.pairBlue ?? [])];
+      Object.assign(m, rest, {
+        smashes: Object.fromEntries(
+          Object.entries(smashes).filter(
+            ([id, s]) => players.includes(id) && (s.hit > 0 || s.net > 0),
+          ),
+        ),
+      });
       break;
     }
     case "upsertSponsor":
@@ -362,6 +406,9 @@ export function applyCommand(
     }
     case "resetDraw":
       if (started(t)) throw new Error("DRAW_LOCKED");
+      // Emptying the teams would orphan every pair on the bảng đấu.
+      if (t.duel?.matches.some((m) => playersOf(m).length > 0))
+        throw new Error("DUEL_HAS_LINEUPS");
       t.draw = {
         status: "not_started",
         algorithmVersion: "balanced-v1",

@@ -1,4 +1,10 @@
 import type { TournamentView } from "../../lib/use-tournament";
+import { deriveDuel } from "../../../../packages/domain/src/duel";
+import {
+  DuelMatchList,
+  DuelScoreboard,
+  SmashLeaders,
+} from "../duel/DuelBoard";
 import { SELF_DRAW_TEAM_IDS } from "../../../../packages/domain/src/team-draw";
 import { Section } from "./primitives";
 import { AthleteTable } from "../athletes/AthleteTable";
@@ -19,6 +25,8 @@ export function LiveSections({ view }: { view: TournamentView }) {
     t.athletes.some((a) =>
       (SELF_DRAW_TEAM_IDS as readonly string[]).includes(a.teamId ?? ""),
     );
+  // The two-team bảng đấu, once the organiser has created it.
+  const duel = deriveDuel(t);
   const played = derived.matches.some((m) => m.winnerTeamId !== null);
 
   return (
@@ -36,6 +44,17 @@ export function LiveSections({ view }: { view: TournamentView }) {
       {selfDrawn && (
         <Section id="hai-doi" title="HAI ĐỘI">
           <TeamPreview t={t} teamIds={SELF_DRAW_TEAM_IDS} />
+        </Section>
+      )}
+      {duel && (
+        <Section id="bang-dau" title="BẢNG ĐẤU">
+          <DuelScoreboard t={t} results={duel} />
+          <DuelMatchList t={t} />
+        </Section>
+      )}
+      {duel && duel.smashHit.length + duel.smashNet.length > 0 && (
+        <Section id="vua-smash" title="VUA SMASH">
+          <SmashLeaders t={t} results={duel} />
         </Section>
       )}
       {drawn && derived.matches.length > 0 && (

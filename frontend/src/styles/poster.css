@@ -1125,3 +1125,133 @@ button.team-draw__back {
     display: block;
   }
 }
+
+/* ================= BẢNG ĐẤU — Đội Đỏ against Đội Xanh =================
+   The match cards reuse the draw sheet's block, tie and row. New here: the
+   running total above them, the status tag, and the two smash tables. */
+.duel-score {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: clamp(22px, 3vw, 34px);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-hard);
+  background: var(--paper);
+}
+.duel-score__side {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: clamp(16px, 3vw, 28px) 10px;
+  color: var(--paper);
+  text-align: center;
+}
+.duel-score__side + .duel-score__side {
+  border-left: 3px solid var(--ink);
+}
+.duel-score__team {
+  font-size: clamp(0.95rem, 2.4vw, 1.3rem);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.duel-score__points {
+  font-size: clamp(3rem, 13vw, 6.5rem);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow:
+    -2px -2px 0 var(--ink),
+    2px -2px 0 var(--ink),
+    -2px 2px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    5px 5px 0 var(--ink);
+}
+.duel-score__side.is-leading .duel-score__points {
+  color: var(--yellow);
+}
+.duel-score__wins {
+  font-weight: 700;
+}
+.duel-score__note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 3px solid var(--ink);
+  background: var(--ink);
+  color: var(--yellow);
+  font-weight: 700;
+  text-align: center;
+}
+/* Each stage sits in its own wrapper, so its label is a first child and gets
+   no top margin of its own; the gap between stages has to come from here,
+   and has to clear the hard shadow of the cards above. */
+.duel-stage + .duel-stage {
+  margin-top: clamp(40px, 5vw, 56px);
+}
+.duel-match__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.duel-status {
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.duel-status--live {
+  background: var(--yellow);
+}
+.duel-status--done {
+  background: var(--green);
+  color: var(--paper);
+}
+.smash-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: smash;
+}
+.smash-list li {
+  display: grid;
+  grid-template-columns: 1.6em 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 2px dashed rgba(23, 21, 15, 0.18);
+  counter-increment: smash;
+}
+.smash-list li::before {
+  content: counter(smash);
+  font-weight: 900;
+  opacity: 0.6;
+}
+.smash-list li:last-child {
+  border-bottom: 0;
+}
+.smash-list .team-grid__swatch {
+  width: 14px;
+  height: 14px;
+}
+.smash-list__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.smash-list b {
+  min-width: 2.2em;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  font-weight: 900;
+  text-align: center;
+}
+.smash-list li.is-top .smash-list__name {
+  font-weight: 900;
+}
+.smash-list li.is-top b {
+  background: var(--red);
+  color: var(--paper);
+}

@@ -286,3 +286,68 @@ describe("route — team draw", () => {
     expect((await call("POST", "/api/team-draw", {}, null)).status).toBe(400);
   });
 });
+
+describe("route — two organisers scoring at once", () => {
+  const save = (matchId: string, extra: Record<string, unknown> = {}) => ({
+    type: "saveDuelMatch",
+    payload: {
+      matchId,
+      pairRed: null,
+      pairBlue: null,
+      status: "pending",
+      score: null,
+      smashes: {},
+      ...extra,
+    },
+  });
+  const version = async () =>
+    ((await call("GET", "/api/admin/state")).body as AdminView).version;
+  const setUp = async () => {
+    await command(await version(), "duel", { type: "createDuel", payload: {} });
+    return version();
+  };
+
+  it("lets a stale save through when it is a different match", async () => {
+    const seen = await setUp();
+    // Court 1 saves first; court 2 still holds the older version.
+    expect((await command(seen, "c1", save("vong-loai-1"))).status).toBe(200);
+    const res = await command(seen, "c2", save("vong-loai-2"));
+    expect(res.status).toBe(200);
+    expect((res.body as AdminView).version).toBe(seen + 2);
+  });
+
+  it("still refuses a stale save of the same match", async () => {
+    const seen = await setUp();
+    const athletes = ((await call("GET", "/api/admin/state")).body as AdminView)
+      .document.athletes;
+    const men = athletes.filter((a) => a.gender === "male");
+    // Put two men in each team so a pair can be saved.
+    let v = seen;
+    for (const [a, teamId] of [
+      [men[0], "red"],
+      [men[1], "red"],
+      [men[2], "blue"],
+      [men[3], "blue"],
+    ] as const) {
+      await command(v, `t-${a.id}`, {
+        type: "setAthleteTeam",
+        payload: { athleteId: a.id, teamId },
+      });
+      v = await version();
+    }
+    const pairs = {
+      pairRed: [men[0].id, men[1].id],
+      pairBlue: [men[2].id, men[3].id],
+    };
+    expect((await command(v, "first", save("vong-loai-1", pairs))).status).toBe(200);
+    // The other screen saw the match empty and would wipe the pairs.
+    const res = await command(v, "second", save("vong-loai-1"));
+    expect(res.status).toBe(409);
+  });
+
+  it("keeps refusing every other stale command", async () => {
+    const seen = await setUp();
+    expect((await command(seen, "c1", save("vong-loai-1"))).status).toBe(200);
+    expect((await command(seen, "fee", fee(1000))).status).toBe(409);
+  });
+});

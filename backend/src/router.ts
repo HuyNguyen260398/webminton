@@ -96,18 +96,51 @@ async function publishState(deps: Deps, s: StoredState): Promise<AdminView> {
   }
 }
 
+// Key order is not something a DynamoDB map promises to keep.
+const stable = (value: unknown): string =>
+  JSON.stringify(value, (_key, v: unknown) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? Object.fromEntries(
+          Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+        )
+      : v,
+  );
+
+// On match day two organisers score two courts at once, and each save would
+// make the other's screen stale. A save of one bảng đấu match is let through
+// when that match is exactly as the organiser last saw it: whatever changed
+// in between was somebody else's match.
+async function sameDuelMatch(
+  deps: Deps,
+  cur: StoredState,
+  baseVersion: number,
+  command: unknown,
+): Promise<boolean> {
+  const c = command as { type?: unknown; payload?: { matchId?: unknown } };
+  const matchId = c?.payload?.matchId;
+  if (c?.type !== "saveDuelMatch" || typeof matchId !== "string") return false;
+  const seen = await deps.store.snapshot(baseVersion);
+  const find = (s: AdminState | null) =>
+    s?.document.duel?.matches.find((m) => m.id === matchId);
+  const then = find(seen);
+  return then !== undefined && stable(then) === stable(find(cur));
+}
+
 async function commit(
   deps: Deps,
   actorEmail: string,
   body: z.infer<typeof Envelope>,
   commandType: string,
   produce: (s: StoredState) => AdminState,
+  // Asked only when the screen was stale: may this save go ahead anyway?
+  stillValid?: (cur: StoredState) => Promise<boolean>,
 ): Promise<ApiResponse> {
   const cur = await current(deps);
   // A double tap or a retry: the change is already in, so report success.
   if (cur.recentRequests.some((r) => r.requestId === body.requestId))
     return ok(view(cur));
-  if (cur.version !== body.baseVersion) throw new Error("CONFLICT");
+  if (cur.version !== body.baseVersion && !(await stillValid?.(cur)))
+    throw new Error("CONFLICT");
   const saved = await deps.store.write(cur, produce(cur), {
     at: deps.now(),
     actorEmail,
@@ -166,8 +199,13 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
           typeof (body.command as { type?: unknown })?.type === "string"
             ? (body.command as { type: string }).type
             : "unknown";
-        return await commit(deps, actor, body, type, (s) =>
-          applyCommand(s, body.command, actor, deps.now()),
+        return await commit(
+          deps,
+          actor,
+          body,
+          type,
+          (s) => applyCommand(s, body.command, actor, deps.now()),
+          (cur) => sameDuelMatch(deps, cur, body.baseVersion, body.command),
         );
       }
 

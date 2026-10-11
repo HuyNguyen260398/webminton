@@ -136,6 +136,32 @@ athletes rolling at once is retried. History shows these as `tu-boc-tham`.
   no identity check — the confirmation pop-up is the only guard — and undoing a
   roll is setting that athlete back to "chưa xếp đội" in the `Đội` tab.
 
+### The two-team bảng đấu
+
+The giải is now Đội Đỏ against Đội Xanh, and that lives in `document.duel`,
+beside — not inside — the four-team `matches` engine, which is dormant unless
+a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
+
+- `createDuel` lays out eleven matches: nine vòng loại (seven đôi nam, two đôi
+  nam nữ) and two finals. `resetDuel` removes them.
+- `saveDuelMatch` carries a whole match in one save: both pairs, the status
+  (`pending` → `live` → `done`), the final score and the smash counts
+  (`hit` = smash ăn điểm, `net` = smash rúc lưới, per athlete per match).
+- `deriveDuel(t)` computes, in the browser, the team totals (every point
+  scored, finals doubled), matches won, the leader, and the two smash tables
+  summed across matches. Nothing of that is stored.
+- Pairs are validated for team, gender and active status on every save
+  (`finalize` re-checks all of them). How many matches each athlete plays is
+  shown to the organiser but not enforced.
+- A pair is rendered publicly only once its match is `live` or `done`.
+- Two organisers scoring two courts: a stale `saveDuelMatch` is accepted when
+  the match itself is unchanged since the version the screen was on
+  (`router.ts::sameDuelMatch`). Every other stale command is still a `409`.
+
+In the admin screen the `Trận` tab is `DuelTab` unless a four-team draw is
+confirmed, in which case it is the old `MatchesTab`. The public page shows
+`BẢNG ĐẤU` and `VUA SMASH` once the bảng đấu exists.
+
 ### Derived state is never stored
 
 The JSON stores **facts only**: match scores, team membership, finance lines.
