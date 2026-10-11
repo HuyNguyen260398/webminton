@@ -11,6 +11,9 @@ type Phase =
   | { step: "done"; name: string; teamId: string }
   | { step: "failed"; message: string };
 
+// Long enough to read which team came up, short enough not to sit waiting.
+const HOME_AFTER_SECONDS = 6;
+
 // The roll itself happens in the Lambda, which is the only place that knows
 // each athlete's trình độ. This page sends a name and is told a team.
 async function roll(athleteId: string): Promise<string> {
@@ -56,6 +59,20 @@ export function TeamDrawPortal({
     if (athleteId && !chosen && phase.step === "pick") setAthleteId("");
   }, [athleteId, chosen, phase.step]);
 
+  // After a successful roll the page shows the team, counts down, and goes
+  // back to the landing page, where the two rosters are.
+  const [secondsLeft, setSecondsLeft] = useState(HOME_AFTER_SECONDS);
+  const done = phase.step === "done";
+  useEffect(() => {
+    if (!done) return;
+    setSecondsLeft(HOME_AFTER_SECONDS);
+    const id = setInterval(() => setSecondsLeft((n) => n - 1), 1000);
+    return () => clearInterval(id);
+  }, [done]);
+  useEffect(() => {
+    if (done && secondsLeft <= 0) location.assign("/");
+  }, [done, secondsLeft]);
+
   async function confirm() {
     dialog.current?.close();
     if (!chosen) return;
@@ -93,6 +110,10 @@ export function TeamDrawPortal({
           <span>{phase.name} về</span>
           <strong>{team.name.toLocaleUpperCase("vi-VN")}</strong>
           <span>Chúc mừng, hoặc chia buồn — tuỳ đồng đội là ai.</span>
+          <span className="team-draw__countdown">
+            Tự về trang giải sau {Math.max(secondsLeft, 0)} giây…{" "}
+            <a href="/">Về ngay</a>
+          </span>
         </div>
       )}
       {phase.step === "failed" && (

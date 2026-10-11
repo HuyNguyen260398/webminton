@@ -1020,6 +1020,14 @@ button.team-draw__cta:disabled {
   font-weight: 900;
   line-height: 1;
 }
+.team-draw__countdown {
+  margin-top: 10px;
+  font-weight: 500;
+}
+.team-draw__countdown a {
+  color: inherit;
+  font-weight: 800;
+}
 .team-draw__teams {
   margin-top: clamp(26px, 4vw, 44px);
 }
