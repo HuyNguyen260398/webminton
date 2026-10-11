@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Team } from "../../../../packages/domain/src/schema";
+import { playingTeams } from "../../../../packages/domain/src/team-draw";
 import type { ReadyAdmin } from "../../lib/use-admin";
 import { Card, Pill } from "../landing/primitives";
 import { ConfirmButton, Field } from "./fields";
@@ -293,7 +294,7 @@ function MemberList({ admin, ids }: { admin: ReadyAdmin; ids: string[] }) {
               }
             >
               <option value="">— chưa xếp đội —</option>
-              {t.teams.map((team) => (
+              {playingTeams(t).map((team) => (
                 <option key={team.id} value={team.id}>
                   {team.name}
                 </option>
@@ -314,7 +315,7 @@ export function TeamsTab({ admin }: { admin: ReadyAdmin }) {
       <SelfDrawPanel admin={admin} />
       <DrawPanel admin={admin} />
       <div className="team-grid">
-        {t.teams.map((team) => (
+        {playingTeams(t).map((team) => (
           // Remount when the stored team changes so the fields show it.
           <TeamCard
             key={`${team.id}:${team.name}:${team.color}:${team.captainId}`}

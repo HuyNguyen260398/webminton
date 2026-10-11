@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyCommand, type AdminState } from "../src/commands";
 import { makeTournament } from "../src/testing/fixtures";
-import { drawTeam, openTeams } from "../src/team-draw";
+import { drawTeam, openTeams, playingTeams } from "../src/team-draw";
 
 type Spec = [gender: "male" | "female", band: 1 | 2 | 3, count: number];
 
@@ -173,5 +173,17 @@ describe("team draw", () => {
         "2026-10-11T00:00:00.000+07:00",
       ),
     ).toThrow("DRAW_LOCKED");
+  });
+
+  it("counts only Đỏ and Xanh as playing, unless a four-team draw is confirmed", () => {
+    const state = makeState(REAL);
+    const ids = (s: AdminState) => playingTeams(s.document).map((x) => x.id);
+    expect(ids(state)).toEqual(["red", "blue"]);
+    state.document.draw.status = "not_started";
+    expect(ids(state)).toEqual(["red", "blue"]);
+    // Someone left in another team must stay reachable to be moved out.
+    expect(ids(place(state, "a1", "white"))).toEqual(["red", "blue", "white"]);
+    state.document.draw.status = "confirmed";
+    expect(ids(state)).toHaveLength(4);
   });
 });

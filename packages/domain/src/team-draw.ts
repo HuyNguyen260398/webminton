@@ -1,8 +1,24 @@
 import type { AdminState } from "./commands";
+import type { TournamentDocument } from "./schema";
 
 // The athletes draw their own team on the public page, one at a time. Only
 // two of the four teams take part: fourteen people are too few for four.
 export const SELF_DRAW_TEAM_IDS = ["red", "blue"] as const;
+
+// The teams that actually exist for the organiser. The document always
+// carries four, because the schedule engine is built for four; with the
+// athletes' own draw only Đỏ and Xanh are in play, so the other two are left
+// out unless a four-team draw is confirmed or somebody is still in one.
+export function playingTeams(
+  t: TournamentDocument,
+): TournamentDocument["teams"] {
+  if (t.draw.status === "confirmed") return t.teams;
+  return t.teams.filter(
+    (team) =>
+      (SELF_DRAW_TEAM_IDS as readonly string[]).includes(team.id) ||
+      t.athletes.some((a) => a.teamId === team.id),
+  );
+}
 
 interface Group {
   size: number;
