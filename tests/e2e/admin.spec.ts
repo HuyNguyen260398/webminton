@@ -268,3 +268,53 @@ test("a match called by mistake can be un-called", async ({ page }) => {
   await expect(item).toContainText("Chờ");
   await expect(page.getByRole("button", { name: "Gọi trận" })).toBeVisible();
 });
+
+test("ticks an athlete's lệ phí and the balance follows", async ({
+  page,
+  request,
+}) => {
+  const headers = { authorization: "Bearer test:admin@example.com" };
+  const before = await (await request.get("/api/admin/state", { headers })).json();
+  await request.post("/api/admin/commands", {
+    headers,
+    data: {
+      baseVersion: before.version,
+      requestId: "fee-setup",
+      command: { type: "updateInfo", payload: { feeVnd: 150000 } },
+    },
+  });
+  const first = before.document.athletes[0].name as string;
+
+  await signIn(page, "#thu-chi");
+  await expect(page.getByText("0/16 đã nộp")).toBeVisible();
+  const row = page.locator(".fee-row").first();
+  await expect(row).toContainText(first);
+  const box = row.getByRole("checkbox");
+  // click(), not check(): the box only flips once the save returns.
+  await box.click();
+  await expect(page.getByText("1/16 đã nộp")).toBeVisible();
+  await expect(page.getByText("Đã thu 150.000")).toBeVisible();
+  await expect(box).toBeChecked();
+
+  // Published as a total; who paid is not in the public file.
+  const res = await request.get("/tournament.json");
+  const raw = await res.text();
+  expect(raw).not.toContain("feePaid");
+  const fee = JSON.parse(raw).finance.income.find(
+    (i: { id: string }) => i.id === "le-phi",
+  );
+  expect(fee).toMatchObject({ amountVnd: 150000, received: true });
+
+  await box.click();
+  await expect(page.getByText("0/16 đã nộp")).toBeVisible();
+  await expect(box).not.toBeChecked();
+  const after = await (await request.get("/tournament.json")).json();
+  expect(
+    after.finance.income.some((i: { id: string }) => i.id === "le-phi"),
+  ).toBe(false);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    ),
+  ).toBeLessThanOrEqual(0);
+});

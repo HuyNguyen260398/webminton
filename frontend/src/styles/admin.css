@@ -168,6 +168,38 @@
   border-color: var(--paper);
   box-shadow: none;
 }
+/* A whole-row tick box in Thu chi: the row is the touch target. */
+.fee-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-weight: 700;
+  cursor: pointer;
+}
+.fee-row input {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  accent-color: var(--green);
+}
+.fee-row span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fee-row small {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.fee-row:has(input:checked) {
+  background: color-mix(in srgb, var(--green) 14%, var(--paper));
+}
 .pick-item[aria-pressed="true"] {
   background: var(--ink);
   color: var(--paper);

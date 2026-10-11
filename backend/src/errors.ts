@@ -37,6 +37,8 @@ const domain: Record<string, string> = {
   INVALID_TIE: "Các đội này không đồng hạng, hoặc thứ tự xếp chưa đủ đội.",
   PLACEMENT_RESET_REQUIRED:
     "Đã có trận tranh hạng được đánh — xoá kết quả tranh hạng trước khi sửa vòng loại.",
+  FEE_LINE_LOCKED:
+    "Dòng lệ phí tự tính theo số VĐV đã tick — sửa ở mục Lệ phí tham gia.",
   MONEY_OVERFLOW: "Số tiền quá lớn.",
 };
 

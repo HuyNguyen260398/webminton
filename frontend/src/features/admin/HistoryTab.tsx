@@ -20,6 +20,7 @@ const LABELS: Record<string, string> = {
   updateTeam: "Sửa đội",
   upsertAthlete: "Thêm hoặc sửa VĐV",
   removeAthlete: "Xoá VĐV",
+  setFeePaid: "Tick hoặc bỏ tick lệ phí",
   setAthleteTeam: "Chuyển đội cho VĐV",
   setTeamDrawOpen: "Mở hoặc đóng tự bốc thăm",
   teamDraw: "VĐV tự bốc thăm",

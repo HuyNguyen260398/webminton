@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
 import type { TournamentDocument } from "../../../../packages/domain/src/schema";
+import { FEE_INCOME_ID } from "../../../../packages/domain/src/commands";
 import { calculateFinance } from "../../../../packages/domain/src/finance";
 import type { ReadyAdmin } from "../../lib/use-admin";
 import { formatVnd } from "../../lib/format";
-import { Card } from "../landing/primitives";
+import { Card, Pill } from "../landing/primitives";
 import { ConfirmButton, Field } from "./fields";
 
 type Sponsor = TournamentDocument["sponsorships"][number];
@@ -163,6 +164,61 @@ function Lines<T extends { id: string }>({
   );
 }
 
+// One tick per athlete who has paid. Each tick saves at once; the domain
+// turns the count into the "Lệ phí tham gia" income line, so the totals above
+// move with it. Who paid stays private — the public page sees only the sum.
+function FeeCard({ admin }: { admin: ReadyAdmin }) {
+  const { view, send, busy } = admin;
+  const t = view.document;
+  const fee = t.info.feeVnd;
+  const paid = t.athletes.filter((a) => view.private[a.id]?.feePaid).length;
+  return (
+    <Card title="Lệ phí tham gia">
+      <div className="pill-row">
+        <Pill tone={paid === t.athletes.length ? "green" : "yellow"}>
+          {paid}/{t.athletes.length} đã nộp
+        </Pill>
+        <Pill tone="outline">Đã thu {formatVnd(paid * (fee ?? 0))}</Pill>
+      </div>
+      <p>
+        {fee === null
+          ? "Chưa chốt lệ phí — đặt ở mục “Giải”. Tick trước cũng được, tiền sẽ tự cộng khi có con số."
+          : `Mỗi người ${formatVnd(fee)}. Tick là cộng ngay vào quỹ giải, bỏ tick là trừ lại.`}
+      </p>
+      {t.athletes.length === 0 && <p>Chưa có VĐV nào.</p>}
+      <ul className="pick-list">
+        {t.athletes.map((a) => {
+          const done = view.private[a.id]?.feePaid ?? false;
+          return (
+            <li key={a.id}>
+              <label className="fee-row">
+                <input
+                  type="checkbox"
+                  checked={done}
+                  disabled={busy}
+                  onChange={(e) =>
+                    send(
+                      {
+                        type: "setFeePaid",
+                        payload: { athleteId: a.id, paid: e.target.checked },
+                      },
+                      e.target.checked
+                        ? `${a.name} đã nộp lệ phí.`
+                        : `Đã bỏ tick lệ phí của ${a.name}.`,
+                    )
+                  }
+                />
+                <span>{a.name}</span>
+                <small>{done ? "Đã nộp" : "Chưa nộp"}</small>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+}
+
 export function FinanceTab({ admin }: { admin: ReadyAdmin }) {
   const { view, send, busy } = admin;
   const t = view.document;
@@ -205,6 +261,8 @@ export function FinanceTab({ admin }: { admin: ReadyAdmin }) {
         </Field>
       </Card>
 
+      <FeeCard admin={admin} />
+
       <Lines<Sponsor>
         admin={admin}
         title="Nhà tài trợ"
@@ -236,7 +294,8 @@ export function FinanceTab({ admin }: { admin: ReadyAdmin }) {
         admin={admin}
         title="Khoản thu"
         noun="khoản thu"
-        items={t.finance.income}
+        // The fee line is kept by the ticks above, not edited by hand.
+        items={t.finance.income.filter((i) => i.id !== FEE_INCOME_ID)}
         fields={[
           { key: "label", label: "Khoản thu", kind: "text" },
           { key: "amountVnd", label: "Số tiền (đồng)", kind: "money" },
