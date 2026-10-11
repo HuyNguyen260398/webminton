@@ -72,7 +72,7 @@ export function Pill({
   tone,
   children,
 }: {
-  tone: "red" | "green" | "yellow" | "outline";
+  tone: "black" | "red" | "green" | "yellow" | "outline";
   children: ReactNode;
 }) {
   return <span className={`pill pill--${tone}`}>{children}</span>;

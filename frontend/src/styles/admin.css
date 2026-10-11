@@ -142,6 +142,32 @@
   color: var(--ink);
   text-align: left;
 }
+/* Name, gender and team each on a line of their own; a long name is cut
+   with an ellipsis rather than wrapped. */
+.pick-item__lines {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.pick-item__lines > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pick-item__lines > span {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.pick-item .pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+/* The selected row is ink, which would swallow the ink border and the black
+   level pill with it. */
+.pick-item[aria-pressed="true"] .pill {
+  border-color: var(--paper);
+  box-shadow: none;
+}
 .pick-item[aria-pressed="true"] {
   background: var(--ink);
   color: var(--paper);

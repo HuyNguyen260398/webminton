@@ -7,6 +7,23 @@ import { ConfirmButton, Field } from "./fields";
 
 const NEW = "__new__";
 
+// One colour per level. Black and outline are kept for "Thiếu trình độ" and
+// "Nghỉ", and the label carries the level for anyone who cannot tell the
+// colours apart.
+const SKILL = {
+  1: { label: "mạnh", tone: "red" },
+  2: { label: "khá", tone: "green" },
+  3: { label: "mới chơi", tone: "yellow" },
+} as const;
+
+function SkillPill({ band }: { band: 1 | 2 | 3 }) {
+  return (
+    <Pill tone={SKILL[band].tone}>
+      {band} · {SKILL[band].label}
+    </Pill>
+  );
+}
+
 function AthleteForm({
   admin,
   athlete,
@@ -46,9 +63,11 @@ function AthleteForm({
           <Field label="Trình độ">
             <select value={skill} onChange={(e) => setSkill(e.target.value)}>
               <option value="">— chưa xếp —</option>
-              <option value="1">1 — mạnh</option>
-              <option value="2">2 — khá</option>
-              <option value="3">3 — mới chơi</option>
+              {([1, 2, 3] as const).map((band) => (
+                <option key={band} value={band}>
+                  {band} — {SKILL[band].label}
+                </option>
+              ))}
             </select>
           </Field>
           <Field label="Đang thi đấu">
@@ -161,18 +180,17 @@ export function AthletesTab({ admin }: { admin: ReadyAdmin }) {
                 aria-pressed={a.id === selected}
                 onClick={() => setSelected(a.id)}
               >
-                <span>
-                  {a.name} · {a.gender === "male" ? "nam" : "nữ"} ·{" "}
-                  {teamName(a.teamId)}
+                <span className="pick-item__lines">
+                  <b>{a.name}</b>
+                  <span>{a.gender === "male" ? "Nam" : "Nữ"}</span>
+                  <span>{teamName(a.teamId)}</span>
                 </span>
                 {!a.active ? (
                   <Pill tone="outline">Nghỉ</Pill>
                 ) : (view.private[a.id]?.skillBand ?? null) === null ? (
-                  <Pill tone="red">Thiếu trình độ</Pill>
+                  <Pill tone="black">Thiếu trình độ</Pill>
                 ) : (
-                  <Pill tone="green">
-                    Trình độ {view.private[a.id]?.skillBand}
-                  </Pill>
+                  <SkillPill band={view.private[a.id]!.skillBand!} />
                 )}
               </button>
             </li>
