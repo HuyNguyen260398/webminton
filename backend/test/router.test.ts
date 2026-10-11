@@ -207,3 +207,82 @@ describe("route — draw preview, history, restore", () => {
     ).toBe(404);
   });
 });
+
+describe("route — team draw", () => {
+  const roll = (athleteId: string) =>
+    call("POST", "/api/team-draw", { athleteId }, null);
+  const open = async () => {
+    const v = (await call("GET", "/api/admin/state")).body as AdminView;
+    await command(v.version, "open", {
+      type: "setTeamDrawOpen",
+      payload: { open: true },
+    });
+    return ((await call("GET", "/api/admin/state")).body as AdminView).document
+      .athletes;
+  };
+
+  it("is refused while the organiser has not opened it", async () => {
+    const res = await roll("a1");
+    expect(res.status).toBe(422);
+    expect((res.body as { code: string }).code).toBe("TEAM_DRAW_CLOSED");
+  });
+
+  it("needs no sign-in, records the team at once and publishes it", async () => {
+    const [first] = await open();
+    deps.random = () => 0.99;
+    const res = await roll(first.id);
+    expect(res).toEqual({
+      status: 200,
+      body: { athleteId: first.id, teamId: "blue" },
+    });
+    const state = (await call("GET", "/api/admin/state")).body as AdminView;
+    expect(state.document.athletes[0].teamId).toBe("blue");
+    expect(JSON.parse(published.at(-1)!).athletes[0].teamId).toBe("blue");
+    expect(state.publishedVersion).toBe(state.version);
+    const { entries } = (await call("GET", "/api/admin/history")).body as {
+      entries: { actorEmail: string; commandType: string }[];
+    };
+    expect(entries[0]).toMatchObject({
+      actorEmail: "tu-boc-tham",
+      commandType: "teamDraw",
+    });
+  });
+
+  it("never returns a level or any other private field", async () => {
+    const [first] = await open();
+    const res = await roll(first.id);
+    expect(JSON.stringify(res.body)).not.toMatch(/skillBand|phone|note/);
+  });
+
+  it("refuses a second roll for the same athlete", async () => {
+    const [first] = await open();
+    expect((await roll(first.id)).status).toBe(200);
+    const again = await roll(first.id);
+    expect(again.status).toBe(422);
+    expect((again.body as { code: string }).code).toBe("ALREADY_DRAWN");
+  });
+
+  it("rolls again when another save lands in between", async () => {
+    const [first, second] = await open();
+    const write = deps.store.write.bind(deps.store);
+    let raced = false;
+    deps.store.write = async (prev, next, entry) => {
+      if (!raced) {
+        raced = true;
+        // Someone else's roll gets in first.
+        await roll(second.id);
+      }
+      return write(prev, next, entry);
+    };
+    expect((await roll(first.id)).status).toBe(200);
+    const { athletes } = ((await call("GET", "/api/admin/state")).body as AdminView)
+      .document;
+    expect(athletes[0].teamId).not.toBeNull();
+    expect(athletes[1].teamId).not.toBeNull();
+  });
+
+  it("rejects a body without an athlete", async () => {
+    await open();
+    expect((await call("POST", "/api/team-draw", {}, null)).status).toBe(400);
+  });
+});

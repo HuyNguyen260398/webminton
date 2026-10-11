@@ -132,6 +132,15 @@ resource "aws_apigatewayv2_route" "config" {
   target    = "integrations/${aws_apigatewayv2_integration.api.id}"
 }
 
+# Open on purpose: athletes draw their own team on /boc-tham without signing
+# in. The Lambda refuses it unless the organiser has opened the draw, and an
+# athlete who has a team cannot roll again.
+resource "aws_apigatewayv2_route" "team_draw" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "POST /api/team-draw"
+  target    = "integrations/${aws_apigatewayv2_integration.api.id}"
+}
+
 resource "aws_apigatewayv2_route" "admin" {
   api_id             = aws_apigatewayv2_api.api.id
   route_key          = "ANY /api/admin/{proxy+}"
@@ -147,6 +156,12 @@ resource "aws_apigatewayv2_stage" "default" {
   default_route_settings {
     throttling_rate_limit  = 20
     throttling_burst_limit = 40
+  }
+  # Fourteen people roll once each; anything faster than this is not them.
+  route_settings {
+    route_key              = aws_apigatewayv2_route.team_draw.route_key
+    throttling_rate_limit  = 2
+    throttling_burst_limit = 5
   }
 }
 

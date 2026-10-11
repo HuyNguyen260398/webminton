@@ -20,6 +20,8 @@ const domain: Record<string, string> = {
   INVALID_CAPTAIN: "Đội trưởng phải là VĐV của đội.",
   ATHLETE_NOT_FOUND: "Không tìm thấy VĐV.",
   ATHLETE_IN_LINEUP: "VĐV đang có tên trong đội hình — gỡ khỏi đội hình trước.",
+  TEAM_DRAW_CLOSED: "BTC chưa mở bốc thăm, hoặc đã đóng rồi.",
+  ALREADY_DRAWN: "Bạn đã có đội rồi — mỗi người chỉ bốc một lần.",
   DRAW_LOCKED: "Đã có trận được gọi hoặc đánh — không bốc thăm lại được.",
   MISSING_SKILL: "Còn VĐV đang thi đấu chưa có trình độ (1–3).",
   INSUFFICIENT_ROSTER: "Cần tối thiểu 8 nam và 8 nữ đang thi đấu.",

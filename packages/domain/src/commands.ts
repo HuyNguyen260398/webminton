@@ -77,6 +77,7 @@ export const CommandSchema = z.discriminatedUnion("type", [
     "setAthleteTeam",
     z.strictObject({ athleteId: Id, teamId: Id.nullable() }),
   ),
+  command("setTeamDrawOpen", z.strictObject({ open: z.boolean() })),
   command("confirmDraw", z.strictObject({ seed: text })),
   command("resetDraw", z.strictObject({})),
   command(
@@ -306,6 +307,11 @@ export function applyCommand(
       }
       break;
     }
+    case "setTeamDrawOpen":
+      // A confirmed draw already owns the teams and the eighteen matches.
+      if (t.draw.status === "confirmed") throw new Error("DRAW_LOCKED");
+      t.draw.status = c.payload.open ? "open" : "not_started";
+      break;
     case "confirmDraw": {
       if (started(t)) throw new Error("DRAW_LOCKED");
       const draw = generateDraw(

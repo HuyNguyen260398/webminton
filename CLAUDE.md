@@ -24,7 +24,8 @@ Node 24 (`.nvmrc`), pnpm 10.32.1, ESM everywhere (`"type": "module"`).
 
 ```bash
 pnpm install
-pnpm dev              # next dev on :3000
+pnpm dev              # next dev on :3000 + local admin API on :3100
+pnpm dev:cloud        # the same, over the REAL table and live tournament.json
 pnpm typecheck        # tsc over packages/domain and scripts
 pnpm --filter @webminton/frontend typecheck   # the frontend is separate
 pnpm test             # vitest — domain, scripts, frontend, infra
@@ -42,10 +43,28 @@ Single e2e: `pnpm exec playwright test tests/e2e/landing.spec.ts`.
 
 `pnpm test:e2e` needs a current `frontend/out` — run `pnpm build` first (CI does).
 
-Admin development has no `next dev` API: run `pnpm build`, then
-`node --import tsx scripts/serve-static.ts` and open
-`http://127.0.0.1:3100/quan-tri/`. That server runs the real router over an
-in-memory store and offers a "Đăng nhập thử" button instead of Google.
+`pnpm dev` (`scripts/dev.ts`) starts two servers: `next dev` on :3000 and
+`scripts/serve-static.ts` on :3100. In development only, `next.config.ts`
+rewrites `/api/*` and `/tournament.json` to :3100, so
+`http://localhost:3000/quan-tri/` works with hot reload. That server runs the
+real router over an in-memory store seeded from the test fixture (not from
+`frontend/public/tournament.json`) and offers a "Đăng nhập thử" button instead
+of Google; restarting it resets the data. Once an admin save publishes, the
+public page on :3000 shows that snapshot. `pnpm dev` also works from
+`frontend/`.
+
+`pnpm dev:cloud` is the same pair over the **real** table and site bucket,
+with the API on :3200. Table and bucket names come from `TABLE_NAME` /
+`SITE_BUCKET` or the Terraform outputs, credentials from the AWS profile. A
+save there is a save on the live site: it writes the table and republishes
+`tournament.json`, recorded in the history as `admin@example.com`. It never
+seeds or resets, and `/api/test/reset` is off. The separate port matters —
+Playwright reuses whatever answers on :3100, so a cloud server there would
+have the e2e suite editing live data.
+
+To test the built site instead, run
+`pnpm build`, then `node --import tsx scripts/serve-static.ts` and open
+`http://127.0.0.1:3100/quan-tri/`.
 
 `pnpm install` rewrites `pnpm-lock.yaml` in a style `pnpm lint` rejects; run
 `pnpm format` after adding a dependency.
@@ -96,6 +115,27 @@ Changing a group score after a placement match has been played is refused
 (`PLACEMENT_RESET_REQUIRED`) when it would change who plays whom; un-played
 placement matches are re-seeded automatically.
 
+### The athletes' own team draw
+
+`/boc-tham` lets each athlete pick their name and roll for a team, once. It is
+the one public write: `POST /api/team-draw { athleteId }`, an API Gateway
+route with no authorizer and its own tight throttle. The Lambda does the roll
+(`packages/domain/src/team-draw.ts`), saves it through `setAthleteTeam` and
+publishes, all against one read of the table; a version collision between two
+athletes rolling at once is retried. History shows these as `tu-boc-tham`.
+
+- It only works while `draw.status` is `"open"`, which the organiser toggles
+  in the `Đội` tab (`setTeamDrawOpen`). A confirmed four-team draw cannot be
+  opened.
+- Only two teams take part, `SELF_DRAW_TEAM_IDS` (`red`, `blue`).
+- A team is open to an athlete only if the draw can still end level: every
+  gender × trình độ group split in half (give or take the odd one) and the two
+  teams the same size (give or take one). Counted from stored state, so a
+  manual move in the admin screen is respected.
+- Levels stay private: the browser sends a name and receives a team. There is
+  no identity check — the confirmation pop-up is the only guard — and undoing a
+  roll is setting that athlete back to "chưa xếp đội" in the `Đội` tab.
+
 ### Derived state is never stored
 
 The JSON stores **facts only**: match scores, team membership, finance lines.
@@ -136,7 +176,11 @@ keeps stored `sourceResultsHash` values matching.
 
 ### The page
 
-One route, `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI ĐẤU` → marquee
+`frontend/src/app/boc-tham/page.tsx` is the team draw above; the landing page
+links to it (`TeamDrawCta`) only while the draw is open, and shows `HAI ĐỘI`
+once anyone has rolled.
+
+The landing page is `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI ĐẤU` → marquee
 → poster 2 → poster 3 → the live data sections → a `<details>` linking the
 original JPGs.
 

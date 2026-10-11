@@ -1,10 +1,21 @@
 import type { TournamentDocument } from "../../../../packages/domain/src/schema";
 import { Card } from "../landing/primitives";
 
-export function TeamPreview({ t }: { t: TournamentDocument }) {
+// `teamIds` narrows the grid to the teams taking part — the two of the
+// athletes' own draw — and leaves the other cards out.
+export function TeamPreview({
+  t,
+  teamIds,
+}: {
+  t: TournamentDocument;
+  teamIds?: readonly string[];
+}) {
+  const teams = teamIds
+    ? t.teams.filter((team) => teamIds.includes(team.id))
+    : t.teams;
   return (
     <div className="team-grid">
-      {t.teams.map((team) => {
+      {teams.map((team) => {
         const members = t.athletes.filter((a) => a.teamId === team.id);
         return (
           <Card key={team.id}>

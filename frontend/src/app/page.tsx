@@ -3,7 +3,10 @@ import { useTournament } from "../lib/use-tournament";
 import { PosterOne } from "../features/landing/PosterOne";
 import { PosterTwo } from "../features/landing/PosterTwo";
 import { PosterThree } from "../features/landing/PosterThree";
-import { Registration } from "../features/landing/Registration";
+import {
+  Registration,
+  TeamDrawCta,
+} from "../features/landing/Registration";
 import { LiveSections } from "../features/landing/LiveSections";
 
 export default function Page() {
@@ -26,6 +29,7 @@ export default function Page() {
     <main id="main">
       <PosterOne t={view.t} />
       <Registration t={view.t} />
+      <TeamDrawCta t={view.t} />
       <div className="marquee" aria-hidden="true">
         ĐÔI NAM <b>✦</b> ĐÔI NAM NỮ <b>✦</b> CHUNG KẾT NHÂN ĐÔI <b>✦</b> HẾT MÌNH
         TỪNG ĐIỂM

@@ -134,7 +134,8 @@ export const PublicTournamentSchema = z
     matches: z.array(MatchSchema),
     courts: z.array(z.strictObject({ id: Id, name: text })),
     draw: z.strictObject({
-      status: z.enum(["not_started", "confirmed"]),
+      // "open": athletes are drawing their own team on /boc-tham.
+      status: z.enum(["not_started", "open", "confirmed"]),
       algorithmVersion: z.literal("balanced-v1"),
       assignment: z.record(Id, Id),
     }),

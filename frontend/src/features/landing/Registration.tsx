@@ -50,3 +50,35 @@ export function Registration({ t }: { t: TournamentDocument }) {
     </Section>
   );
 }
+
+// Shown only while the organiser has the athletes' own team draw open; the
+// draw itself lives on /boc-tham.
+export function TeamDrawCta({ t }: { t: TournamentDocument }) {
+  if (t.draw.status !== "open") return null;
+  const waiting = t.athletes.filter((a) => a.active && a.teamId === null);
+  return (
+    <Section id="chia-doi" title="BỐC THĂM CHIA ĐỘI">
+      <Card className="registration">
+        <div className="registration__body">
+          <p className="registration__lead">
+            Ống thăm đã mở. Mỗi người tự bốc đội cho mình, đúng một lần — đội
+            nào ra thì về đội đó, khỏi trách BTC thiên vị.
+          </p>
+          <p className="registration__deadline">
+            {waiting.length > 0
+              ? `Còn ${waiting.length} người chưa bốc — bạn có trong đó không?`
+              : "Cả hội đã bốc xong — vào xem đội hình!"}
+          </p>
+        </div>
+        <div className="registration__action">
+          <a className="registration__cta" href="/boc-tham/">
+            VÀO BỐC THĂM <span aria-hidden="true">→</span>
+          </a>
+          <p className="registration__note">
+            Chọn đúng tên mình rồi hẵng bấm.
+          </p>
+        </div>
+      </Card>
+    </Section>
+  );
+}

@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import { z } from "zod";
 import { Id, PublicTournamentSchema } from "../../packages/domain/src/schema";
 import {
@@ -6,6 +7,7 @@ import {
   PrivateMapSchema,
   type AdminState,
 } from "../../packages/domain/src/commands";
+import { drawTeam } from "../../packages/domain/src/team-draw";
 import { requireAdmin, type Claims } from "./auth";
 import { renderSnapshot, type Publisher } from "./publish";
 import { toResponse } from "./errors";
@@ -32,6 +34,8 @@ export interface Deps {
   adminEmails: string[];
   config: PublicConfig;
   now: () => string;
+  // [0, 1), for the team draw. Tests pin it; everywhere else it is the OS's.
+  random?: () => number;
 }
 export interface AdminView extends AdminState {
   version: number;
@@ -46,6 +50,12 @@ const Envelope = z.object({
 const CommandBody = Envelope.extend({ command: z.unknown() });
 const RestoreBody = Envelope.extend({ version: z.number().int().positive() });
 const PreviewBody = z.object({ seed: z.string().trim().min(1).max(500) });
+const TeamDrawBody = z.object({ athleteId: Id });
+
+// What history shows for a roll made on /boc-tham: nobody is signed in there.
+export const TEAM_DRAW_ACTOR = "tu-boc-tham";
+const TEAM_DRAW_TRIES = 5;
+const osRandom = () => randomInt(2 ** 32) / 2 ** 32;
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
 const view = (s: StoredState): AdminView => ({
@@ -107,10 +117,42 @@ async function commit(
   return ok(await publishState(deps, saved));
 }
 
+// The one write open to the public. The roll and the save happen against the
+// same read of the table, so the team is recorded the moment it is drawn and
+// a second roll finds the athlete already placed. Two athletes rolling at
+// once collide on the version; the loser rolls again over the new state.
+async function teamDraw(deps: Deps, athleteId: string): Promise<ApiResponse> {
+  for (let attempt = 1; ; attempt++) {
+    const cur = await current(deps);
+    const teamId = drawTeam(cur, athleteId, deps.random ?? osRandom);
+    const next = applyCommand(
+      cur,
+      { type: "setAthleteTeam", payload: { athleteId, teamId } },
+      TEAM_DRAW_ACTOR,
+      deps.now(),
+    );
+    try {
+      const saved = await deps.store.write(cur, next, {
+        at: deps.now(),
+        actorEmail: TEAM_DRAW_ACTOR,
+        commandType: "teamDraw",
+        requestId: `team-draw-${athleteId}-${cur.version + 1}`,
+      });
+      await publishState(deps, saved);
+      return ok({ athleteId, teamId });
+    } catch (e) {
+      const conflict = e instanceof Error && e.message === "CONFLICT";
+      if (!conflict || attempt >= TEAM_DRAW_TRIES) throw e;
+    }
+  }
+}
+
 export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
   try {
     const key = `${req.method} ${req.path}`;
     if (key === "GET /api/config") return ok(deps.config);
+    if (key === "POST /api/team-draw")
+      return await teamDraw(deps, parse(TeamDrawBody, req.rawBody).athleteId);
     if (!req.path.startsWith("/api/admin/")) throw new Error("NOT_FOUND");
     const actor = requireAdmin(req.claims, deps.adminEmails);
 

@@ -197,14 +197,16 @@ test("the tab wears the shuttlecock icon", async ({ page, request }) => {
   expect(res.headers()["content-type"]).toContain("image/svg+xml");
 });
 
-// The public site is one page. /quan-tri is the organiser's screen and the
-// only other route; the old per-section pages must stay gone.
-test("the only routes are the page and the admin screen", async ({
+// The public site is one page plus /boc-tham, where athletes draw their own
+// team. /quan-tri is the organiser's screen and the only other route; the old
+// per-section pages must stay gone.
+test("the only routes are the page, the team draw and the admin screen", async ({
   request,
 }) => {
   for (const path of ["/van-dong-vien/", "/lich-thi-dau/", "/thu-chi/"])
     expect((await request.get(path)).status()).toBe(404);
   expect((await request.get("/quan-tri/")).status()).toBe(200);
+  expect((await request.get("/boc-tham/")).status()).toBe(200);
 });
 
 // One line means one line: a slab that wraps at a narrow width is the failure

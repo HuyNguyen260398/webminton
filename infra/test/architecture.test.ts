@@ -71,14 +71,25 @@ describe("infrastructure", () => {
         /resource "aws_apigatewayv2_route" "(\w+)" {\n([\s\S]*?)\n}/g,
       ),
     ].map((m) => ({ name: m[1], body: m[2] }));
-    expect(routes.map((r) => r.name).sort()).toEqual(["admin", "config"]);
+    expect(routes.map((r) => r.name).sort()).toEqual([
+      "admin",
+      "config",
+      "team_draw",
+    ]);
     const admin = routes.find((r) => r.name === "admin")!.body;
     expect(admin).toMatch(/route_key\s+=\s+"ANY \/api\/admin\/\{proxy\+\}"/);
     expect(admin).toMatch(/authorization_type\s+=\s+"JWT"/);
     expect(admin).toContain("aws_apigatewayv2_authorizer.jwt.id");
-    // The only open route serves two public identifiers, nothing else.
+    // Two routes are open. One serves two public identifiers; the other is
+    // the athletes' own team draw, which is throttled hard.
     expect(routes.find((r) => r.name === "config")!.body).toMatch(
       /route_key\s+=\s+"GET \/api\/config"/,
+    );
+    const teamDraw = routes.find((r) => r.name === "team_draw")!.body;
+    expect(teamDraw).toMatch(/route_key\s+=\s+"POST \/api\/team-draw"/);
+    expect(teamDraw).not.toContain("authorization_type");
+    expect(backend).toMatch(
+      /route_settings\s*{\s*route_key\s+=\s+aws_apigatewayv2_route\.team_draw\.route_key\s+throttling_rate_limit\s+=\s+2\s/,
     );
   });
 

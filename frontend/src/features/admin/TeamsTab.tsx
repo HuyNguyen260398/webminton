@@ -136,6 +136,57 @@ function DrawPanel({ admin }: { admin: ReadyAdmin }) {
   );
 }
 
+// The athletes' own draw on /boc-tham. Open, each of them rolls once and the
+// result is saved as they roll; undoing one is the team picker below.
+function SelfDrawPanel({ admin }: { admin: ReadyAdmin }) {
+  const { view, send, busy } = admin;
+  const t = view.document;
+  if (t.draw.status === "confirmed") return null;
+  const open = t.draw.status === "open";
+  const active = t.athletes.filter((a) => a.active);
+  const drawn = active.filter((a) => a.teamId !== null).length;
+  const noSkill = active.filter(
+    (a) => (view.private[a.id]?.skillBand ?? null) === null,
+  ).length;
+  return (
+    <Card title="VĐV tự bốc thăm (2 đội)">
+      <div className="pill-row">
+        <Pill tone={open ? "green" : "outline"}>
+          {open ? "Đang mở" : "Đang đóng"}
+        </Pill>
+        <Pill tone="yellow">
+          {drawn}/{active.length} đã có đội
+        </Pill>
+        {noSkill > 0 && (
+          <Pill tone="black">{noSkill} VĐV chưa có trình độ</Pill>
+        )}
+      </div>
+      <p>
+        Mỗi VĐV tự chọn tên và bốc một lần ở trang{" "}
+        <a href="/boc-tham/" target="_blank" rel="noopener noreferrer">
+          /boc-tham
+        </a>
+        . Hệ thống chia đều nam, nữ và trình độ cho Đội Đỏ và Đội Xanh. Muốn
+        cho ai bốc lại thì đổi đội của người đó về “chưa xếp đội” ở bên dưới.
+      </p>
+      <div className="row-actions">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            send(
+              { type: "setTeamDrawOpen", payload: { open: !open } },
+              open ? "Đã đóng bốc thăm." : "Đã mở bốc thăm.",
+            )
+          }
+        >
+          {open ? "Đóng bốc thăm" : "Mở bốc thăm"}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
 function TeamCard({ admin, team }: { admin: ReadyAdmin; team: Team }) {
   const { view, send, busy } = admin;
   const t = view.document;
@@ -245,6 +296,7 @@ export function TeamsTab({ admin }: { admin: ReadyAdmin }) {
   const unassigned = t.athletes.filter((a) => a.teamId === null);
   return (
     <div className="admin-stack">
+      <SelfDrawPanel admin={admin} />
       <DrawPanel admin={admin} />
       <div className="team-grid">
         {t.teams.map((team) => (
@@ -256,7 +308,7 @@ export function TeamsTab({ admin }: { admin: ReadyAdmin }) {
           />
         ))}
       </div>
-      {t.draw.status === "confirmed" && unassigned.length > 0 && (
+      {t.draw.status !== "not_started" && unassigned.length > 0 && (
         <Card title="Chưa xếp đội" dashed>
           <MemberList admin={admin} ids={unassigned.map((a) => a.id)} />
         </Card>

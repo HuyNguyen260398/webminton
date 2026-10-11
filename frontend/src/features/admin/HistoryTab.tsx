@@ -21,6 +21,8 @@ const LABELS: Record<string, string> = {
   upsertAthlete: "Thêm hoặc sửa VĐV",
   removeAthlete: "Xoá VĐV",
   setAthleteTeam: "Chuyển đội cho VĐV",
+  setTeamDrawOpen: "Mở hoặc đóng tự bốc thăm",
+  teamDraw: "VĐV tự bốc thăm",
   confirmDraw: "Bốc thăm chia đội",
   resetDraw: "Xoá kết quả bốc thăm",
   setLineup: "Sửa đội hình",

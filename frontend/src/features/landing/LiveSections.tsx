@@ -1,4 +1,5 @@
 import type { TournamentView } from "../../lib/use-tournament";
+import { SELF_DRAW_TEAM_IDS } from "../../../../packages/domain/src/team-draw";
 import { Section } from "./primitives";
 import { AthleteTable } from "../athletes/AthleteTable";
 import { TeamPreview } from "../draw/TeamPreview";
@@ -12,6 +13,12 @@ import { FinanceDashboard } from "../finance/FinanceDashboard";
 export function LiveSections({ view }: { view: TournamentView }) {
   const { t, derived } = view;
   const drawn = t.draw.status === "confirmed";
+  // The athletes' own draw fills two teams without a confirmed draw.
+  const selfDrawn =
+    !drawn &&
+    t.athletes.some((a) =>
+      (SELF_DRAW_TEAM_IDS as readonly string[]).includes(a.teamId ?? ""),
+    );
   const played = derived.matches.some((m) => m.winnerTeamId !== null);
 
   return (
@@ -24,6 +31,11 @@ export function LiveSections({ view }: { view: TournamentView }) {
       {drawn && (
         <Section id="boc-tham" title="BỐN ĐỘI">
           <TeamPreview t={t} />
+        </Section>
+      )}
+      {selfDrawn && (
+        <Section id="hai-doi" title="HAI ĐỘI">
+          <TeamPreview t={t} teamIds={SELF_DRAW_TEAM_IDS} />
         </Section>
       )}
       {drawn && derived.matches.length > 0 && (
