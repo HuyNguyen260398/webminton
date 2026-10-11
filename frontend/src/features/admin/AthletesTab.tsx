@@ -1,27 +1,29 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { Athlete } from "../../../../packages/domain/src/schema";
+import type { SkillBand } from "../../../../packages/domain/src/roster";
 import type { ReadyAdmin } from "../../lib/use-admin";
 import { Card, Pill } from "../landing/primitives";
 import { ConfirmButton, Field } from "./fields";
 
 const NEW = "__new__";
 
-// One colour per level. Black and outline are kept for "Thiếu trình độ" and
-// "Nghỉ", and the label carries the level for anyone who cannot tell the
-// colours apart.
+// One colour per level, strongest first. Outline is kept for "Thiếu trình
+// độ" and "Nghỉ", and the label carries the level for anyone who cannot tell
+// the colours apart.
 const SKILL = {
+  0: { label: "hạt giống", tone: "black" },
   1: { label: "mạnh", tone: "red" },
   2: { label: "khá", tone: "green" },
   3: { label: "mới chơi", tone: "yellow" },
 } as const;
+const BANDS = [0, 1, 2, 3] as const;
+// Hạt giống sits above level 1 and has no number of its own.
+const skillName = (band: SkillBand) =>
+  band === 0 ? `★ ${SKILL[band].label}` : `${band} · ${SKILL[band].label}`;
 
-function SkillPill({ band }: { band: 1 | 2 | 3 }) {
-  return (
-    <Pill tone={SKILL[band].tone}>
-      {band} · {SKILL[band].label}
-    </Pill>
-  );
+function SkillPill({ band }: { band: SkillBand }) {
+  return <Pill tone={SKILL[band].tone}>{skillName(band)}</Pill>;
 }
 
 function AthleteForm({
@@ -63,9 +65,9 @@ function AthleteForm({
           <Field label="Trình độ">
             <select value={skill} onChange={(e) => setSkill(e.target.value)}>
               <option value="">— chưa xếp —</option>
-              {([1, 2, 3] as const).map((band) => (
+              {BANDS.map((band) => (
                 <option key={band} value={band}>
-                  {band} — {SKILL[band].label}
+                  {skillName(band)}
                 </option>
               ))}
             </select>
@@ -112,7 +114,7 @@ function AthleteForm({
                   name: name.trim(),
                   gender,
                   active,
-                  skillBand: skill ? (Number(skill) as 1 | 2 | 3) : null,
+                  skillBand: skill ? (Number(skill) as SkillBand) : null,
                   phone: phone.trim() || null,
                   note,
                 },
@@ -188,7 +190,7 @@ export function AthletesTab({ admin }: { admin: ReadyAdmin }) {
                 {!a.active ? (
                   <Pill tone="outline">Nghỉ</Pill>
                 ) : (view.private[a.id]?.skillBand ?? null) === null ? (
-                  <Pill tone="black">Thiếu trình độ</Pill>
+                  <Pill tone="outline">⚠ Thiếu trình độ</Pill>
                 ) : (
                   <SkillPill band={view.private[a.id]!.skillBand!} />
                 )}

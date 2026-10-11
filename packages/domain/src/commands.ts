@@ -14,7 +14,7 @@ import {
 } from "./schema";
 import { deriveTournament } from "./derive";
 import { createDuelMatches, playersOf, validateDuelMatch } from "./duel";
-import type { PrivateRoster } from "./roster";
+import { SkillBandSchema, type PrivateRoster } from "./roster";
 import { generateDraw } from "./draw";
 import { generateGroupMatches } from "./round-robin";
 import { seedPlacement } from "./advancement";
@@ -27,7 +27,7 @@ const time = z.iso.datetime({ offset: true });
 
 // The three fields that must never reach tournament.json, keyed by athlete id.
 export const PrivateFieldsSchema = z.strictObject({
-  skillBand: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
+  skillBand: SkillBandSchema.nullable(),
   phone: z.string().max(30).nullable(),
   note: z.string().max(2000),
 });

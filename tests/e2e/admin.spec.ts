@@ -317,3 +317,24 @@ test("ticks an athlete's lệ phí and the balance follows", async ({
     ),
   ).toBeLessThanOrEqual(0);
 });
+
+test("marks an athlete as hạt giống", async ({ page, request }) => {
+  await signIn(page, "#vdv");
+  const row = page.locator(".pick-list .pick-item").first();
+  await row.click();
+  await page.getByLabel("Trình độ").selectOption("0");
+  await page.getByRole("button", { name: "Lưu VĐV" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã lưu VĐV.");
+  await expect(row.locator(".pill")).toHaveText("★ hạt giống");
+  await expect(row.locator(".pill")).toHaveClass(/pill--black/);
+
+  const state = await (
+    await request.get("/api/admin/state", {
+      headers: { authorization: "Bearer test:admin@example.com" },
+    })
+  ).json();
+  expect(state.private[state.document.athletes[0].id].skillBand).toBe(0);
+  // Reopening the form shows it, rather than falling back to "chưa xếp".
+  await row.click();
+  await expect(page.getByLabel("Trình độ")).toHaveValue("0");
+});

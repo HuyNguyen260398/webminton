@@ -64,7 +64,7 @@ export function generateDraw(
         athletes: [] as PrivateAthlete[],
       }));
     for (const gender of ["male", "female"])
-      for (const skill of [1, 2, 3])
+      for (const skill of [0, 1, 2, 3])
         for (const athlete of shuffle(
           athletes.filter((a) => a.gender === gender && a.skillBand === skill),
           rng,

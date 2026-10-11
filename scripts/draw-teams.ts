@@ -43,7 +43,7 @@ export function applyDraw(
 }
 
 const messages: Record<string, string> = {
-  MISSING_SKILL: "Còn VĐV đang thi đấu chưa có skillBand (1–3).",
+  MISSING_SKILL: "Còn VĐV đang thi đấu chưa có skillBand (0–3).",
   INSUFFICIENT_ROSTER: "Cần tối thiểu 8 nam và 8 nữ đang thi đấu.",
   DRAW_LOCKED: "Đã có trận được đánh — đặt mọi trận về pending trước khi bốc lại.",
   DRAW_NOT_FOUND: "Không tìm được cách chia đều sau 100 lần thử. Đổi seed khác.",
@@ -54,7 +54,7 @@ if (import.meta.filename === process.argv[1]) {
   if (!existsSync(PRIVATE)) {
     console.error(`✗ Chưa có ${PRIVATE}.`);
     console.error(`  Chạy: cp .private/roster.example.json ${PRIVATE}`);
-    console.error("  rồi điền danh sách VĐV (mỗi người cần skillBand 1–3).");
+    console.error("  rồi điền danh sách VĐV (mỗi người cần skillBand 0–3, 0 là hạt giống).");
     process.exit(1);
   }
   const t = PublicTournamentSchema.parse(

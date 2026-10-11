@@ -3,7 +3,7 @@ import { applyCommand, type AdminState } from "../src/commands";
 import { makeTournament } from "../src/testing/fixtures";
 import { drawTeam, openTeams, playingTeams } from "../src/team-draw";
 
-type Spec = [gender: "male" | "female", band: 1 | 2 | 3, count: number];
+type Spec = [gender: "male" | "female", band: 0 | 1 | 2 | 3, count: number];
 
 function makeState(specs: Spec[]): AdminState {
   const document = makeTournament();
@@ -185,5 +185,26 @@ describe("team draw", () => {
     expect(ids(place(state, "a1", "white"))).toEqual(["red", "blue", "white"]);
     state.document.draw.status = "confirmed";
     expect(ids(state)).toHaveLength(4);
+  });
+
+  it("splits the hạt giống between the teams like any other level", () => {
+    const seeded: Spec[] = [
+      ["male", 0, 2],
+      ["male", 1, 4],
+      ["male", 2, 6],
+      ["female", 2, 2],
+    ];
+    for (let seed = 1; seed <= 200; seed++) {
+      const state = drawEveryone(seeded, seed);
+      for (const team of ["red", "blue"]) {
+        expect(count(state, team, "male", 0)).toBe(1);
+        expect(count(state, team, "male", 1)).toBe(2);
+        expect(count(state, team, "male", 2)).toBe(3);
+        expect(count(state, team, "female")).toBe(1);
+      }
+    }
+    // The second hạt giống has only one team left to go to.
+    const one = place(makeState(seeded), "a1", "blue");
+    expect(openTeams(one, "a2")).toEqual(["red"]);
   });
 });

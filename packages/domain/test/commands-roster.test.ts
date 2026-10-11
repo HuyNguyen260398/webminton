@@ -49,6 +49,19 @@ describe("applyCommand — athletes", () => {
     expect(JSON.stringify(next.document)).not.toContain("0901");
   });
 
+  it("accepts hạt giống (0) as a level, and nothing outside 0–3", () => {
+    const s = { document: makeTournament(), private: {} };
+    const next = run(s, {
+      type: "upsertAthlete",
+      payload: athlete({ skillBand: 0 }),
+    });
+    expect(next.private.a01.skillBand).toBe(0);
+    for (const skillBand of [4, -1, 1.5])
+      expect(() =>
+        run(s, { type: "upsertAthlete", payload: athlete({ skillBand }) }),
+      ).toThrow("INVALID_COMMAND");
+  });
+
   it("starts at a01 on an empty roster", () => {
     const s = { document: makeTournament(), private: {} };
     const next = run(s, { type: "upsertAthlete", payload: athlete() });

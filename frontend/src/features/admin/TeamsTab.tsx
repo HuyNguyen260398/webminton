@@ -49,7 +49,7 @@ function DrawPanel({ admin }: { admin: ReadyAdmin }) {
       </div>
       {!eligible && (
         <p>
-          Cần tối thiểu 8 nam và 8 nữ đang thi đấu, ai cũng có trình độ 1–3.
+          Cần tối thiểu 8 nam và 8 nữ đang thi đấu, ai cũng có trình độ.
           Bổ sung ở mục “VĐV”.
         </p>
       )}
