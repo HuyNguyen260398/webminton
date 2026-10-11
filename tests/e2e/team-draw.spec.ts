@@ -145,6 +145,39 @@ test("when everyone has rolled, the two teams are level", async ({
   await expect(page.getByRole("heading", { name: "HAI ĐỘI" })).toBeVisible();
 });
 
+test("the organiser can wipe the teams and start the draw over", async ({
+  page,
+  request,
+}) => {
+  await open(request);
+  const { document } = await state(request);
+  for (const a of document.athletes.slice(0, 3))
+    await request.post("/api/team-draw", { data: { athleteId: a.id } });
+
+  await page.goto("/quan-tri/#doi");
+  await page.getByRole("button", { name: "Đăng nhập thử" }).click();
+  await expect(page.getByText("3/16 đã có đội")).toBeVisible();
+  const reset = page.getByRole("button", { name: "Xoá hết đội, bốc lại từ đầu" });
+  // One tap only arms it.
+  await reset.click();
+  expect(
+    (await state(request)).document.athletes.filter((a) => a.teamId).length,
+  ).toBe(3);
+  await page.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.getByText("0/16 đã có đội")).toBeVisible();
+  await expect(page.getByText("Đang đóng")).toBeVisible();
+  await expect(reset).toHaveCount(0);
+  expect(
+    (await state(request)).document.athletes.every((a) => a.teamId === null),
+  ).toBe(true);
+
+  // Closed again, so nobody rolls until the organiser reopens it.
+  const res = await request.post("/api/team-draw", {
+    data: { athleteId: document.athletes[0].id },
+  });
+  expect((await res.json()).code).toBe("TEAM_DRAW_CLOSED");
+});
+
 test("fits a phone without scrolling sideways", async ({ page, request }) => {
   await open(request);
   await page.setViewportSize({ width: 390, height: 844 });

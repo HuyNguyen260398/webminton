@@ -167,7 +167,8 @@ function SelfDrawPanel({ admin }: { admin: ReadyAdmin }) {
           /boc-tham
         </a>
         . Hệ thống chia đều nam, nữ và trình độ cho Đội Đỏ và Đội Xanh. Muốn
-        cho ai bốc lại thì đổi đội của người đó về “chưa xếp đội” ở bên dưới.
+        cho một người bốc lại thì đổi đội của người đó về “chưa xếp đội” ở bên
+        dưới; muốn cả hội bốc lại thì xoá hết đội.
       </p>
       <div className="row-actions">
         <button
@@ -182,6 +183,20 @@ function SelfDrawPanel({ admin }: { admin: ReadyAdmin }) {
         >
           {open ? "Đóng bốc thăm" : "Mở bốc thăm"}
         </button>
+        {drawn > 0 && (
+          // resetDraw empties every team and closes the draw, so nobody
+          // rolls into the gap before the organiser is ready again.
+          <ConfirmButton
+            label="Xoá hết đội, bốc lại từ đầu"
+            disabled={busy}
+            onConfirm={() =>
+              send(
+                { type: "resetDraw", payload: {} },
+                "Đã xoá hết đội và đóng bốc thăm. Mở lại khi sẵn sàng.",
+              )
+            }
+          />
+        )}
       </div>
     </Card>
   );
