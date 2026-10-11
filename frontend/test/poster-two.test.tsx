@@ -13,25 +13,31 @@ describe("PosterTwo", () => {
     for (const title of [
       "CHIA ĐỘI & THỂ THỨC",
       "LUẬT MỖI SÉC",
-      "XẾP HẠNG SAU VÒNG LOẠI",
-      "VÒNG TRANH HẠNG",
+      "TÍNH ĐIỂM & DANH HIỆU",
+      "HAI TRẬN CHUNG KẾT",
       "LỆ PHÍ & QUỸ GIẢI",
       "MẤY ĐIỀU NHỚ GIÙM",
     ])
       expect(screen.getByText(title)).toBeDefined();
   });
 
-  it("renders the four placement pills", () => {
+  it("renders the two placement pills and the two individual titles", () => {
     render(<PosterTwo t={t} />);
-    for (const label of ["NHẤT", "NHÌ", "BA", "KHUYẾN KHÍCH"])
+    for (const label of [
+      "NHẤT",
+      "NHÌ",
+      "SMASH ĂN ĐIỂM NHIỀU NHẤT",
+      "SMASH RÚC LƯỚI NHIỀU NHẤT",
+    ])
       expect(screen.getByText(label)).toBeDefined();
+    expect(screen.queryByText("KHUYẾN KHÍCH")).toBeNull();
   });
 
   it("renders the three tiebreak pills in ranking order", () => {
     render(<PosterTwo t={t} />);
     expect(screen.getByText(/1 · Số trận thắng/)).toBeDefined();
-    expect(screen.getByText(/2 · Hiệu số điểm/)).toBeDefined();
-    expect(screen.getByText(/3 · Đối đầu trực tiếp/)).toBeDefined();
+    expect(screen.getByText(/2 · Điểm chung kết/)).toBeDefined();
+    expect(screen.getByText(/3 · Một quả cầu vàng/)).toBeDefined();
   });
 
   it("states the scoring numbers from rules, not hardcoded prose", () => {

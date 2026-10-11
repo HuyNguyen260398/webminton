@@ -575,6 +575,9 @@
 .poster-two__grid p {
   margin: 0 0 14px;
 }
+.poster-two__grid .pill-row + p {
+  margin-top: 22px;
+}
 
 .poster-two__fee {
   display: grid;

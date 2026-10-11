@@ -27,7 +27,8 @@ export default function Page() {
       <PosterOne t={view.t} />
       <Registration t={view.t} />
       <div className="marquee" aria-hidden="true">
-        ĐÔI NAM <b>✦</b> ĐÔI NỮ <b>✦</b> ĐÔI NAM NỮ <b>✦</b> HẾT MÌNH TỪNG ĐIỂM
+        ĐÔI NAM <b>✦</b> ĐÔI NAM NỮ <b>✦</b> CHUNG KẾT NHÂN ĐÔI <b>✦</b> HẾT MÌNH
+        TỪNG ĐIỂM
       </div>
       <PosterTwo t={view.t} />
       <PosterThree t={view.t} />

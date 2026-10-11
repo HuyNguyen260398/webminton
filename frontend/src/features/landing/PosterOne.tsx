@@ -42,11 +42,11 @@ export function PosterOne({ t }: { t: TournamentDocument }) {
     ["Ở ĐÂU?", info.location],
     [
       "ĐÁNH NHỮNG GÌ?",
-      "Đôi nam · Đôi nữ · Đôi nam nữ — 4 đội đấu vòng loại xoay tua rồi tranh hạng, tổng 24 trận",
+      "Đôi nam · Đôi nam nữ — 2 đội đấu 9 trận vòng loại rồi 2 trận chung kết nhân đôi điểm, tổng 11 trận",
     ],
     [
-      "CẦN BAO NHIÊU NGƯỜI?",
-      "Tối thiểu 16, lý tưởng 24 để chia đều 4 đội. Rủ thêm bạn cùng đánh nhé",
+      "CÓ BAO NHIÊU NGƯỜI?",
+      "Chốt sổ 14 người, chia 2 đội, mỗi đội 7. Ai cũng được ra sân 3 trận",
     ],
   ];
 
@@ -70,9 +70,9 @@ export function PosterOne({ t }: { t: TournamentDocument }) {
         </p>
 
         <p className="poster-one__intro">
-          Bốn đội. Ba nội dung. Vòng loại xoay tua rồi vào tranh hạng — hai mươi
-          bốn trận gói gọn trong một buổi. Và một chầu chốt sổ ngay sau đó mà
-          đội nào cũng có phần.
+          Hai đội. Hai nội dung. Chín trận vòng loại rồi hai trận chung kết nhân
+          đôi điểm — mười một trận gói gọn trong một buổi. Và một chầu chốt sổ
+          ngay sau đó mà đội nào cũng có phần.
         </p>
 
         <Card className="poster-one__facts">

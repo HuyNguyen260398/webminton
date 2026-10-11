@@ -45,42 +45,45 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             <Steps
               items={[
                 <>
-                  Cả hội chia thành <b>4 đội</b>. BTC bốc thăm chia đều trình độ
-                  — không ai được tự chọn đồng đội.
+                  Chốt sổ 14 người nên cả hội chia thành <b>2 đội</b>, mỗi đội
+                  7 người. BTC bốc thăm chia đều trình độ — không ai được tự
+                  chọn đồng đội.
                 </>,
                 <>
-                  <b>Vòng loại:</b> bốn đội đấu xoay tua, mỗi đội gặp cả ba đội
-                  còn lại — 6 lượt đấu.
+                  Đánh <b>2 nội dung</b>: đôi nam và đôi nam nữ. Trận nào cũng
+                  đúng <b>1 séc</b>.
                 </>,
                 <>
-                  Mỗi lượt gặp nhau đánh <b>3 nội dung</b>: đôi nam, đôi nữ, đôi
-                  nam nữ. Mỗi nội dung đúng <b>1 trận, 1 séc</b>.
+                  <b>Vòng loại 9 trận</b>: 7 trận đôi nam, 2 trận đôi nam nữ.
+                  Xong thì vào 2 trận chung kết — <b>cả giải 11 trận</b>.
                 </>,
                 <>
-                  Vòng loại 18 trận, mỗi đội đánh 9 trận. Cộng vòng tranh hạng
-                  nữa là <b>cả giải 24 trận</b>.
+                  Ai cũng ra sân <b>3 trận</b>, tính cả chung kết — không ai
+                  được ngồi cắn hạt dưa cả buổi. Mỗi đội có đúng một anh phải
+                  gánh thêm trận thứ tư, đội trưởng tự chọn người khoẻ nhất.
                 </>,
               ]}
             />
           </Card>
 
-          <Card title="VÒNG TRANH HẠNG">
+          <Card title="HAI TRẬN CHUNG KẾT">
             <Bullets
               items={[
                 <>
-                  Đội <b>nhất</b> gặp đội <b>nhì</b> vòng loại — tranh giải Nhất
-                  và Nhì.
+                  Sau vòng loại, hai đội gặp lại nhau ở <b>2 trận chung kết</b>
+                  : một trận đôi nam, một trận đôi nam nữ.
                 </>,
                 <>
-                  Đội <b>ba</b> gặp đội <b>tư</b> — tranh giải Ba và Khuyến
-                  khích.
+                  Điểm ghi được ở chung kết <b>nhân đôi</b> khi cộng vào tổng —
+                  đang thua xa vẫn lật kèo được, đang dẫn cũng đừng vội gọi
+                  món.
                 </>,
                 <>
-                  Mỗi cặp đánh đủ <b>3 nội dung</b>. Đội nào{" "}
-                  <b>thắng {rules.placementWins} trên 3</b> là đội thắng.
+                  Mỗi người chỉ đánh <b>một</b> trận chung kết. Không ai được
+                  ôm cả hai, khoẻ mấy cũng vậy.
                 </>,
                 <>
-                  Đội trưởng được <b>xếp lại cặp theo chiến thuật</b>. Các đội
+                  Đội trưởng <b>chốt cặp chung kết từ đầu buổi</b>. Các đội
                   không biết trước cặp của đối thủ — chỉ BTC biết, tới giờ mới
                   gọi tên.
                 </>,
@@ -89,8 +92,6 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             <div className="pill-row">
               <Pill tone="red">NHẤT</Pill>
               <Pill tone="green">NHÌ</Pill>
-              <Pill tone="outline">BA</Pill>
-              <Pill tone="outline">KHUYẾN KHÍCH</Pill>
             </div>
           </Card>
 
@@ -98,8 +99,9 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             <Bullets
               items={[
                 <>
-                  Mỗi séc <b>{rules.setTarget} điểm</b>, tính điểm trực tiếp —
-                  thắng pha cầu nào ăn điểm pha đó.
+                  Vòng loại hay chung kết, séc nào cũng{" "}
+                  <b>{rules.setTarget} điểm</b>, tính điểm trực tiếp — thắng
+                  pha cầu nào ăn điểm pha đó.
                 </>,
                 <>
                   <b>Đổi sân khi một bên đạt {rules.changeEndsAt} điểm</b>, áp
@@ -150,17 +152,25 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             </p>
           </Card>
 
-          <Card title="XẾP HẠNG SAU VÒNG LOẠI">
+          <Card title="TÍNH ĐIỂM &amp; DANH HIỆU">
             <p>
-              Cộng <b>tổng số điểm mỗi đội ghi được</b> qua cả 9 trận. Đội nào
-              tổng điểm cao nhất xếp trên — nên kể cả biết sẽ thua thì vẫn phải
-              giành từng điểm một.
+              Điểm của đội là <b>tổng số điểm ghi được qua cả 11 trận</b>,
+              riêng 2 trận chung kết nhân đôi. Đội nào tổng cao hơn thì vô địch
+              — nên kể cả biết sẽ thua trận thì vẫn phải giành từng điểm một.
             </p>
             <p>Bằng điểm thì xét lần lượt:</p>
             <div className="pill-row">
               <Pill tone="yellow">1 · Số trận thắng</Pill>
-              <Pill tone="yellow">2 · Hiệu số điểm</Pill>
-              <Pill tone="yellow">3 · Đối đầu trực tiếp</Pill>
+              <Pill tone="yellow">2 · Điểm chung kết</Pill>
+              <Pill tone="yellow">3 · Một quả cầu vàng</Pill>
+            </div>
+            <p>
+              Thêm <b>hai danh hiệu cá nhân</b>, BTC cử người ngồi đếm từng
+              trận. Một cái để khoe, một cái để cả hội nhắc tới Tết:
+            </p>
+            <div className="pill-row">
+              <Pill tone="red">SMASH ĂN ĐIỂM NHIỀU NHẤT</Pill>
+              <Pill tone="outline">SMASH RÚC LƯỚI NHIỀU NHẤT</Pill>
             </div>
           </Card>
 
@@ -168,8 +178,9 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
             <Bullets
               items={[
                 <>
-                  Đội trưởng nộp danh sách cặp cho BTC <b>trước mỗi vòng</b>.
-                  Nộp trễ thì BTC xếp giùm, đừng kêu.
+                  Đội trưởng nộp danh sách cặp cho BTC{" "}
+                  <b>trước giờ khai mạc</b>, cả vòng loại lẫn chung kết. Nộp
+                  trễ thì BTC xếp giùm, đừng kêu.
                 </>,
                 <>
                   Có mặt trước giờ đánh <b>{rules.lateMinutes} phút</b>. Quá{" "}
