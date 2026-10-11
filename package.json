@@ -16,7 +16,8 @@
     "draw": "node --import tsx scripts/draw-teams.ts",
     "seed": "node --import tsx scripts/seed.ts",
     "deploy": "./scripts/deploy.sh",
-    "dev": "pnpm --filter @webminton/frontend dev"
+    "dev": "node --import tsx scripts/dev.ts",
+    "dev:cloud": "node --import tsx scripts/dev.ts --cloud"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

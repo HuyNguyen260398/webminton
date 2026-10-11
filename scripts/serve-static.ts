@@ -1,9 +1,35 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
-import { createLocalApi } from "./local-api";
+import { execFileSync } from "node:child_process";
+import { awsPublisher, awsStore } from "../backend/src/aws";
+import { createLocalApi, type CloudTarget } from "./local-api";
 
-const api = createLocalApi();
+const terraformOutput = (name: string) =>
+  execFileSync("terraform", ["-chdir=infra", "output", "-raw", name], {
+    encoding: "utf8",
+  }).trim();
+
+// `pnpm dev:cloud` sets this. Names come from the environment or, like
+// `pnpm seed`, from the Terraform outputs; credentials from the AWS profile.
+function cloudTarget(): CloudTarget | undefined {
+  if (process.env.WEBMINTON_CLOUD !== "1") return undefined;
+  const table = process.env.TABLE_NAME ?? terraformOutput("table_name");
+  const bucket = process.env.SITE_BUCKET ?? terraformOutput("site_bucket_name");
+  console.log(
+    [
+      "",
+      "  ⚠  DỮ LIỆU THẬT — không phải bản thử.",
+      `     Bảng: ${table} · Bucket: ${bucket}`,
+      "     Mỗi lần lưu ở /quan-tri sẽ ghi vào bảng thật và công bố ngay",
+      "     lên trang giải. Sửa nhầm thì khôi phục ở tab Lịch sử.",
+      "",
+    ].join("\n"),
+  );
+  return { store: awsStore(table), publish: awsPublisher(bucket) };
+}
+
+const api = createLocalApi(cloudTarget());
 await api.reset();
 
 const ROOT = "frontend/out";
@@ -44,7 +70,8 @@ createServer(async (req, res) => {
 
   // Once an admin save has published, that snapshot replaces the built file —
   // the same thing the Lambda does to the bucket.
-  const snapshot = api.snapshot();
+  const snapshot =
+    url === "/tournament.json" ? await api.snapshot() : null;
   if (url === "/tournament.json" && snapshot !== null) {
     res.writeHead(200, {
       "content-type": "application/json; charset=utf-8",
@@ -54,9 +81,17 @@ createServer(async (req, res) => {
   }
 
   const rel = normalize(decodeURIComponent(url)).replace(/^(\.\.[/\\])+/, "");
-  for (const candidate of [rel, join(rel, "index.html"), `${rel}.html`]) {
+  // `pnpm dev` sends /tournament.json here before any build exists, so the
+  // seed file stands in for the built copy.
+  const candidates = [
+    join(ROOT, rel),
+    join(ROOT, rel, "index.html"),
+    join(ROOT, `${rel}.html`),
+    ...(url === "/tournament.json" ? ["frontend/public/tournament.json"] : []),
+  ];
+  for (const candidate of candidates) {
     try {
-      const body = await readFile(join(ROOT, candidate));
+      const body = await readFile(candidate);
       res.writeHead(200, {
         "content-type": types[extname(candidate)] ?? "application/octet-stream",
         // Mirrors the deployed cache policy for the data file.
