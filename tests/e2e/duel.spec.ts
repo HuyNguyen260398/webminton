@@ -103,10 +103,10 @@ test("the organiser runs a match from pairs to final score", async ({
   // Count smashes, then the final score.
   for (let i = 0; i < 3; i++)
     await page
-      .getByRole("button", { name: `Tăng Smash ăn điểm của ${r1.name}` })
+      .getByRole("button", { name: `Tăng Smash ăn điểm của ${r1.name}`, exact: true })
       .click();
   await page
-    .getByRole("button", { name: `Tăng Smash rúc lưới của ${b2.name}` })
+    .getByRole("button", { name: `Tăng Smash rúc lưới của ${b2.name}`, exact: true })
     .click();
   await page.getByRole("textbox", { name: "Điểm Đội Đỏ" }).fill("21");
   await page.getByRole("textbox", { name: "Điểm Đội Xanh" }).fill("20");
@@ -222,6 +222,12 @@ test("the organiser creates a code and opens refereeing", async ({
   await expect(page.getByRole("button", { name: "Đóng chấm điểm" })).toBeVisible();
   expect((await state(request)).document.referee).toEqual({ open: true });
   expect(await (await request.get("/tournament.json")).text()).not.toContain(code);
+
+  // Both steps read as plain Vietnamese in the history, not as identifiers.
+  await page.getByRole("button", { name: "Lịch sử", exact: true }).click();
+  await expect(page.getByText("Mở hoặc đóng chấm điểm cho trọng tài")).toBeVisible();
+  await expect(page.getByText("Tạo hoặc đổi mã trọng tài")).toBeVisible();
+  await expect(page.getByText("setRefereeOpen")).toHaveCount(0);
 });
 
 test("saving smashes on a live match keeps the running score", async ({

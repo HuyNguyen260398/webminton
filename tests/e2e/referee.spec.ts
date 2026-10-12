@@ -201,6 +201,43 @@ test("the scorer fits a phone: no sideways scroll, nothing too small to hit", as
     expect(sizes.buttons.find((b) => b.id === id)!.h).toBeGreaterThanOrEqual(96);
 });
 
+// A Vietnamese name ends with the given name, the one called on court. Cutting
+// a long name short with an ellipsis would cut exactly that part.
+test("a long name is shown whole, given name included", async ({ page, request }) => {
+  const long = "Nguyễn Hoàng Phương Thảo Nguyên";
+  const all = (await (
+    await request.get("/api/admin/state", { headers: AUTH })
+  ).json()) as {
+    private: Record<string, { skillBand: number | null; phone: string | null; note: string }>;
+  };
+  await send(request, {
+    type: "upsertAthlete",
+    payload: {
+      id: red[0].id,
+      name: long,
+      gender: "male",
+      active: true,
+      ...all.private[red[0].id],
+    },
+  });
+  await open(request);
+  await enter(page);
+  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: "Bắt đầu trận" }).click();
+  await saved(page);
+  const name = page.locator(".ref-side__pair span", { hasText: long });
+  await expect(name).toBeVisible();
+  const fit = await name.evaluate((el) => ({
+    clipped: el.scrollWidth > el.clientWidth,
+    scroll: document.documentElement.scrollWidth,
+    width: document.documentElement.clientWidth,
+  }));
+  expect(fit.clipped).toBe(false);
+  expect(fit.scroll).toBeLessThanOrEqual(fit.width);
+  // The names took more room; the +1 must still be on the first screen.
+  await expect(page.getByTestId("plus-red")).toBeInViewport({ ratio: 1 });
+});
+
 test("a changed code sends the referee back to the code screen", async ({
   page,
   request,
