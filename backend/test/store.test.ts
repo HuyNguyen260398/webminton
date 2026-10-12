@@ -45,6 +45,21 @@ describe("MemoryStore", () => {
     expect(await store.snapshot(9)).toBeNull();
   });
 
+  it("keeps the secrets beside the document, in the current item and in history", async () => {
+    const store = new MemoryStore();
+    const state = { ...makeAdminState(), secrets: { refereeCode: "048213" } };
+    const saved = await store.write(null, state, entry("r1"));
+    expect(saved.secrets).toEqual({ refereeCode: "048213" });
+    expect((await store.read())!.secrets).toEqual({ refereeCode: "048213" });
+    expect((await store.snapshot(1))!.secrets).toEqual({ refereeCode: "048213" });
+  });
+
+  it("reads a state stored without secrets as having none", async () => {
+    const store = new MemoryStore();
+    await store.write(null, makeAdminState(), entry("r1"));
+    expect((await store.read())!.secrets).toBeUndefined();
+  });
+
   it("round-trips Vietnamese text and returns copies, not references", async () => {
     const store = new MemoryStore();
     const state = makeAdminState();

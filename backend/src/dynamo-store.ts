@@ -50,6 +50,7 @@ export class DynamoStore implements TournamentStore {
     const state = JSON.stringify({
       document: next.document,
       private: next.private,
+      secrets: next.secrets,
     });
     try {
       // One transaction: the current item moves only if nobody else moved it,

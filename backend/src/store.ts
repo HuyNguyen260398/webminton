@@ -44,6 +44,7 @@ export function nextStored(
     ].slice(-RECENT_REQUESTS),
     document: next.document,
     private: next.private,
+    secrets: next.secrets,
   };
 }
 
@@ -70,7 +71,11 @@ export class MemoryStore implements TournamentStore {
     this.current = JSON.stringify(saved);
     this.versions.set(saved.version, {
       entry: { ...entry, version: saved.version },
-      state: JSON.stringify({ document: next.document, private: next.private }),
+      state: JSON.stringify({
+        document: next.document,
+        private: next.private,
+        secrets: next.secrets,
+      }),
     });
     return JSON.parse(this.current) as StoredState;
   }
