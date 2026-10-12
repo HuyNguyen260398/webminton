@@ -90,6 +90,11 @@ export function MatchList({
                         </span>
                       );
                     })}
+                    {m.referee && (
+                      <span className="ref-match__who">
+                        Trọng tài: {m.referee}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}

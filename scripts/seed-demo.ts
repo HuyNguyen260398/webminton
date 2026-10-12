@@ -46,6 +46,7 @@ const BLUE = [
   "Ngô Nhật Minh",
   "Lý Quang Vinh",
 ];
+export const DEMO_REFEREES = ["Cô Hạnh", "Anh Tuấn", "Chị Linh"];
 const RED_WOMAN = "Trần Thị Mai";
 const BLUE_WOMAN = "Phạm Ngọc Ánh";
 
@@ -98,6 +99,7 @@ export async function seedDemo(call: Call): Promise<void> {
   const r = ids.slice(0, 7);
   const b = ids.slice(7, 14);
 
+  await send("setRefereeNames", { names: DEMO_REFEREES });
   await send("createDuel", {});
   const match = (
     matchId: string,
@@ -119,6 +121,7 @@ export async function seedDemo(call: Call): Promise<void> {
   await match("vong-loai-1", [r[0], r[1]], [b[0], b[1]], {
     status: "done",
     score: { red: 21, blue: 17 },
+    referee: DEMO_REFEREES[0],
     smashes: {
       [r[0]]: { hit: 5, net: 1 },
       [r[1]]: { hit: 2, net: 0 },
@@ -130,6 +133,7 @@ export async function seedDemo(call: Call): Promise<void> {
   await match("vong-loai-2", [r[2], r[5]], [b[2], b[3]], {
     status: "live",
     score: { red: 11, blue: 9 },
+    referee: DEMO_REFEREES[1],
     smashes: { [r[2]]: { hit: 2, net: 0 }, [b[3]]: { hit: 1, net: 1 } },
   });
   // Trận 3 (đôi nam nữ), 4 and 5: pairs set, ready for a referee to start.
@@ -162,6 +166,7 @@ if (import.meta.filename === process.argv[1]) {
         "✓ Đã nạp dữ liệu thử vào máy chủ dev (trong bộ nhớ — khởi động lại là mất).",
         "",
         "  2 đội × 7 VĐV · 11 trận: 1 đã xong, 1 đang đánh, 3 sẵn sàng, 6 chưa xếp cặp",
+        `  Trọng tài: ${DEMO_REFEREES.join(", ")}`,
         "",
         "  Trọng tài   http://localhost:3000/trong-tai/        mã: " + DEMO_CODE,
         "  Quản trị    http://localhost:3000/quan-tri/#tran-dau  (bấm “Đăng nhập thử”)",

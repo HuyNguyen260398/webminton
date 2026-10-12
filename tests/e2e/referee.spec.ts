@@ -14,6 +14,7 @@ interface Match {
   status: string;
   score: { red: number; blue: number } | null;
   smashes: Record<string, { hit: number; net: number }>;
+  referee?: string;
 }
 interface State {
   version: number;
@@ -69,7 +70,7 @@ test.beforeEach(async ({ request }) => {
 });
 test.afterAll(async ({ playwright }) => {
   const ctx = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: `http://127.0.0.1:${process.env.E2E_PORT ?? "3100"}`,
   });
   await ctx.post("/api/test/reset");
   await ctx.dispose();
@@ -199,6 +200,69 @@ test("the scorer fits a phone: no sideways scroll, nothing too small to hit", as
   }
   for (const id of ["plus-red", "plus-blue"])
     expect(sizes.buttons.find((b) => b.id === id)!.h).toBeGreaterThanOrEqual(96);
+});
+
+test("a referee picks their name to take a match, and it shows everywhere", async ({
+  page,
+  request,
+}) => {
+  await send(request, { type: "setRefereeNames", payload: { names: ["Huy", "Bảo"] } });
+  await send(request, {
+    type: "saveDuelMatch",
+    payload: {
+      matchId: "vong-loai-2",
+      pairRed: [red[2].id, red[3].id],
+      pairBlue: [blue[2].id, blue[3].id],
+      status: "pending",
+      score: null,
+      smashes: {},
+    },
+  });
+  await open(request);
+  await enter(page);
+  await page.getByRole("button", { name: /Trận 1/ }).click();
+
+  // With a list of names, nobody starts a match anonymously.
+  const start = page.getByRole("button", { name: "Bắt đầu trận" });
+  await expect(start).toBeDisabled();
+  await page.getByLabel("Trọng tài", { exact: true }).selectOption("Bảo");
+  await start.click();
+  await saved(page);
+  expect(await first(request)).toMatchObject({ status: "live", referee: "Bảo" });
+
+  // A point does not drop the name.
+  await tap(page, "plus-red", 1);
+  await saved(page);
+  expect((await first(request)).referee).toBe("Bảo");
+
+  await page.getByRole("button", { name: "← Trận khác" }).click();
+  await expect(page.getByRole("button", { name: /Trận 1/ })).toContainText(
+    "Trọng tài: Bảo",
+  );
+  // The phone remembers who is holding it for the next match.
+  await page.getByRole("button", { name: /Trận 2/ }).click();
+  await expect(page.getByLabel("Trọng tài", { exact: true })).toHaveValue("Bảo");
+  await expect(page.getByRole("button", { name: "Bắt đầu trận" })).toBeEnabled();
+
+  const publicPage = await page.context().newPage();
+  await publicPage.goto("/");
+  await expect(publicPage.getByTestId("duel-vong-loai-1")).toContainText(
+    "Trọng tài: Bảo",
+  );
+  await publicPage.close();
+});
+
+test("a live match can be handed to another referee", async ({ page, request }) => {
+  await send(request, { type: "setRefereeNames", payload: { names: ["Huy", "Bảo"] } });
+  await open(request);
+  await enter(page);
+  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByLabel("Trọng tài", { exact: true }).selectOption("Huy");
+  await page.getByRole("button", { name: "Bắt đầu trận" }).click();
+  await saved(page);
+  await page.getByLabel("Trọng tài", { exact: true }).selectOption("Bảo");
+  await saved(page);
+  expect((await first(request)).referee).toBe("Bảo");
 });
 
 // A Vietnamese name ends with the given name, the one called on court. Cutting

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { createLocalApi, LOCAL_ADMIN } from "../local-api";
-import { DEMO_CODE, seedDemo, type Call } from "../seed-demo";
+import { DEMO_CODE, DEMO_REFEREES, seedDemo, type Call } from "../seed-demo";
 import type { AdminView } from "../../backend/src/router";
 import { deriveDuel } from "../../packages/domain/src/duel";
 
@@ -45,6 +45,9 @@ describe("seedDemo", () => {
     expect(pending.some((m) => !m.pairRed)).toBe(true);
     expect(deriveDuel(view.document)!.smashHit.length).toBeGreaterThan(0);
 
+    expect(view.document.refereeNames).toEqual(DEMO_REFEREES);
+    expect(by("done")[0].referee).toBe(DEMO_REFEREES[0]);
+    expect(by("live")[0].referee).toBe(DEMO_REFEREES[1]);
     expect(view.secrets).toEqual({ refereeCode: DEMO_CODE });
     expect(referee).toEqual({ open: true });
     // And the public page has it: the last save published.

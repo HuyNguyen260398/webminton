@@ -41,7 +41,7 @@ test.beforeEach(async ({ request }) => {
 });
 test.afterAll(async ({ playwright }) => {
   const ctx = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: `http://127.0.0.1:${process.env.E2E_PORT ?? "3100"}`,
   });
   await ctx.post("/api/test/reset");
   await ctx.dispose();
@@ -228,6 +228,35 @@ test("the organiser creates a code and opens refereeing", async ({
   await expect(page.getByText("Mở hoặc đóng chấm điểm cho trọng tài")).toBeVisible();
   await expect(page.getByText("Tạo hoặc đổi mã trọng tài")).toBeVisible();
   await expect(page.getByText("setRefereeOpen")).toHaveCount(0);
+});
+
+test("the organiser enters the referees and puts one on a match", async ({
+  page,
+  request,
+}) => {
+  await send(request, { type: "createDuel", payload: {} });
+  await signIn(page);
+  await page
+    .getByLabel("Danh sách trọng tài (mỗi dòng một tên)")
+    .fill("Huy\n  Bảo \n\nHuy");
+  await page.getByRole("button", { name: "Lưu danh sách" }).click();
+  await expect(page.getByText("Đã lưu danh sách trọng tài.")).toBeVisible();
+  const doc = (await state(request)).document as unknown as {
+    refereeNames: string[];
+  };
+  expect(doc.refereeNames).toEqual(["Huy", "Bảo"]);
+
+  await page.getByRole("button", { name: /Trận 1 ·/ }).click();
+  await page.getByLabel("Trọng tài của trận").selectOption("Bảo");
+  await page.getByRole("button", { name: "Lưu cặp" }).click();
+  await expect(page.getByText("Đã lưu cặp.")).toBeVisible();
+  const m = (await state(request)).document.duel!.matches[0] as unknown as {
+    referee?: string;
+  };
+  expect(m.referee).toBe("Bảo");
+  await expect(page.getByRole("button", { name: /Trận 1 ·/ })).toContainText(
+    "Trọng tài: Bảo",
+  );
 });
 
 test("saving smashes on a live match keeps the running score", async ({

@@ -30,7 +30,7 @@ test.beforeEach(async ({ request }) => {
 });
 test.afterAll(async ({ playwright }) => {
   const ctx = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: `http://127.0.0.1:${process.env.E2E_PORT ?? "3100"}`,
   });
   await ctx.post("/api/test/reset");
   await ctx.dispose();
@@ -100,7 +100,7 @@ test("an athlete picks a name, confirms it, and gets a team once", async ({
 
   // Then the page takes them back to the landing page by itself.
   await expect(result).toContainText(/Tự về trang giải sau \d giây/);
-  await expect(page).toHaveURL(/127\.0\.0\.1:3100\/$/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "HAI ĐỘI" })).toBeVisible();
 
   const again = await request.post("/api/team-draw", {

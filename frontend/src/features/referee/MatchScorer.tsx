@@ -10,7 +10,11 @@ import {
   type DuelSide,
 } from "../../../../packages/domain/src/duel";
 import { isFinalScore } from "../../../../packages/domain/src/score";
-import type { RefereeError } from "../../lib/referee-api";
+import {
+  readName,
+  storeName,
+  type RefereeError,
+} from "../../lib/referee-api";
 import { useMatchDraft, type SaveState } from "../../lib/use-referee";
 import { matchTitle, nameOf, teamOf } from "./MatchList";
 
@@ -87,6 +91,18 @@ export function MatchScorer({
     return () => clearTimeout(id);
   }, [armed]);
 
+  // The organiser's list. With one, a match is not started anonymously; the
+  // phone offers whoever used it last.
+  const names = t.refereeNames ?? [];
+  const [remembered, setRemembered] = useState("");
+  useEffect(() => {
+    setRemembered(readName() ?? "");
+  }, []);
+  const referee =
+    draft.referee ?? (names.includes(remembered) ? remembered : "");
+  // Someone the organiser has since taken off the list still shows.
+  const options = names.includes(referee) || !referee ? names : [referee, ...names];
+
   const score = draft.score ?? { red: 0, blue: 0 };
   const final = isFinalScore({ a: score.red, b: score.blue });
   const edit = (next: typeof draft, now = false) => {
@@ -96,6 +112,15 @@ export function MatchScorer({
   };
   const point = (side: DuelSide, by: number) =>
     edit({ ...draft, score: { ...score, [side]: clamp(score[side] + by, 25) } });
+  const take = (name: string) => {
+    if (!name) return;
+    storeName(name);
+    setRemembered(name);
+    // Before the start it rides along with "Bắt đầu trận"; after, it is a
+    // hand-over and is saved at once.
+    if (draft.status === "pending") change({ ...draft, referee: name });
+    else edit({ ...draft, referee: name }, true);
+  };
   const smash = (id: string, key: "hit" | "net", by: number) => {
     const now = draft.smashes[id] ?? { hit: 0, net: 0 };
     edit({
@@ -122,6 +147,27 @@ export function MatchScorer({
         <p role="alert" className="error">
           {message}
         </p>
+      )}
+      {draft.status !== "done" && options.length > 0 ? (
+        <div className="ref-who">
+          <label htmlFor="ref-who">Trọng tài</label>
+          <select
+            id="ref-who"
+            value={referee}
+            onChange={(e) => take(e.target.value)}
+          >
+            <option value="" disabled>
+              — chọn tên của bạn —
+            </option>
+            {options.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        draft.referee && <p className="ref-hint">Trọng tài: {draft.referee}</p>
       )}
 
       <div className="ref-score">
@@ -174,7 +220,14 @@ export function MatchScorer({
         <button
           type="button"
           className="ref-main"
-          onClick={() => edit({ ...draft, status: "live" }, true)}
+          disabled={names.length > 0 && !referee}
+          onClick={() => {
+            if (referee) storeName(referee);
+            edit(
+              { ...draft, status: "live", ...(referee ? { referee } : {}) },
+              true,
+            );
+          }}
         >
           Bắt đầu trận
         </button>

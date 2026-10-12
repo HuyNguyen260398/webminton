@@ -95,10 +95,14 @@ export function applyRefereeSave(m: DuelMatch, save: RefereeSave): DuelMatch {
       ([id, s]) => players.includes(id) && (s.hit > 0 || s.net > 0),
     ),
   );
+  // Not mentioned: whoever has the match keeps it. Null: nobody.
+  const referee =
+    save.referee === undefined ? m.referee : (save.referee ?? undefined);
   if (
     m.status === save.status &&
     m.score?.red === save.score?.red &&
     m.score?.blue === save.score?.blue &&
+    m.referee === referee &&
     sameSmashes(m.smashes, smashes)
   )
     return m;
@@ -110,7 +114,14 @@ export function applyRefereeSave(m: DuelMatch, save: RefereeSave): DuelMatch {
     save.score !== null &&
     isFinalScore({ a: save.score.red, b: save.score.blue });
   if (save.status === "done" && !final) throw new Error("INVALID_SCORE");
-  return { ...m, status: save.status, score: save.score, smashes };
+  const { referee: _was, ...rest } = m;
+  return {
+    ...rest,
+    status: save.status,
+    score: save.score,
+    smashes,
+    ...(referee === undefined ? {} : { referee }),
+  };
 }
 
 export interface DuelTeamTotal {

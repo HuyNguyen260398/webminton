@@ -256,6 +256,7 @@ async function refereeMatch(
           status: next.status,
           score: next.score,
           smashes: next.smashes,
+          referee: next.referee ?? null,
         },
       },
       REFEREE_ACTOR,

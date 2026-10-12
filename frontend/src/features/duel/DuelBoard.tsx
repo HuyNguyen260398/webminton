@@ -139,6 +139,11 @@ export function DuelMatchList({ t }: { t: TournamentDocument }) {
                     </span>
                     <Row t={t} m={m} side="red" />
                     <Row t={t} m={m} side="blue" />
+                    {m.referee && m.status !== "pending" && (
+                      <small className="duel-match__referee">
+                        Trọng tài: {m.referee}
+                      </small>
+                    )}
                   </div>
                 </div>
               ))}

@@ -27,7 +27,9 @@ không bốc lại được.
 ### Trọng tài tự chấm điểm
 
 1. Ở tab `Trận`, tạo bảng đấu và xếp cặp cho các trận sắp đánh.
-2. Trong thẻ `Trọng tài`: bấm `Tạo mã`, rồi `Mở chấm điểm`.
+2. Trong thẻ `Trọng tài`: bấm `Tạo mã`, rồi `Mở chấm điểm`. Nếu muốn ghi lại ai
+   cầm trận nào, nhập tên các trọng tài (mỗi dòng một tên) rồi bấm
+   `Lưu danh sách`; khi đó trọng tài phải chọn tên mình trước khi bắt đầu trận.
 3. Gửi cho trọng tài đường link trong thẻ và mã 6 số. Trọng tài nhập mã một
    lần trên điện thoại của mình.
 4. Trọng tài chọn trận, bấm `Bắt đầu trận`, chấm từng điểm, đếm smash và bấm

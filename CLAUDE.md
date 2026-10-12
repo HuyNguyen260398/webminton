@@ -43,6 +43,8 @@ Single test: `pnpm vitest run packages/domain/test/draw.test.ts -t "name"`.
 Single e2e: `pnpm exec playwright test tests/e2e/landing.spec.ts`.
 
 `pnpm test:e2e` needs a current `frontend/out` — run `pnpm build` first (CI does).
+It reuses whatever answers on :3100 and resets it, so with `pnpm dev` running
+use `E2E_PORT=3199 pnpm test:e2e` to give the suite a server of its own.
 
 `pnpm dev` (`scripts/dev.ts`) starts two servers: `next dev` on :3000 and
 `scripts/serve-static.ts` on :3100. In development only, `next.config.ts`
@@ -197,6 +199,13 @@ authorizer and its own throttle. History shows these saves as `trong-tai`.
   retried, as on `/boc-tham`.
 - Restoring an old version keeps the current code and the current on/off
   switch.
+- The organiser may enter a list of referee names in the same card
+  (`setRefereeNames` → `document.refereeNames`). With a list, a referee picks
+  their name before `Bắt đầu trận`; it is stored on the match
+  (`DuelMatch.referee`) and shown in the admin screen, the referee's match
+  list and under the match on the public `BẢNG ĐẤU`. It is a label, not an
+  identity check. A save that leaves `referee` out keeps whoever has the
+  match; `null` clears it.
 - The referee always sends the whole match, so an organiser's edit of a live
   match can be overwritten by the referee's next tap. The admin editor says so.
 - The page keeps a draft of the open match (`lib/use-referee.ts`) and saves it

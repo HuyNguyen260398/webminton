@@ -212,3 +212,82 @@ describe("applyRefereeSave", () => {
     expect(applyRefereeSave(m, finish)).toBe(m);
   });
 });
+
+describe("danh sách trọng tài", () => {
+  const names = (s: AdminState, list: string[]) =>
+    run(s, { type: "setRefereeNames", payload: { names: list } });
+
+  it("is empty until the organiser enters names", () => {
+    expect(makeState().document.refereeNames).toBeUndefined();
+  });
+
+  it("keeps the names in order, trimmed, without blanks or repeats", () => {
+    const s = names(makeState(), ["  Huy ", "Bảo", "Huy", "Mai"]);
+    expect(s.document.refereeNames).toEqual(["Huy", "Bảo", "Mai"]);
+    expect(() => names(s, ["", "Huy"])).toThrow("INVALID_COMMAND");
+    expect(() => names(s, ["x".repeat(61)])).toThrow("INVALID_COMMAND");
+    expect(names(s, []).document.refereeNames).toEqual([]);
+  });
+
+  it("outlives the bảng đấu being deleted and refereeing being toggled", () => {
+    let s = names(makeState(), ["Huy"]);
+    s = run(s, { type: "setRefereeCode", payload: { code: "048213" } });
+    s = run(s, { type: "setRefereeOpen", payload: { open: true } });
+    expect(s.document.refereeNames).toEqual(["Huy"]);
+    s = run(s, { type: "resetDuel", payload: {} });
+    expect(s.document.refereeNames).toEqual(["Huy"]);
+  });
+});
+
+describe("trọng tài của trận", () => {
+  it("is recorded when a referee starts the match with their name", () => {
+    const m = applyRefereeSave(first(makeState()), {
+      ...live(),
+      referee: "Huy",
+    });
+    expect(m).toMatchObject({ status: "live", referee: "Huy" });
+  });
+
+  it("stays when a later save does not mention it, and can be handed over", () => {
+    let m = applyRefereeSave(first(makeState()), { ...live(), referee: "Huy" });
+    m = applyRefereeSave(m, live({ red: 1, blue: 0 }));
+    expect(m.referee).toBe("Huy");
+    m = applyRefereeSave(m, { ...live({ red: 1, blue: 0 }), referee: "Bảo" });
+    expect(m.referee).toBe("Bảo");
+    m = applyRefereeSave(m, { ...live({ red: 1, blue: 0 }), referee: null });
+    expect(m.referee).toBeUndefined();
+  });
+
+  it("counts a change of name alone as a change, and the same name as none", () => {
+    const m = applyRefereeSave(first(makeState()), {
+      ...live(),
+      referee: "Huy",
+    });
+    expect(applyRefereeSave(m, { ...live(), referee: "Huy" })).toBe(m);
+    expect(applyRefereeSave(m, { ...live(), referee: "Bảo" })).not.toBe(m);
+  });
+
+  it("is set, kept and cleared by the organiser's own save", () => {
+    const save = (s: AdminState, extra: Record<string, unknown>) =>
+      run(s, {
+        type: "saveDuelMatch",
+        payload: {
+          matchId: "vong-loai-1",
+          pairRed: ["r1", "r2"],
+          pairBlue: ["b1", "b2"],
+          status: "pending",
+          score: null,
+          smashes: {},
+          ...extra,
+        },
+      });
+    let s = save(makeState(), { referee: "Huy" });
+    expect(first(s).referee).toBe("Huy");
+    // Not mentioned: left alone.
+    s = save(s, {});
+    expect(first(s).referee).toBe("Huy");
+    s = save(s, { referee: null });
+    expect(first(s).referee).toBeUndefined();
+    expect(() => PublicTournamentSchema.parse(s.document)).not.toThrow();
+  });
+});

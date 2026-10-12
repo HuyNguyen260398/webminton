@@ -7,7 +7,10 @@ import type {
 import { RefereeError, saveMatch } from "./referee-api";
 
 // What the referee's screen edits. `pending` only until "Bắt đầu trận".
-export type Draft = Pick<DuelMatch, "status" | "score" | "smashes">;
+export type Draft = Pick<
+  DuelMatch,
+  "status" | "score" | "smashes" | "referee"
+>;
 export type SaveState = "idle" | "saving" | "saved" | "retrying";
 export const SAVE_DELAY_MS = 500;
 export const RETRY_MS = 2000;
@@ -16,6 +19,8 @@ const toDraft = (m: DuelMatch): Draft => ({
   status: m.status,
   score: m.score,
   smashes: m.smashes,
+  // Left out when nobody has the match, and then not sent either.
+  ...(m.referee === undefined ? {} : { referee: m.referee }),
 });
 
 // Holds the newest value and sends it: a burst of taps becomes one request,

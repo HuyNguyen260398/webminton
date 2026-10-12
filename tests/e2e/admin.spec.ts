@@ -8,7 +8,7 @@ test.beforeEach(async ({ request }) => {
 });
 test.afterAll(async ({ playwright }) => {
   const ctx = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: `http://127.0.0.1:${process.env.E2E_PORT ?? "3100"}`,
   });
   await ctx.post("/api/test/reset");
   await ctx.dispose();

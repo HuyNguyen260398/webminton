@@ -4,6 +4,7 @@ import {
   InfoSchema,
   PairSchema,
   DuelScoreSchema,
+  RefereeName,
   SmashCountSchema,
   ScoreSchema,
   SponsorSchema,
@@ -157,7 +158,13 @@ export const CommandSchema = z.discriminatedUnion("type", [
       status: z.enum(["pending", "live", "done"]),
       score: DuelScoreSchema.nullable(),
       smashes: z.record(Id, SmashCountSchema),
+      // Left out: unchanged. Null: nobody.
+      referee: RefereeName.nullable().optional(),
     }),
+  ),
+  command(
+    "setRefereeNames",
+    z.strictObject({ names: z.array(RefereeName).max(30) }),
   ),
   command("setRefereeCode", z.strictObject({ code: RefereeCode })),
   command("setRefereeOpen", z.strictObject({ open: z.boolean() })),
@@ -303,9 +310,11 @@ export function applyCommand(
       delete t.referee;
       break;
     case "saveDuelMatch": {
-      const { matchId, smashes, ...rest } = c.payload;
+      const { matchId, smashes, referee, ...rest } = c.payload;
       const m = t.duel?.matches.find((x) => x.id === matchId);
       if (!m) throw new Error("MATCH_NOT_FOUND");
+      if (referee === null) delete m.referee;
+      else if (referee !== undefined) m.referee = referee;
       // A zero is the same as no entry; keeping only real counts means a
       // swapped-out player leaves nothing behind.
       const players = [...(rest.pairRed ?? []), ...(rest.pairBlue ?? [])];
@@ -318,6 +327,9 @@ export function applyCommand(
       });
       break;
     }
+    case "setRefereeNames":
+      t.refereeNames = [...new Set(c.payload.names)];
+      break;
     case "setRefereeCode":
       secrets.refereeCode = c.payload.code;
       break;

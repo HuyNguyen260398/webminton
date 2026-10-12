@@ -1192,6 +1192,12 @@ button.team-draw__back {
   justify-content: space-between;
   gap: 10px;
 }
+.duel-match__referee {
+  display: block;
+  padding: 6px 12px 2px;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
 .duel-status {
   padding: 1px 8px;
   border: 2px solid var(--ink);

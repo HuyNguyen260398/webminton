@@ -80,3 +80,20 @@ export function forgetCode(): void {
     // As above.
   }
 }
+
+// Who is holding this phone, so the next match starts with their name picked.
+const NAME_KEY = "wm.referee.name";
+export function readName(): string | null {
+  try {
+    return localStorage.getItem(NAME_KEY);
+  } catch {
+    return null;
+  }
+}
+export function storeName(name: string): void {
+  try {
+    localStorage.setItem(NAME_KEY, name);
+  } catch {
+    // Asked again next match.
+  }
+}

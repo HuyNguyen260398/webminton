@@ -150,7 +150,9 @@ button.ref-bar__back {
 .ref-side {
   display: grid;
   gap: 8px;
-  align-content: start;
+  /* The names take the slack, so when one side's names wrap further the two
+     scores and the two +1 buttons still sit level. */
+  grid-template-rows: auto 1fr;
   min-width: 0;
   padding: 12px 10px;
   border: 3px solid var(--ink);
@@ -275,4 +277,25 @@ button.ref-main {
 }
 .ref-count button:last-of-type {
   grid-column: 4;
+}
+
+/* Who is umpiring */
+.ref-who {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+.ref-who select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 12px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+}
+.ref-match__who {
+  font-size: 0.85rem;
 }

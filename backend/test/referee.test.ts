@@ -146,6 +146,21 @@ describe("referee — scoring a match", () => {
     });
   });
 
+  it("records who took the match, keeps it across saves and lets it be handed over", async () => {
+    await admin({ type: "setRefereeNames", payload: { names: ["Huy", "Bảo"] } });
+    expect((await referee({ referee: "Huy" })).status).toBe(200);
+    expect((await stored()).referee).toBe("Huy");
+    // A scoring save does not mention the name.
+    await referee({ score: { red: 1, blue: 0 } });
+    expect((await stored()).referee).toBe("Huy");
+    await referee({ score: { red: 1, blue: 0 }, referee: "Bảo" });
+    expect((await stored()).referee).toBe("Bảo");
+    const snapshot = JSON.parse(published.at(-1)!);
+    expect(snapshot.refereeNames).toEqual(["Huy", "Bảo"]);
+    expect(snapshot.duel.matches[0].referee).toBe("Bảo");
+    expect((await referee({ referee: "" })).status).toBe(400);
+  });
+
   it("never publishes the code", async () => {
     await referee({ score: { red: 1, blue: 0 } });
     expect(published.at(-1)).not.toContain(CODE);

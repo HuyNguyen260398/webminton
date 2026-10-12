@@ -39,6 +39,7 @@ const LABELS: Record<string, string> = {
   saveDuelMatch: "Sửa trận, tỉ số hoặc số smash",
   refereeMatch: "Trọng tài chấm điểm",
   setRefereeCode: "Tạo hoặc đổi mã trọng tài",
+  setRefereeNames: "Sửa danh sách trọng tài",
   setRefereeOpen: "Mở hoặc đóng chấm điểm cho trọng tài",
   upsertSponsor: "Thêm hoặc sửa nhà tài trợ",
   removeSponsor: "Xoá nhà tài trợ",
