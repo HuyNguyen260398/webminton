@@ -1,0 +1,79 @@
+import type {
+  DuelMatch,
+  RefereeSave,
+} from "../../../packages/domain/src/schema";
+
+// `code` is the API's error code. "NETWORK" is the one that means the save
+// did not get through and should be sent again; every other is a refusal.
+export class RefereeError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+const OFFLINE = "Mất mạng — đang thử lại.";
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch {
+    throw new RefereeError("NETWORK", OFFLINE);
+  }
+  // A throttle is API Gateway asking for a moment, not saying no.
+  if (res.status === 429 || res.status >= 500)
+    throw new RefereeError("NETWORK", OFFLINE);
+  const data = (await res.json().catch(() => null)) as {
+    code?: string;
+    message?: string;
+  } | null;
+  if (!res.ok)
+    throw new RefereeError(
+      data?.code ?? "UNKNOWN",
+      data?.message ?? `Lỗi ${res.status}.`,
+    );
+  return data as T;
+}
+
+export const checkCode = async (code: string): Promise<void> => {
+  await post("/api/referee/check", { code });
+};
+export const saveMatch = (code: string, matchId: string, save: RefereeSave) =>
+  post<{ match: DuelMatch; updatedAt: string }>("/api/referee/match", {
+    code,
+    matchId,
+    ...save,
+  });
+
+// The code, kept on this phone so a reload mid-match does not ask again.
+// Storage can be blocked; then it is simply asked for on every load.
+const KEY = "wm.referee";
+export function readCode(): string | null {
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+}
+export function storeCode(code: string): void {
+  try {
+    localStorage.setItem(KEY, code);
+  } catch {
+    // Nothing to do: the code lives for this page load only.
+  }
+}
+export function forgetCode(): void {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // As above.
+  }
+}
