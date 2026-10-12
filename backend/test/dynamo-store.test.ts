@@ -67,6 +67,17 @@ describe("DynamoStore", () => {
     expect(db.sent[0].input.TransactItems[1].Put.Item.sk).toBe("V#000042");
   });
 
+  it("writes the secrets into the current item and the history item", async () => {
+    const db = fakeDb(() => ({}));
+    const state = { ...makeAdminState(), secrets: { refereeCode: "048213" } };
+    const saved = await new DynamoStore(db as never, "t").write(null, state, entry);
+    expect(saved.secrets).toEqual({ refereeCode: "048213" });
+    for (const item of db.sent[0].input.TransactItems)
+      expect(JSON.parse(item.Put.Item.state).secrets).toEqual({
+        refereeCode: "048213",
+      });
+  });
+
   it("turns a cancelled transaction into CONFLICT", async () => {
     const db = fakeDb(() => {
       throw Object.assign(new Error("x"), { name: "TransactionCanceledException" });
@@ -110,6 +121,15 @@ describe("DynamoStore", () => {
     expect(await store.history()).toEqual([{ version: 2, ...entry }]);
     expect(db.sent[0].input).toMatchObject({ ScanIndexForward: false });
     await expect(store.markPublished(1)).resolves.toBeUndefined();
+  });
+
+  it("asks only for the versions after the one given", async () => {
+    const db = fakeDb(() => ({ Items: [] }));
+    await new DynamoStore(db as never, "t").history(41);
+    expect(db.sent[0].input).toMatchObject({
+      KeyConditionExpression: "pk = :pk AND sk > :v",
+      ExpressionAttributeValues: { ":pk": "T#noi-bo-2026", ":v": "V#000041" },
+    });
   });
 
   it("lists the whole history across pages, without loading each version's state", async () => {

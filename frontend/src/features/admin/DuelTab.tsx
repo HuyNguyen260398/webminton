@@ -96,6 +96,11 @@ function MatchEditor({
     blue: [m.pairBlue?.[0] ?? "", m.pairBlue?.[1] ?? ""],
   });
   const [smashes, setSmashes] = useState<Smashes>(structuredClone(m.smashes));
+  const [referee, setReferee] = useState(m.referee ?? "");
+  // Whoever has the match stays pickable after leaving the list.
+  const listed = t.refereeNames ?? [];
+  const referees =
+    !m.referee || listed.includes(m.referee) ? listed : [m.referee, ...listed];
   const [score, setScore] = useState<Record<DuelSide, number | null>>({
     red: m.score?.red ?? null,
     blue: m.score?.blue ?? null,
@@ -145,6 +150,7 @@ function MatchEditor({
           smashes: Object.fromEntries(
             Object.entries(smashes).filter(([id]) => players.includes(id)),
           ),
+          referee: referee || null,
         },
       },
       saved,
@@ -163,6 +169,22 @@ function MatchEditor({
           <Pill tone={STATUS[m.status].tone}>{STATUS[m.status].label}</Pill>
           {m.stage === "final" && <Pill tone="red">Điểm nhân đôi</Pill>}
         </div>
+        {referees.length > 0 && (
+          <Field label="Trọng tài của trận">
+            <select
+              value={referee}
+              disabled={busy}
+              onChange={(e) => setReferee(e.target.value)}
+            >
+              <option value="">— chưa có —</option>
+              {referees.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
 
         {DUEL_SIDES.map((side) => (
           <fieldset className="duel-side" key={side}>
@@ -215,6 +237,14 @@ function MatchEditor({
 
         {both && (
           <>
+            {m.status === "live" && (
+              <small>
+                Trận đang đánh: nếu trọng tài đang chấm trận này ở /trong-tai
+                thì số smash và tỉ số sửa ở đây có thể bị điện thoại của trọng
+                tài ghi đè ở lần bấm kế tiếp. Muốn sửa chắc chắn, đợi trọng tài
+                kết thúc trận rồi sửa.
+              </small>
+            )}
             <h4 className="duel-heading">Đếm smash</h4>
             <div className="duel-smash">
               {players.map((id) => (
@@ -258,7 +288,7 @@ function MatchEditor({
             </div>
             <small aria-live="polite">
               {final === null
-                ? "Nhập điểm của hai đội khi trận kết thúc."
+                ? "Trọng tài chấm từng điểm ở /trong-tai, hoặc nhập điểm của hai đội khi trận kết thúc."
                 : valid
                   ? "Tỉ số hợp lệ."
                   : "Chưa hợp lệ: séc tới 21, hơn 2 điểm, trần 25."}
@@ -280,7 +310,7 @@ function MatchEditor({
                 label="Mở lại trận"
                 disabled={busy}
                 onConfirm={() =>
-                  save("live", false, "Đã mở lại trận, tỉ số đã xoá.")
+                  save("live", true, "Đã mở lại trận — tỉ số được giữ để sửa.")
                 }
               />
             </>
@@ -293,7 +323,9 @@ function MatchEditor({
                 onClick={() =>
                   save(
                     m.status,
-                    false,
+                    // A referee may be scoring this match: keep the running
+                    // score rather than send it back empty.
+                    m.status === "live",
                     m.status === "live" ? "Đã lưu số smash." : "Đã lưu cặp.",
                   )
                 }
@@ -322,6 +354,128 @@ function MatchEditor({
           )}
           <button type="button" className="button--ghost" onClick={onClose}>
             Đóng
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// Six digits from the browser's own generator. applyCommand stays pure.
+const newCode = () =>
+  String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(
+    6,
+    "0",
+  );
+
+function RefereeCard({ admin }: { admin: ReadyAdmin }) {
+  const { view, send, busy } = admin;
+  const code = view.secrets?.refereeCode ?? null;
+  const open = view.document.referee?.open ?? false;
+  const [link, setLink] = useState("/trong-tai/");
+  const [copied, setCopied] = useState(false);
+  useEffect(() => setLink(`${location.origin}/trong-tai/`), []);
+  const saved = (view.document.refereeNames ?? []).join("\n");
+  const [names, setNames] = useState(saved);
+  // Follow the stored list when it changes under this screen.
+  useEffect(() => setNames(saved), [saved]);
+  const setCode = () =>
+    send(
+      { type: "setRefereeCode", payload: { code: newCode() } },
+      "Đã tạo mã trọng tài mới.",
+    );
+  return (
+    <Card title="Trọng tài">
+      <div className="admin-stack">
+        <p>
+          Trọng tài mở trang dưới đây trên điện thoại, nhập mã rồi tự bắt đầu
+          trận, chấm từng điểm và đếm smash. Cặp đấu vẫn do BTC xếp ở đây.
+        </p>
+        <div className="pill-row">
+          <Pill tone={open ? "green" : "outline"}>
+            {open ? "Đang mở" : "Đang đóng"}
+          </Pill>
+        </div>
+        <p className="referee-code" data-testid="referee-code">
+          {code ?? "Chưa có mã"}
+        </p>
+        <div className="row-actions">
+          {code ? (
+            <ConfirmButton label="Đổi mã" disabled={busy} onConfirm={setCode} />
+          ) : (
+            <button type="button" disabled={busy} onClick={setCode}>
+              Tạo mã
+            </button>
+          )}
+          <button
+            type="button"
+            className={open ? "button--ghost" : undefined}
+            disabled={busy || !code}
+            onClick={() =>
+              send(
+                { type: "setRefereeOpen", payload: { open: !open } },
+                open
+                  ? "Đã đóng chấm điểm cho trọng tài."
+                  : "Đã mở chấm điểm cho trọng tài.",
+              )
+            }
+          >
+            {open ? "Đóng chấm điểm" : "Mở chấm điểm"}
+          </button>
+        </div>
+        <small>
+          Đổi mã là khoá mọi điện thoại đang dùng mã cũ. Đóng chấm điểm là
+          chặn mọi trọng tài cho tới khi mở lại.
+        </small>
+        <Field label="Danh sách trọng tài (mỗi dòng một tên)">
+          <textarea
+            rows={4}
+            value={names}
+            disabled={busy}
+            onChange={(e) => setNames(e.target.value)}
+          />
+        </Field>
+        <div className="row-actions">
+          <button
+            type="button"
+            className="button--ghost"
+            disabled={busy || names === saved}
+            onClick={() =>
+              send(
+                {
+                  type: "setRefereeNames",
+                  payload: {
+                    names: names
+                      .split("\n")
+                      .map((line) => line.trim())
+                      .filter(Boolean),
+                  },
+                },
+                "Đã lưu danh sách trọng tài.",
+              )
+            }
+          >
+            Lưu danh sách
+          </button>
+        </div>
+        <small>
+          Có danh sách thì trọng tài phải chọn tên mình trước khi bắt đầu
+          trận, và tên đó hiện trên trang giải. Để trống thì không ai phải
+          chọn.
+        </small>
+        <div className="row-actions">
+          <code className="referee-link">{link}</code>
+          <button
+            type="button"
+            className="button--ghost"
+            onClick={() =>
+              navigator.clipboard
+                ?.writeText(link)
+                .then(() => setCopied(true))
+                .catch(() => {})
+            }
+          >
+            {copied ? "Đã chép" : "Chép link"}
           </button>
         </div>
       </div>
@@ -383,6 +537,8 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
           </small>
         </Card>
 
+        <RefereeCard admin={admin} />
+
         <ul className="pick-list">
           {matches.map((m) => (
             <li key={m.id}>
@@ -414,6 +570,7 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
                       </span>
                     );
                   })}
+                  {m.referee && <small>Trọng tài: {m.referee}</small>}
                 </span>
                 <Pill tone={STATUS[m.status].tone}>
                   {STATUS[m.status].label}

@@ -163,8 +163,8 @@ describe("bảng đấu — status and score", () => {
     expect(() =>
       save(s, {
         matchId: "vong-loai-1",
-        status: "live",
-        score: { red: 21, blue: 10 },
+        status: "pending",
+        score: { red: 1, blue: 0 },
       }),
     ).toThrow("INVALID_SCORE");
     for (const [red, blue] of [
@@ -190,6 +190,36 @@ describe("bảng đấu — status and score", () => {
 });
 
 describe("bảng đấu — totals", () => {
+  it("shows a live match's running score but counts none of it", () => {
+    const s = save(makeState(), {
+      matchId: "vong-loai-1",
+      status: "live",
+      score: { red: 7, blue: 5 },
+      smashes: { r1: { hit: 2, net: 0 } },
+    });
+    expect(s.document.duel!.matches[0].score).toEqual({ red: 7, blue: 5 });
+    const r = deriveDuel(s.document)!;
+    expect(r.totals.red).toEqual({ points: 0, wins: 0, finalPoints: 0 });
+    expect(r.totals.blue).toEqual({ points: 0, wins: 0, finalPoints: 0 });
+    expect(r.played).toBe(0);
+    expect(r.leader).toBeNull();
+    expect(r.smashHit[0]).toMatchObject({ athleteId: "r1", hit: 2 });
+  });
+
+  it("is not finished while the last match is still live with a score", () => {
+    let s = makeState();
+    for (const m of s.document.duel!.matches)
+      s = done(s, m.id, 21, 10, m.category === "mixed_doubles" ? mixed : {});
+    s = save(s, {
+      matchId: "vong-loai-1",
+      status: "live",
+      score: { red: 21, blue: 10 },
+    });
+    const r = deriveDuel(s.document)!;
+    expect(r.played).toBe(10);
+    expect(r.finished).toBe(false);
+  });
+
   it("adds every point scored, win or lose, and doubles the finals", () => {
     let s = done(makeState(), "vong-loai-1", 21, 15);
     s = done(s, "vong-loai-2", 18, 21);

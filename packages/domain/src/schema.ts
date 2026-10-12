@@ -66,6 +66,7 @@ export const SmashCountSchema = z.strictObject({
   hit: z.number().int().min(0).max(99),
   net: z.number().int().min(0).max(99),
 });
+export const RefereeName = z.string().trim().min(1).max(60);
 export const DuelMatchSchema = z.strictObject({
   id: Id,
   stage: z.enum(["playoff", "final"]),
@@ -75,9 +76,21 @@ export const DuelMatchSchema = z.strictObject({
   pairBlue: PairSchema.nullable(),
   // "live" is the organiser calling the match: from then the pairs are shown.
   status: z.enum(["pending", "live", "done"]),
+  // Null until the match is called; a running score while live; final when done.
   score: DuelScoreSchema.nullable(),
   // Keyed by athlete id; only the four players of the match appear.
   smashes: z.record(Id, SmashCountSchema),
+  // Who umpired it, as they picked their name on /trong-tai. A label, not an
+  // identity: absent until someone takes the match.
+  referee: RefereeName.optional(),
+});
+// All a referee may send for a match. Pairs are the organiser's.
+export const RefereeSaveSchema = z.strictObject({
+  status: z.enum(["live", "done"]),
+  score: DuelScoreSchema.nullable(),
+  smashes: z.record(Id, SmashCountSchema),
+  // Left out: unchanged. Null: nobody.
+  referee: RefereeName.nullable().optional(),
 });
 export const InfoSchema = z.strictObject({
   name: text,
@@ -88,6 +101,9 @@ export const InfoSchema = z.strictObject({
   dateLabel: text,
   registrationDeadline: time.nullable(),
   registrationFormUrl: z.url().nullable(),
+  // The organiser's switch. False hides ĐĂNG KÝ THI ĐẤU while keeping the
+  // link; absent, on every document older than the switch, means open.
+  registrationOpen: z.boolean().optional(),
   timezone: z.literal("Asia/Ho_Chi_Minh"),
   feeVnd: Money.nullable(),
   contactName: text.nullable(),
@@ -168,6 +184,12 @@ export const PublicTournamentSchema = z
     }),
     // Absent until the organiser creates the bảng đấu.
     duel: z.strictObject({ matches: z.array(DuelMatchSchema) }).optional(),
+    // Whether /trong-tai accepts saves. Absent means closed. The code the
+    // referees type is a secret and is stored beside the document.
+    referee: z.strictObject({ open: z.boolean() }).optional(),
+    // The names a referee picks from when taking a match. The organiser's
+    // list; it belongs to no bảng đấu and outlives one being deleted.
+    refereeNames: z.array(RefereeName).max(30).optional(),
     tieDecisions: z.array(
       z.strictObject({
         tiedTeamIds: z.array(Id).min(2),
@@ -244,8 +266,12 @@ export const PublicTournamentSchema = z
           fail("Một VĐV không thể đứng hai chỗ trong cùng một trận");
         if (Object.keys(m.smashes).some((id) => !players.includes(id)))
           fail("Chỉ đếm smash cho VĐV của trận");
-        if ((m.status === "done") !== (m.score !== null))
-          fail("Trận đã xong phải có tỉ số, trận chưa xong thì không");
+        if (
+          m.status === "pending"
+            ? m.score !== null
+            : m.status === "done" && m.score === null
+        )
+          fail("Trận chưa gọi không có tỉ số, trận đã xong phải có");
         if (m.status !== "pending" && !(m.pairRed && m.pairBlue))
           fail("Trận đã gọi phải có đủ hai cặp");
       });
@@ -255,6 +281,7 @@ export const PublicTournamentSchema = z
   });
 export type TournamentDocument = z.infer<typeof PublicTournamentSchema>;
 export type DuelMatch = z.infer<typeof DuelMatchSchema>;
+export type RefereeSave = z.infer<typeof RefereeSaveSchema>;
 export type Athlete = z.infer<typeof AthleteSchema>;
 export type Team = z.infer<typeof TeamSchema>;
 export type Match = z.infer<typeof MatchSchema>;

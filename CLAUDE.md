@@ -26,6 +26,7 @@ Node 24 (`.nvmrc`), pnpm 10.32.1, ESM everywhere (`"type": "module"`).
 pnpm install
 pnpm dev              # next dev on :3000 + local admin API on :3100
 pnpm dev:cloud        # the same, over the REAL table and live tournament.json
+pnpm dev:demo         # fill a running `pnpm dev` with a giải ready to referee
 pnpm typecheck        # tsc over packages/domain and scripts
 pnpm --filter @webminton/frontend typecheck   # the frontend is separate
 pnpm test             # vitest — domain, scripts, frontend, infra
@@ -42,6 +43,8 @@ Single test: `pnpm vitest run packages/domain/test/draw.test.ts -t "name"`.
 Single e2e: `pnpm exec playwright test tests/e2e/landing.spec.ts`.
 
 `pnpm test:e2e` needs a current `frontend/out` — run `pnpm build` first (CI does).
+It reuses whatever answers on :3100 and resets it, so with `pnpm dev` running
+use `E2E_PORT=3199 pnpm test:e2e` to give the suite a server of its own.
 
 `pnpm dev` (`scripts/dev.ts`) starts two servers: `next dev` on :3000 and
 `scripts/serve-static.ts` on :3100. In development only, `next.config.ts`
@@ -52,6 +55,12 @@ real router over an in-memory store seeded from the test fixture (not from
 of Google; restarting it resets the data. Once an admin save publishes, the
 public page on :3000 shows that snapshot. `pnpm dev` also works from
 `frontend/`.
+
+`pnpm dev:demo` (`scripts/seed-demo.ts`), run beside `pnpm dev`, resets that
+in-memory store and loads two teams of seven, the eleven bảng đấu matches in
+every state (one done, one live, three with pairs, six without), the referee
+code `123456` and refereeing open. It begins with `/api/test/reset`, which only
+`pnpm dev` answers, so it cannot write to `dev:cloud` or the deployed site.
 
 `pnpm dev:cloud` is the same pair over the **real** table and site bucket,
 with the API on :3200. Table and bucket names come from `TABLE_NAME` /
@@ -156,11 +165,55 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
 - A pair is rendered publicly only once its match is `live` or `done`.
 - Two organisers scoring two courts: a stale `saveDuelMatch` is accepted when
   the match itself is unchanged since the version the screen was on
-  (`router.ts::sameDuelMatch`). Every other stale command is still a `409`.
+  (`router.ts::sameDuelMatch`). Any other command is also accepted stale when
+  every version in between was a referee's save (`router.ts::staleButSafe`) —
+  otherwise live scoring would make the off switch and every fee tick a `409`.
+  Every other stale command is still a `409`.
 
 In the admin screen the `Trận` tab is `DuelTab` unless a four-team draw is
 confirmed, in which case it is the old `MatchesTab`. The public page shows
 `BẢNG ĐẤU` and `VUA SMASH` once the bảng đấu exists.
+
+### The referees' page
+
+`/trong-tai` lets whoever umpires a court run their own match from a phone:
+start it, score it point by point, count smashes, finish it. It is the second
+public write, `POST /api/referee/{check,match}`, an API Gateway route with no
+authorizer and its own throttle. History shows these saves as `trong-tai`.
+
+- It works only while `document.referee.open` is true and the request carries
+  the six-digit code, both set in the `Trọng tài` card of the `Trận` tab
+  (`setRefereeOpen`, `setRefereeCode`). The code lives in `AdminState.secrets`,
+  beside the document, and never reaches `tournament.json`. Changing it locks
+  out every phone holding the old one.
+- A referee sends status, score and smashes for one match — never pairs. The
+  router turns that into a `saveDuelMatch` with the stored pairs
+  (`duel.ts::applyRefereeSave`), so it passes through `applyCommand` like every
+  other edit. A `done` match is locked to referees; reopening is the
+  organiser's.
+- A `live` match carries a running score. **A score no longer means the match
+  is finished**: totals, wins, `played` and the winner mark all test
+  `status === "done"`.
+- A save that changes nothing is answered without writing, so a retried
+  `Kết thúc trận` succeeds. A version collision with the other court is
+  retried, as on `/boc-tham`.
+- Restoring an old version keeps the current code and the current on/off
+  switch.
+- The organiser may enter a list of referee names in the same card
+  (`setRefereeNames` → `document.refereeNames`). With a list, a referee picks
+  their name before `Bắt đầu trận`; it is stored on the match
+  (`DuelMatch.referee`) and shown in the admin screen, the referee's match
+  list and under the match on the public `BẢNG ĐẤU`. It is a label, not an
+  identity check. A save that leaves `referee` out keeps whoever has the
+  match; `null` clears it.
+- The referee always sends the whole match, so an organiser's edit of a live
+  match can be overwritten by the referee's next tap. The admin editor says so.
+- The page keeps a draft of the open match (`lib/use-referee.ts`) and saves it
+  500ms after the last tap. The draft and its save queue are kept per match
+  for the life of the page, so leaving a match and reopening it loses nothing. The poll of `tournament.json` replaces the draft
+  only when nothing is unsaved and the snapshot is not older than the page's
+  own last save.
+- Live scoring adds 40–60 versions per match. That is expected.
 
 ### Derived state is never stored
 
@@ -210,10 +263,18 @@ The landing page is `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI Đ
 → poster 2 → poster 3 → the live data sections → a `<details>` linking the
 original JPGs.
 
+`features/landing/SiteNav.tsx` is the sticky bar at the top. It lists only the
+sections that are on the page right now: it and `LiveSections` both read
+`features/landing/sections.ts::pageSections`, so add a section's condition
+there and the bar cannot link to something that is not rendered. On a phone
+the bar scrolls sideways inside itself.
+
 `features/landing/Registration.tsx` is the one section with no poster behind
 it: a link to the Microsoft Form in `info.registrationFormUrl`. It **renders
-nothing when that field is null**, so registration closes by clearing the link
-in the admin screen's `Giải` tab — no rebuild.
+nothing when that field is null or `info.registrationOpen` is false**. The
+organiser closes and reopens registration with the `Đăng ký thi đấu` switch at
+the top of the admin screen's `Giải` tab, which keeps the link — no rebuild.
+A document without `registrationOpen` counts as open.
 
 `features/landing/LiveSections.tsx` renders `DANH SÁCH VĐV`, `BỐN ĐỘI`,
 `LỊCH THI ĐẤU`, `BẢNG XẾP HẠNG` and `THU CHI` — each **hides itself when its
@@ -242,7 +303,9 @@ Phone first: one column with the tab bar fixed to the bottom, two panes from
   Real AWS clients are constructed only in `aws.ts`.
 - `frontend` — Next.js App Router with `output: "export"`; **no server
   runtime**. `/quan-tri` is a second static page whose tabs live in
-  `features/admin/` and whose styles are `src/styles/admin.css`. Types are
+  `features/admin/` and whose styles are `src/styles/admin.css`. `/trong-tai`
+  is a third, with its screens in `features/referee/` and its styles in
+  `src/styles/referee.css`. Types are
   imported across the workspace by relative path
   (`../../../packages/domain/src/schema`). The public design system lives in
   `src/styles/poster.css` and `features/landing/primitives.tsx`.
@@ -250,7 +313,8 @@ Phone first: one column with the tab bar fixed to the bottom, two panes from
   ACM, Route53 (`main.tf`); the table, Lambda, its role and the HTTP API
   (`backend.tf`); Cognito with Google as the only identity provider
   (`auth.tf`). `infra/test/architecture.test.ts` asserts the invariants
-  against the HCL text: admin routes behind the JWT authorizer, the Lambda
+  against the HCL text: admin routes behind the JWT authorizer, the two open write routes
+  throttled, the Lambda
   able to write only `tournament.json`, PITR and deletion protection on the
   table, and no resource with a fixed monthly fee.
 - `scripts` — `validate-tournament.ts`, `draw-teams.ts`, `seed.ts`,

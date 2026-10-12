@@ -4,6 +4,7 @@ import {
   InfoSchema,
   PairSchema,
   DuelScoreSchema,
+  RefereeName,
   SmashCountSchema,
   ScoreSchema,
   SponsorSchema,
@@ -55,9 +56,18 @@ export const PrivateMapSchema = z.record(Id, PrivateFieldsSchema);
 export type PrivateFields = z.infer<typeof PrivateFieldsSchema>;
 export type PrivateMap = z.infer<typeof PrivateMapSchema>;
 
+// What belongs to no athlete and must never be published.
+export const RefereeCode = z.string().regex(/^\d{6}$/);
+export const SecretsSchema = z.strictObject({
+  refereeCode: RefereeCode.nullable(),
+});
+export type Secrets = z.infer<typeof SecretsSchema>;
+
 export interface AdminState {
   document: TournamentDocument;
   private: PrivateMap;
+  // Absent on anything stored before the referees' page: no code.
+  secrets?: Secrets;
 }
 
 const command = <T extends string, S extends z.ZodType>(type: T, payload: S) =>
@@ -148,8 +158,16 @@ export const CommandSchema = z.discriminatedUnion("type", [
       status: z.enum(["pending", "live", "done"]),
       score: DuelScoreSchema.nullable(),
       smashes: z.record(Id, SmashCountSchema),
+      // Left out: unchanged. Null: nobody.
+      referee: RefereeName.nullable().optional(),
     }),
   ),
+  command(
+    "setRefereeNames",
+    z.strictObject({ names: z.array(RefereeName).max(30) }),
+  ),
+  command("setRefereeCode", z.strictObject({ code: RefereeCode })),
+  command("setRefereeOpen", z.strictObject({ open: z.boolean() })),
   command("upsertSponsor", SponsorSchema),
   command("removeSponsor", byId),
   command("upsertIncome", IncomeSchema),
@@ -176,6 +194,7 @@ const remove = (items: { id: string }[], id: string) => {
 function finalize(
   t: TournamentDocument,
   priv: PrivateMap,
+  secrets: Secrets,
   now: string,
 ): AdminState {
   t.updatedAt = now;
@@ -189,7 +208,11 @@ function finalize(
   const parsed = PublicTournamentSchema.safeParse(t);
   if (!parsed.success) throw new Error("INVALID_DOCUMENT");
   deriveTournament(parsed.data);
-  return { document: parsed.data, private: PrivateMapSchema.parse(priv) };
+  return {
+    document: parsed.data,
+    private: PrivateMapSchema.parse(priv),
+    secrets: SecretsSchema.parse(secrets),
+  };
 }
 
 export function toRoster(state: AdminState): PrivateRoster {
@@ -231,6 +254,7 @@ export function applyCommand(
   // `let`: the match commands added in Task 3 replace the document wholesale.
   let t = structuredClone(state.document);
   const priv = structuredClone(state.private);
+  const secrets: Secrets = { refereeCode: state.secrets?.refereeCode ?? null };
   const inLineup = (id: string) =>
     t.matches.some((m) =>
       [...(m.pairA ?? []), ...(m.pairB ?? [])].includes(id),
@@ -283,11 +307,14 @@ export function applyCommand(
       break;
     case "resetDuel":
       delete t.duel;
+      delete t.referee;
       break;
     case "saveDuelMatch": {
-      const { matchId, smashes, ...rest } = c.payload;
+      const { matchId, smashes, referee, ...rest } = c.payload;
       const m = t.duel?.matches.find((x) => x.id === matchId);
       if (!m) throw new Error("MATCH_NOT_FOUND");
+      if (referee === null) delete m.referee;
+      else if (referee !== undefined) m.referee = referee;
       // A zero is the same as no entry; keeping only real counts means a
       // swapped-out player leaves nothing behind.
       const players = [...(rest.pairRed ?? []), ...(rest.pairBlue ?? [])];
@@ -300,6 +327,20 @@ export function applyCommand(
       });
       break;
     }
+    case "setRefereeNames":
+      t.refereeNames = [...new Set(c.payload.names)];
+      break;
+    case "setRefereeCode":
+      secrets.refereeCode = c.payload.code;
+      break;
+    case "setRefereeOpen":
+      if (c.payload.open) {
+        if (!t.duel || t.duel.matches.length === 0)
+          throw new Error("DUEL_REQUIRED");
+        if (!secrets.refereeCode) throw new Error("REFEREE_NEEDS_CODE");
+      }
+      t.referee = { open: c.payload.open };
+      break;
     case "upsertSponsor":
       upsert(t.sponsorships, c.payload);
       break;
@@ -509,5 +550,5 @@ export function applyCommand(
       break;
     }
   }
-  return finalize(t, priv, now);
+  return finalize(t, priv, secrets, now);
 }

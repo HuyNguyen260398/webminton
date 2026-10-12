@@ -141,6 +141,15 @@ resource "aws_apigatewayv2_route" "team_draw" {
   target    = "integrations/${aws_apigatewayv2_integration.api.id}"
 }
 
+# Open on purpose: referees score their own match on /trong-tai without
+# signing in. The Lambda refuses every call unless the organiser has switched
+# refereeing on and the request carries the code the organiser set.
+resource "aws_apigatewayv2_route" "referee" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "POST /api/referee/{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.api.id}"
+}
+
 resource "aws_apigatewayv2_route" "admin" {
   api_id             = aws_apigatewayv2_api.api.id
   route_key          = "ANY /api/admin/{proxy+}"
@@ -162,6 +171,13 @@ resource "aws_apigatewayv2_stage" "default" {
     route_key              = aws_apigatewayv2_route.team_draw.route_key
     throttling_rate_limit  = 2
     throttling_burst_limit = 5
+  }
+  # Two courts, each saving at most twice a second. At this rate a six-digit
+  # code takes about fourteen hours to guess on average.
+  route_settings {
+    route_key              = aws_apigatewayv2_route.referee.route_key
+    throttling_rate_limit  = 10
+    throttling_burst_limit = 20
   }
 }
 

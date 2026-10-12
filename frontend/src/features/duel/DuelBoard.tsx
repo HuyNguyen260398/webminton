@@ -77,7 +77,8 @@ function Row({
   side: DuelSide;
 }) {
   const other = side === "red" ? "blue" : "red";
-  const won = m.score !== null && m.score[side] > m.score[other];
+  const won =
+    m.status === "done" && m.score !== null && m.score[side] > m.score[other];
   // Until the organiser calls the match, the opposing pair stays a secret.
   const pair = m.status === "pending" ? null : pairOf(m, side);
   return (
@@ -138,6 +139,11 @@ export function DuelMatchList({ t }: { t: TournamentDocument }) {
                     </span>
                     <Row t={t} m={m} side="red" />
                     <Row t={t} m={m} side="blue" />
+                    {m.referee && m.status !== "pending" && (
+                      <small className="duel-match__referee">
+                        Trọng tài: {m.referee}
+                      </small>
+                    )}
                   </div>
                 </div>
               ))}

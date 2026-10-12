@@ -73,11 +73,16 @@ if (import.meta.filename === process.argv[1]) {
     const table = process.env.TABLE_NAME ?? output("table_name");
     const bucket = process.env.SITE_BUCKET ?? output("site_bucket_name");
     const store = awsStore(table);
-    const state = buildSeed(
-      JSON.parse(readFileSync(PUBLIC, "utf8")),
-      existsSync(PRIVATE) ? JSON.parse(readFileSync(PRIVATE, "utf8")) : null,
-      (await store.read())?.private,
-    );
+    const existing = await store.read();
+    // A forced reseed replaces the document, not the referees' code.
+    const state = {
+      ...buildSeed(
+        JSON.parse(readFileSync(PUBLIC, "utf8")),
+        existsSync(PRIVATE) ? JSON.parse(readFileSync(PRIVATE, "utf8")) : null,
+        existing?.private,
+      ),
+      secrets: existing?.secrets,
+    };
     const version = await seed(store, awsPublisher(bucket), state, {
       force,
       now: new Date().toISOString(),

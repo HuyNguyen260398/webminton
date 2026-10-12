@@ -1,5 +1,6 @@
 import type { TournamentDocument } from "../../../../packages/domain/src/schema";
 import { Card, Section } from "./primitives";
+import { registrationOpen } from "./sections";
 
 // Not on the poster JPGs: registration moved to a Microsoft Form, and the
 // link has to live somewhere people actually look — right under poster 1.
@@ -17,9 +18,9 @@ function deadlineLabel(iso: string | null) {
 
 export function Registration({ t }: { t: TournamentDocument }) {
   const { info } = t;
-  // No form, no section — closing registration is a one-field edit to
-  // tournament.json, the same rule the live sections follow.
-  if (!info.registrationFormUrl) return null;
+  // No form, or closed by the organiser: no section, the same rule the live
+  // sections follow.
+  if (!info.registrationFormUrl || !registrationOpen(info)) return null;
 
   return (
     <Section id="dang-ky" title="ĐĂNG KÝ THI ĐẤU">

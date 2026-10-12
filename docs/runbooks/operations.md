@@ -24,6 +24,24 @@ Bốc thăm cần tối thiểu 8 nam và 8 nữ đang thi đấu, ai cũng có 
 Xem trước theo một mã rồi mới xác nhận; khi đã có trận được gọi hoặc đánh thì
 không bốc lại được.
 
+### Trọng tài tự chấm điểm
+
+1. Ở tab `Trận`, tạo bảng đấu và xếp cặp cho các trận sắp đánh.
+2. Trong thẻ `Trọng tài`: bấm `Tạo mã`, rồi `Mở chấm điểm`. Nếu muốn ghi lại ai
+   cầm trận nào, nhập tên các trọng tài (mỗi dòng một tên) rồi bấm
+   `Lưu danh sách`; khi đó trọng tài phải chọn tên mình trước khi bắt đầu trận.
+3. Gửi cho trọng tài đường link trong thẻ và mã 6 số. Trọng tài nhập mã một
+   lần trên điện thoại của mình.
+4. Trọng tài chọn trận, bấm `Bắt đầu trận`, chấm từng điểm, đếm smash và bấm
+   `Kết thúc trận`. Trang công khai hiện tỉ số đang đánh sau tối đa 20 giây.
+
+- Trọng tài bấm nhầm `Kết thúc trận`: BTC mở trận đó ở tab `Trận`, bấm
+  `Mở lại trận`. Tỉ số được giữ nguyên để sửa.
+- Muốn khoá một điện thoại: bấm `Đổi mã` và gửi mã mới cho những người còn lại.
+- Muốn chặn mọi trọng tài ngay: bấm `Đóng chấm điểm`.
+- Mục `Lịch sử` sẽ có vài trăm dòng `trong-tai` sau một ngày thi đấu. Đó là
+  bình thường: mỗi điểm là một lần lưu.
+
 ### Các thông báo hay gặp
 
 - **“Dữ liệu vừa thay đổi — kiểm tra rồi lưu lại.”** Một máy khác vừa lưu.

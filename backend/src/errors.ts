@@ -5,6 +5,8 @@ const http: Record<string, [number, string]> = {
   UNAUTHORIZED: [401, "Cần đăng nhập."],
   FORBIDDEN: [403, "Tài khoản này không có quyền quản trị."],
   NOT_FOUND: [404, "Không tìm thấy."],
+  REFEREE_CLOSED: [403, "BTC chưa mở chấm điểm cho trọng tài, hoặc đã đóng rồi."],
+  REFEREE_CODE: [401, "Mã trọng tài không đúng."],
   CONFLICT: [409, "Dữ liệu vừa thay đổi — kiểm tra rồi lưu lại."],
   NOT_SEEDED: [503, "Chưa nạp dữ liệu giải. Chạy pnpm seed."],
 };
@@ -41,6 +43,10 @@ const domain: Record<string, string> = {
   DUEL_NEEDS_PAIRS: "Phải xếp đủ hai cặp trước khi gọi trận hoặc nhập tỉ số.",
   DUEL_HAS_LINEUPS:
     "Bảng đấu đang có cặp đã xếp — xoá bảng đấu trước khi xoá hết đội.",
+  DUEL_REQUIRED: "Chưa có bảng đấu — tạo bảng đấu trước.",
+  REFEREE_NEEDS_CODE: "Tạo mã trọng tài trước khi mở.",
+  REFEREE_MATCH_DONE: "Trận đã kết thúc — nhờ BTC mở lại nếu cần sửa.",
+  REFEREE_BAD_MOVE: "Phải bắt đầu trận trước khi kết thúc.",
   FEE_LINE_LOCKED:
     "Dòng lệ phí tự tính theo số VĐV đã tick — sửa ở mục Lệ phí tham gia.",
   MONEY_OVERFLOW: "Số tiền quá lớn.",

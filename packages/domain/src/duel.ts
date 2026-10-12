@@ -1,4 +1,4 @@
-import type { DuelMatch, TournamentDocument } from "./schema";
+import type { DuelMatch, RefereeSave, TournamentDocument } from "./schema";
 import { isFinalScore } from "./score";
 
 // Đội Đỏ against Đội Xanh. Same two teams as the athletes' own draw.
@@ -66,13 +66,62 @@ export function validateDuelMatch(t: TournamentDocument, m: DuelMatch): void {
   }
   if (m.status !== "pending" && !(m.pairRed && m.pairBlue))
     throw new Error("DUEL_NEEDS_PAIRS");
-  if ((m.status === "done") !== (m.score !== null))
-    throw new Error("INVALID_SCORE");
-  if (m.score && !isFinalScore({ a: m.score.red, b: m.score.blue }))
+  // No score before the match is called; any running score while it is
+  // played; a final one once it is done.
+  const final =
+    m.score !== null && isFinalScore({ a: m.score.red, b: m.score.blue });
+  if (m.status === "pending" ? m.score !== null : m.status === "done" && !final)
     throw new Error("INVALID_SCORE");
   const players = playersOf(m);
   if (Object.keys(m.smashes).some((id) => !players.includes(id)))
     throw new Error("INVALID_LINEUP");
+}
+
+type Smashes = DuelMatch["smashes"];
+const sameSmashes = (a: Smashes, b: Smashes) =>
+  Object.keys(a).length === Object.keys(b).length &&
+  Object.entries(a).every(
+    ([id, s]) => b[id]?.hit === s.hit && b[id]?.net === s.net,
+  );
+
+// What a referee's save makes of the stored match. Pairs never change here.
+// A save that changes nothing gives back the stored match itself, so the
+// caller can tell a retry from an edit — and so a repeated "kết thúc" whose
+// reply was lost is answered, not refused.
+export function applyRefereeSave(m: DuelMatch, save: RefereeSave): DuelMatch {
+  const players = playersOf(m);
+  const smashes = Object.fromEntries(
+    Object.entries(save.smashes).filter(
+      ([id, s]) => players.includes(id) && (s.hit > 0 || s.net > 0),
+    ),
+  );
+  // Not mentioned: whoever has the match keeps it. Null: nobody.
+  const referee =
+    save.referee === undefined ? m.referee : (save.referee ?? undefined);
+  if (
+    m.status === save.status &&
+    m.score?.red === save.score?.red &&
+    m.score?.blue === save.score?.blue &&
+    m.referee === referee &&
+    sameSmashes(m.smashes, smashes)
+  )
+    return m;
+  if (m.status === "done") throw new Error("REFEREE_MATCH_DONE");
+  if (!(m.pairRed && m.pairBlue)) throw new Error("DUEL_NEEDS_PAIRS");
+  if (m.status === "pending" && save.status === "done")
+    throw new Error("REFEREE_BAD_MOVE");
+  const final =
+    save.score !== null &&
+    isFinalScore({ a: save.score.red, b: save.score.blue });
+  if (save.status === "done" && !final) throw new Error("INVALID_SCORE");
+  const { referee: _was, ...rest } = m;
+  return {
+    ...rest,
+    status: save.status,
+    score: save.score,
+    smashes,
+    ...(referee === undefined ? {} : { referee }),
+  };
 }
 
 export interface DuelTeamTotal {
@@ -121,7 +170,8 @@ export function deriveDuel(t: TournamentDocument): DuelResults | null {
       const sum = smashes.get(id) ?? { hit: 0, net: 0 };
       smashes.set(id, { hit: sum.hit + s.hit, net: sum.net + s.net });
     }
-    if (!m.score) continue;
+    // A live match shows its score but only a finished one counts.
+    if (m.status !== "done" || !m.score) continue;
     for (const side of DUEL_SIDES) {
       const scored = m.score[side] * weight(m);
       totals[side].points += scored;
@@ -141,7 +191,7 @@ export function deriveDuel(t: TournamentDocument): DuelResults | null {
   // the golden rally on court, which no table can decide.
   const order: Array<keyof DuelTeamTotal> = ["points", "wins", "finalPoints"];
   const key = order.find((k) => totals.red[k] !== totals.blue[k]);
-  const played = matches.filter((m) => m.score).length;
+  const played = matches.filter((m) => m.status === "done").length;
   return {
     totals,
     played,

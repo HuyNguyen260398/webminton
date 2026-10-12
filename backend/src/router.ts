@@ -1,12 +1,18 @@
-import { randomInt } from "node:crypto";
+import { randomInt, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { Id, PublicTournamentSchema } from "../../packages/domain/src/schema";
+import {
+  Id,
+  PublicTournamentSchema,
+  RefereeSaveSchema,
+} from "../../packages/domain/src/schema";
 import {
   applyCommand,
   previewDraw,
   PrivateMapSchema,
   type AdminState,
+  type Secrets,
 } from "../../packages/domain/src/commands";
+import { applyRefereeSave } from "../../packages/domain/src/duel";
 import { drawTeam } from "../../packages/domain/src/team-draw";
 import { requireAdmin, type Claims } from "./auth";
 import { renderSnapshot, type Publisher } from "./publish";
@@ -38,6 +44,7 @@ export interface Deps {
   random?: () => number;
 }
 export interface AdminView extends AdminState {
+  secrets: Secrets;
   version: number;
   publishedVersion: number;
   published?: boolean;
@@ -51,10 +58,18 @@ const CommandBody = Envelope.extend({ command: z.unknown() });
 const RestoreBody = Envelope.extend({ version: z.number().int().positive() });
 const PreviewBody = z.object({ seed: z.string().trim().min(1).max(500) });
 const TeamDrawBody = z.object({ athleteId: Id });
+const RefereeCheckBody = z.strictObject({ code: z.string().max(20) });
+const RefereeMatchBody = z.strictObject({
+  code: z.string().max(20),
+  matchId: Id,
+  ...RefereeSaveSchema.shape,
+});
 
 // What history shows for a roll made on /boc-tham: nobody is signed in there.
 export const TEAM_DRAW_ACTOR = "tu-boc-tham";
-const TEAM_DRAW_TRIES = 5;
+// What history shows for a save made on /trong-tai.
+export const REFEREE_ACTOR = "trong-tai";
+const OPEN_WRITE_TRIES = 5;
 const osRandom = () => randomInt(2 ** 32) / 2 ** 32;
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
@@ -63,6 +78,7 @@ const view = (s: StoredState): AdminView => ({
   publishedVersion: s.publishedVersion,
   document: s.document,
   private: s.private,
+  secrets: s.secrets ?? { refereeCode: null },
 });
 
 function parse<T>(schema: z.ZodType<T>, raw: string | null): T {
@@ -126,6 +142,25 @@ async function sameDuelMatch(
   return then !== undefined && stable(then) === stable(find(cur));
 }
 
+// A referee's save moves the version every few seconds on match day, and it
+// touches nothing but its own match. So an organiser whose screen is behind
+// only by referee saves is not really stale: the off switch, a code change or
+// a fee tick must land between two rallies. Their own save of a bảng đấu
+// match is the exception and keeps the stricter rule above.
+async function staleButSafe(
+  deps: Deps,
+  cur: StoredState,
+  baseVersion: number,
+  command: unknown,
+): Promise<boolean> {
+  if (await sameDuelMatch(deps, cur, baseVersion, command)) return true;
+  if ((command as { type?: unknown })?.type === "saveDuelMatch") return false;
+  const since = await deps.store.history(baseVersion);
+  return (
+    since.length > 0 && since.every((h) => h.actorEmail === REFEREE_ACTOR)
+  );
+}
+
 async function commit(
   deps: Deps,
   actorEmail: string,
@@ -175,7 +210,73 @@ async function teamDraw(deps: Deps, athleteId: string): Promise<ApiResponse> {
       return ok({ athleteId, teamId });
     } catch (e) {
       const conflict = e instanceof Error && e.message === "CONFLICT";
-      if (!conflict || attempt >= TEAM_DRAW_TRIES) throw e;
+      if (!conflict || attempt >= OPEN_WRITE_TRIES) throw e;
+    }
+  }
+}
+
+// The switch is the organiser's; the code is what the referees were told.
+function refereeGate(cur: StoredState, code: string): void {
+  if (!cur.document.referee?.open) throw new Error("REFEREE_CLOSED");
+  const want = Buffer.from(cur.secrets?.refereeCode ?? "");
+  const got = Buffer.from(code);
+  if (
+    want.length === 0 ||
+    got.length !== want.length ||
+    !timingSafeEqual(got, want)
+  )
+    throw new Error("REFEREE_CODE");
+}
+
+// The other open write. A referee names one match and sends its status,
+// score and smash counts; the pairs come from the table, so this cannot
+// re-seat anyone. Two courts saving at once collide on the version, and the
+// loser goes again over the new state — its match is untouched by the other.
+async function refereeMatch(
+  deps: Deps,
+  body: z.infer<typeof RefereeMatchBody>,
+): Promise<ApiResponse> {
+  const { code, matchId, ...save } = body;
+  for (let attempt = 1; ; attempt++) {
+    const cur = await current(deps);
+    refereeGate(cur, code);
+    const m = cur.document.duel?.matches.find((x) => x.id === matchId);
+    if (!m) throw new Error("MATCH_NOT_FOUND");
+    const next = applyRefereeSave(m, save);
+    // Nothing to change: a retry, or a second tap. Not worth a version.
+    if (next === m) return ok({ match: m, updatedAt: cur.document.updatedAt });
+    const state = applyCommand(
+      cur,
+      {
+        type: "saveDuelMatch",
+        payload: {
+          matchId,
+          pairRed: next.pairRed,
+          pairBlue: next.pairBlue,
+          status: next.status,
+          score: next.score,
+          smashes: next.smashes,
+          referee: next.referee ?? null,
+        },
+      },
+      REFEREE_ACTOR,
+      deps.now(),
+    );
+    try {
+      const saved = await deps.store.write(cur, state, {
+        at: deps.now(),
+        actorEmail: REFEREE_ACTOR,
+        commandType: "refereeMatch",
+        requestId: `referee-${matchId}-${cur.version + 1}`,
+      });
+      await publishState(deps, saved);
+      return ok({
+        match: saved.document.duel?.matches.find((x) => x.id === matchId),
+        updatedAt: saved.document.updatedAt,
+      });
+    } catch (e) {
+      const conflict = e instanceof Error && e.message === "CONFLICT";
+      if (!conflict || attempt >= OPEN_WRITE_TRIES) throw e;
     }
   }
 }
@@ -186,6 +287,13 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
     if (key === "GET /api/config") return ok(deps.config);
     if (key === "POST /api/team-draw")
       return await teamDraw(deps, parse(TeamDrawBody, req.rawBody).athleteId);
+    if (key === "POST /api/referee/check") {
+      const { code } = parse(RefereeCheckBody, req.rawBody);
+      refereeGate(await current(deps), code);
+      return ok({});
+    }
+    if (key === "POST /api/referee/match")
+      return await refereeMatch(deps, parse(RefereeMatchBody, req.rawBody));
     if (!req.path.startsWith("/api/admin/")) throw new Error("NOT_FOUND");
     const actor = requireAdmin(req.claims, deps.adminEmails);
 
@@ -205,7 +313,7 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
           body,
           type,
           (s) => applyCommand(s, body.command, actor, deps.now()),
-          (cur) => sameDuelMatch(deps, cur, body.baseVersion, body.command),
+          (cur) => staleButSafe(deps, cur, body.baseVersion, body.command),
         );
       }
 
@@ -224,12 +332,16 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
         const body = parse(RestoreBody, req.rawBody);
         const old = await deps.store.snapshot(body.version);
         if (!old) throw new Error("NOT_FOUND");
-        return await commit(deps, actor, body, `restore:${body.version}`, () => ({
+        return await commit(deps, actor, body, `restore:${body.version}`, (s) => ({
           document: PublicTournamentSchema.parse({
             ...old.document,
             updatedAt: deps.now(),
+            // Nor may it open or close their page behind the organiser's back.
+            referee: old.document.duel ? s.document.referee : undefined,
           }),
           private: PrivateMapSchema.parse(old.private),
+          // An undo must not change what the referees were told.
+          secrets: s.secrets,
         }));
       }
     }
