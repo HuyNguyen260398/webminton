@@ -43,12 +43,12 @@ describe("SiteNav", () => {
     return t;
   };
 
-  it("puts BẢNG ĐẤU and VUA SMASH first once the organiser starts the giải", () => {
+  it("puts BẢNG ĐẤU and SMASH OF THE DAY first once the organiser starts the giải", () => {
     const t = underWay();
     t.info.started = true;
     expect(links(t).map(([label]) => label)).toEqual([
       "BẢNG ĐẤU",
-      "VUA SMASH",
+      "SMASH OF THE DAY",
       "TRANG CHỦ",
       "THỂ LỆ THI ĐẤU",
       "NHÀ TÀI TRỢ",
@@ -78,7 +78,7 @@ describe("SiteNav", () => {
       ["DANH SÁCH VĐV", "#van-dong-vien"],
       ["HAI ĐỘI", "#hai-doi"],
       ["BẢNG ĐẤU", "#bang-dau"],
-      ["VUA SMASH", "#vua-smash"],
+      ["SMASH OF THE DAY", "#vua-smash"],
       ["ĐĂNG KÝ THI ĐẤU", "#dang-ky"],
       ["BỐC THĂM CHIA ĐỘI", "/boc-tham/"],
     ]);

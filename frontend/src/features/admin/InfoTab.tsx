@@ -49,7 +49,7 @@ function RegistrationSwitch({ admin }: { admin: ReadyAdmin }) {
   );
 }
 
-// Starting the giải moves BẢNG ĐẤU and VUA SMASH to the top of the public
+// Starting the giải moves BẢNG ĐẤU and SMASH OF THE DAY to the top of the public
 // page. It changes nothing else: refereeing, registration and the team draw
 // keep their own switches.
 function StartSwitch({ admin }: { admin: ReadyAdmin }) {
@@ -70,7 +70,7 @@ function StartSwitch({ admin }: { admin: ReadyAdmin }) {
           </Pill>
         </div>
         <p>
-          Khi giải bắt đầu, “BẢNG ĐẤU” và “VUA SMASH” được đưa lên đầu trang
+          Khi giải bắt đầu, “BẢNG ĐẤU” và “SMASH OF THE DAY” được đưa lên đầu trang
           giải để người xem theo dõi trận và tỉ số. Dừng thì hai mục về lại
           chỗ cũ.
         </p>

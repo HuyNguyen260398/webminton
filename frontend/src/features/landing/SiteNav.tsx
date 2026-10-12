@@ -8,7 +8,7 @@ export function SiteNav({ view }: { view: TournamentView }) {
   type Item = [label: string, href: string, shown: boolean];
   const duel: Item[] = [
     ["BẢNG ĐẤU", "#bang-dau", on.duel !== null],
-    ["VUA SMASH", "#vua-smash", on.smash],
+    ["SMASH OF THE DAY", "#vua-smash", on.smash],
   ];
   // Once the giải has started the scores lead the page, and so the bar.
   const items: Item[] = [

@@ -105,7 +105,7 @@ export const InfoSchema = z.strictObject({
   // link; absent, on every document older than the switch, means open.
   registrationOpen: z.boolean().optional(),
   // The organiser's other switch: the giải is being played. True moves BẢNG
-  // ĐẤU and VUA SMASH to the top of the page. Absent means not started.
+  // ĐẤU and SMASH OF THE DAY to the top of the page. Absent means not started.
   started: z.boolean().optional(),
   timezone: z.literal("Asia/Ho_Chi_Minh"),
   feeVnd: Money.nullable(),

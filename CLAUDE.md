@@ -173,7 +173,7 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
 
 In the admin screen the `Trận` tab is `DuelTab` unless a four-team draw is
 confirmed, in which case it is the old `MatchesTab`. The public page shows
-`BẢNG ĐẤU` and `VUA SMASH` once the bảng đấu exists.
+`BẢNG ĐẤU` and `SMASH OF THE DAY` once the bảng đấu exists.
 
 ### The referees' page
 
@@ -272,7 +272,7 @@ the bar scrolls sideways inside itself.
 
 Once the organiser starts the giải — the `Bắt đầu giải` switch at the top of
 the admin screen's `Giải` tab, `info.started` through `updateInfo` — `BẢNG
-ĐẤU` and `VUA SMASH` move above poster 1 and to the front of the bar
+ĐẤU` and `SMASH OF THE DAY` move above poster 1 and to the front of the bar
 (`LiveSections.tsx::DuelSections`, `pageSections().started`). The switch moves
 those two sections and nothing else; it needs the bảng đấu to exist, and a
 document without the field counts as not started.

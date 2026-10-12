@@ -27,7 +27,7 @@ export function pageSections({ t, derived }: TournamentView) {
         (SELF_DRAW_TEAM_IDS as readonly string[]).includes(a.teamId ?? ""),
       ),
     duel,
-    // The giải is being played: BẢNG ĐẤU and VUA SMASH go to the top of the
+    // The giải is being played: BẢNG ĐẤU and SMASH OF THE DAY go to the top of the
     // page and the front of the bar. Without a bảng đấu there is nothing to
     // move.
     started: t.info.started === true && duel !== null,

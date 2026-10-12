@@ -14,7 +14,7 @@ import { Standings } from "../matches/Standings";
 import { PlacementBracket } from "../matches/PlacementBracket";
 import { FinanceDashboard } from "../finance/FinanceDashboard";
 
-// BẢNG ĐẤU and VUA SMASH. They sit among the live sections until the
+// BẢNG ĐẤU and SMASH OF THE DAY. They sit among the live sections until the
 // organiser starts the giải, and at the top of the page from then on: each
 // of the two places asks for them and only the right one gets them.
 export function DuelSections({
@@ -34,7 +34,7 @@ export function DuelSections({
         <DuelMatchList t={view.t} />
       </Section>
       {on.smash && (
-        <Section id="vua-smash" title="VUA SMASH">
+        <Section id="vua-smash" title="SMASH OF THE DAY">
           <SmashLeaders t={view.t} results={duel} />
         </Section>
       )}
