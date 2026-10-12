@@ -75,6 +75,7 @@ export const DuelMatchSchema = z.strictObject({
   pairBlue: PairSchema.nullable(),
   // "live" is the organiser calling the match: from then the pairs are shown.
   status: z.enum(["pending", "live", "done"]),
+  // Null until the match is called; a running score while live; final when done.
   score: DuelScoreSchema.nullable(),
   // Keyed by athlete id; only the four players of the match appear.
   smashes: z.record(Id, SmashCountSchema),
@@ -244,8 +245,12 @@ export const PublicTournamentSchema = z
           fail("Một VĐV không thể đứng hai chỗ trong cùng một trận");
         if (Object.keys(m.smashes).some((id) => !players.includes(id)))
           fail("Chỉ đếm smash cho VĐV của trận");
-        if ((m.status === "done") !== (m.score !== null))
-          fail("Trận đã xong phải có tỉ số, trận chưa xong thì không");
+        if (
+          m.status === "pending"
+            ? m.score !== null
+            : m.status === "done" && m.score === null
+        )
+          fail("Trận chưa gọi không có tỉ số, trận đã xong phải có");
         if (m.status !== "pending" && !(m.pairRed && m.pairBlue))
           fail("Trận đã gọi phải có đủ hai cặp");
       });

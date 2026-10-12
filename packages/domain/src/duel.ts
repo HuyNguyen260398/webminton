@@ -66,9 +66,11 @@ export function validateDuelMatch(t: TournamentDocument, m: DuelMatch): void {
   }
   if (m.status !== "pending" && !(m.pairRed && m.pairBlue))
     throw new Error("DUEL_NEEDS_PAIRS");
-  if ((m.status === "done") !== (m.score !== null))
-    throw new Error("INVALID_SCORE");
-  if (m.score && !isFinalScore({ a: m.score.red, b: m.score.blue }))
+  // No score before the match is called; any running score while it is
+  // played; a final one once it is done.
+  const final =
+    m.score !== null && isFinalScore({ a: m.score.red, b: m.score.blue });
+  if (m.status === "pending" ? m.score !== null : m.status === "done" && !final)
     throw new Error("INVALID_SCORE");
   const players = playersOf(m);
   if (Object.keys(m.smashes).some((id) => !players.includes(id)))
@@ -121,7 +123,8 @@ export function deriveDuel(t: TournamentDocument): DuelResults | null {
       const sum = smashes.get(id) ?? { hit: 0, net: 0 };
       smashes.set(id, { hit: sum.hit + s.hit, net: sum.net + s.net });
     }
-    if (!m.score) continue;
+    // A live match shows its score but only a finished one counts.
+    if (m.status !== "done" || !m.score) continue;
     for (const side of DUEL_SIDES) {
       const scored = m.score[side] * weight(m);
       totals[side].points += scored;
@@ -141,7 +144,7 @@ export function deriveDuel(t: TournamentDocument): DuelResults | null {
   // the golden rally on court, which no table can decide.
   const order: Array<keyof DuelTeamTotal> = ["points", "wins", "finalPoints"];
   const key = order.find((k) => totals.red[k] !== totals.blue[k]);
-  const played = matches.filter((m) => m.score).length;
+  const played = matches.filter((m) => m.status === "done").length;
   return {
     totals,
     played,
