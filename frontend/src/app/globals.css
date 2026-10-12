@@ -92,6 +92,49 @@ button.secondary,
   top: 10px;
 }
 
+/* ---- The bar that follows the reader down the page ---- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: var(--border);
+  background: var(--ink);
+}
+/* It scrolls sideways inside itself on a phone; the page never does. */
+.site-nav ul {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0 var(--gutter);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.site-nav ul::-webkit-scrollbar {
+  display: none;
+}
+.site-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+  color: var(--paper);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  color: var(--ink);
+  background: var(--yellow);
+}
+/* A section jumped to must not land underneath the bar. */
+main [id] {
+  scroll-margin-top: 56px;
+}
+
 /* ---- Scrolling divider between poster sections ---- */
 .marquee {
   display: flex;

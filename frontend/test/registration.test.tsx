@@ -32,6 +32,23 @@ describe("Registration", () => {
     expect(link.getAttribute("rel")).toBe("noopener noreferrer");
   });
 
+  it("renders nothing once the organiser closes registration, link or no link", () => {
+    const { container } = render(
+      <Registration t={open({ registrationOpen: false })} />,
+    );
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("is open when the switch was never touched or is switched back on", () => {
+    for (const registrationOpen of [undefined, true]) {
+      const { container, unmount } = render(
+        <Registration t={open({ registrationOpen })} />,
+      );
+      expect(container.querySelector("#dang-ky")).not.toBeNull();
+      unmount();
+    }
+  });
+
   it("says the deadline is still open while registrationDeadline is null", () => {
     const { container } = render(<Registration t={open()} />);
     expect(container.textContent).toMatch(/Chưa chốt hạn/);

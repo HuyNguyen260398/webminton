@@ -101,6 +101,9 @@ export const InfoSchema = z.strictObject({
   dateLabel: text,
   registrationDeadline: time.nullable(),
   registrationFormUrl: z.url().nullable(),
+  // The organiser's switch. False hides ĐĂNG KÝ THI ĐẤU while keeping the
+  // link; absent, on every document older than the switch, means open.
+  registrationOpen: z.boolean().optional(),
   timezone: z.literal("Asia/Ho_Chi_Minh"),
   feeVnd: Money.nullable(),
   contactName: text.nullable(),

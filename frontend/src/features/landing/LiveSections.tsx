@@ -1,5 +1,4 @@
 import type { TournamentView } from "../../lib/use-tournament";
-import { deriveDuel } from "../../../../packages/domain/src/duel";
 import {
   DuelMatchList,
   DuelScoreboard,
@@ -7,6 +6,7 @@ import {
 } from "../duel/DuelBoard";
 import { SELF_DRAW_TEAM_IDS } from "../../../../packages/domain/src/team-draw";
 import { Section } from "./primitives";
+import { pageSections } from "./sections";
 import { AthleteTable } from "../athletes/AthleteTable";
 import { TeamPreview } from "../draw/TeamPreview";
 import { GroupSchedule } from "../matches/GroupSchedule";
@@ -18,30 +18,22 @@ import { FinanceDashboard } from "../finance/FinanceDashboard";
 // renders the posters alone and the page fills in as the tournament runs.
 export function LiveSections({ view }: { view: TournamentView }) {
   const { t, derived } = view;
-  const drawn = t.draw.status === "confirmed";
-  // The athletes' own draw fills two teams without a confirmed draw.
-  const selfDrawn =
-    !drawn &&
-    t.athletes.some((a) =>
-      (SELF_DRAW_TEAM_IDS as readonly string[]).includes(a.teamId ?? ""),
-    );
-  // The two-team bảng đấu, once the organiser has created it.
-  const duel = deriveDuel(t);
-  const played = derived.matches.some((m) => m.winnerTeamId !== null);
+  const on = pageSections(view);
+  const { duel } = on;
 
   return (
     <>
-      {t.athletes.length > 0 && (
+      {on.athletes && (
         <Section id="van-dong-vien" title="DANH SÁCH VĐV">
           <AthleteTable t={t} />
         </Section>
       )}
-      {drawn && (
+      {on.fourTeams && (
         <Section id="boc-tham" title="BỐN ĐỘI">
           <TeamPreview t={t} />
         </Section>
       )}
-      {selfDrawn && (
+      {on.twoTeams && (
         <Section id="hai-doi" title="HAI ĐỘI">
           <TeamPreview t={t} teamIds={SELF_DRAW_TEAM_IDS} />
         </Section>
@@ -52,23 +44,23 @@ export function LiveSections({ view }: { view: TournamentView }) {
           <DuelMatchList t={t} />
         </Section>
       )}
-      {duel && duel.smashHit.length + duel.smashNet.length > 0 && (
+      {duel && on.smash && (
         <Section id="vua-smash" title="VUA SMASH">
           <SmashLeaders t={t} results={duel} />
         </Section>
       )}
-      {drawn && derived.matches.length > 0 && (
+      {on.schedule && (
         <Section id="lich-thi-dau" title="LỊCH THI ĐẤU">
           <GroupSchedule t={t} derived={derived} />
           <PlacementBracket t={t} derived={derived} />
         </Section>
       )}
-      {played && (
+      {on.standings && (
         <Section id="bang-xep-hang" title="BẢNG XẾP HẠNG">
           <Standings t={t} derived={derived} />
         </Section>
       )}
-      {t.finance.published && (
+      {on.finance && (
         <Section id="thu-chi" title="THU CHI">
           <FinanceDashboard t={t} />
         </Section>

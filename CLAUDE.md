@@ -263,10 +263,18 @@ The landing page is `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI Đ
 → poster 2 → poster 3 → the live data sections → a `<details>` linking the
 original JPGs.
 
+`features/landing/SiteNav.tsx` is the sticky bar at the top. It lists only the
+sections that are on the page right now: it and `LiveSections` both read
+`features/landing/sections.ts::pageSections`, so add a section's condition
+there and the bar cannot link to something that is not rendered. On a phone
+the bar scrolls sideways inside itself.
+
 `features/landing/Registration.tsx` is the one section with no poster behind
 it: a link to the Microsoft Form in `info.registrationFormUrl`. It **renders
-nothing when that field is null**, so registration closes by clearing the link
-in the admin screen's `Giải` tab — no rebuild.
+nothing when that field is null or `info.registrationOpen` is false**. The
+organiser closes and reopens registration with the `Đăng ký thi đấu` switch at
+the top of the admin screen's `Giải` tab, which keeps the link — no rebuild.
+A document without `registrationOpen` counts as open.
 
 `features/landing/LiveSections.tsx` renders `DANH SÁCH VĐV`, `BỐN ĐỘI`,
 `LỊCH THI ĐẤU`, `BẢNG XẾP HẠNG` and `THU CHI` — each **hides itself when its

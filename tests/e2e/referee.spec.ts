@@ -211,8 +211,10 @@ test("a referee picks their name to take a match, and it shows everywhere", asyn
     type: "saveDuelMatch",
     payload: {
       matchId: "vong-loai-2",
-      pairRed: [red[2].id, red[3].id],
-      pairBlue: [blue[2].id, blue[3].id],
+      // The same four as trận 1: the draw is random and may give a team no
+      // more than two men.
+      pairRed: [red[0].id, red[1].id],
+      pairBlue: [blue[0].id, blue[1].id],
       status: "pending",
       score: null,
       smashes: {},

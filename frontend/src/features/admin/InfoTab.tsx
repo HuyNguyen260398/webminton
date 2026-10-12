@@ -1,11 +1,53 @@
 "use client";
 import { useState } from "react";
 import type { ReadyAdmin } from "../../lib/use-admin";
-import { Card } from "../landing/primitives";
+import { Card, Pill } from "../landing/primitives";
 import { Field } from "./fields";
 import { fromLocalInput, toLocalInput } from "./time";
 
 const orNull = (v: string) => (v.trim() === "" ? null : v.trim());
+
+// The same kind of switch as the team draw's: one tap, no form to save.
+// Closing keeps the link, so reopening is one tap too.
+function RegistrationSwitch({ admin }: { admin: ReadyAdmin }) {
+  const { send, busy } = admin;
+  const { registrationFormUrl, registrationOpen } = admin.view.document.info;
+  const open = registrationOpen !== false;
+  return (
+    <Card title="Đăng ký thi đấu">
+      <div className="admin-stack">
+        <div className="pill-row">
+          <Pill tone={registrationFormUrl && open ? "green" : "outline"}>
+            {!registrationFormUrl
+              ? "Chưa có link form"
+              : open
+                ? "Đang mở"
+                : "Đã đóng"}
+          </Pill>
+        </div>
+        <p>
+          Khi đóng, mục “ĐĂNG KÝ THI ĐẤU” biến khỏi trang giải và thanh điều
+          hướng. Link form vẫn được giữ, mở lại là hiện ngay.
+        </p>
+        <div className="row-actions">
+          <button
+            type="button"
+            className={open ? "button--ghost" : undefined}
+            disabled={busy || !registrationFormUrl}
+            onClick={() =>
+              send(
+                { type: "updateInfo", payload: { registrationOpen: !open } },
+                open ? "Đã đóng đăng ký." : "Đã mở đăng ký.",
+              )
+            }
+          >
+            {open ? "Đóng đăng ký" : "Mở đăng ký"}
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 function InfoForm({ admin }: { admin: ReadyAdmin }) {
   const { send, busy } = admin;
@@ -63,7 +105,7 @@ function InfoForm({ admin }: { admin: ReadyAdmin }) {
             />
           </Field>
         </div>
-        {text("registrationFormUrl", "Link form đăng ký (để trống = đóng đăng ký)", "url")}
+        {text("registrationFormUrl", "Link form đăng ký", "url")}
         <div className="field-row">
           {text("contactName", "Người liên hệ")}
           {text("contactPhone", "Số điện thoại liên hệ (hiện công khai)")}
@@ -194,6 +236,7 @@ export function InfoTab({ admin }: { admin: ReadyAdmin }) {
   const v = admin.view.version;
   return (
     <div className="admin-stack">
+      <RegistrationSwitch admin={admin} />
       <InfoForm key={`info:${v}`} admin={admin} />
       <CourtsForm key={`courts:${v}`} admin={admin} />
     </div>
