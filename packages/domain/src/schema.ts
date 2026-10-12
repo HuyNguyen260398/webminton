@@ -80,6 +80,12 @@ export const DuelMatchSchema = z.strictObject({
   // Keyed by athlete id; only the four players of the match appear.
   smashes: z.record(Id, SmashCountSchema),
 });
+// All a referee may send for a match. Pairs are the organiser's.
+export const RefereeSaveSchema = z.strictObject({
+  status: z.enum(["live", "done"]),
+  score: DuelScoreSchema.nullable(),
+  smashes: z.record(Id, SmashCountSchema),
+});
 export const InfoSchema = z.strictObject({
   name: text,
   clubName: text,
@@ -169,6 +175,9 @@ export const PublicTournamentSchema = z
     }),
     // Absent until the organiser creates the bảng đấu.
     duel: z.strictObject({ matches: z.array(DuelMatchSchema) }).optional(),
+    // Whether /trong-tai accepts saves. Absent means closed. The code the
+    // referees type is a secret and is stored beside the document.
+    referee: z.strictObject({ open: z.boolean() }).optional(),
     tieDecisions: z.array(
       z.strictObject({
         tiedTeamIds: z.array(Id).min(2),
@@ -260,6 +269,7 @@ export const PublicTournamentSchema = z
   });
 export type TournamentDocument = z.infer<typeof PublicTournamentSchema>;
 export type DuelMatch = z.infer<typeof DuelMatchSchema>;
+export type RefereeSave = z.infer<typeof RefereeSaveSchema>;
 export type Athlete = z.infer<typeof AthleteSchema>;
 export type Team = z.infer<typeof TeamSchema>;
 export type Match = z.infer<typeof MatchSchema>;

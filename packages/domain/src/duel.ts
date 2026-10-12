@@ -1,4 +1,4 @@
-import type { DuelMatch, TournamentDocument } from "./schema";
+import type { DuelMatch, RefereeSave, TournamentDocument } from "./schema";
 import { isFinalScore } from "./score";
 
 // Đội Đỏ against Đội Xanh. Same two teams as the athletes' own draw.
@@ -75,6 +75,42 @@ export function validateDuelMatch(t: TournamentDocument, m: DuelMatch): void {
   const players = playersOf(m);
   if (Object.keys(m.smashes).some((id) => !players.includes(id)))
     throw new Error("INVALID_LINEUP");
+}
+
+type Smashes = DuelMatch["smashes"];
+const sameSmashes = (a: Smashes, b: Smashes) =>
+  Object.keys(a).length === Object.keys(b).length &&
+  Object.entries(a).every(
+    ([id, s]) => b[id]?.hit === s.hit && b[id]?.net === s.net,
+  );
+
+// What a referee's save makes of the stored match. Pairs never change here.
+// A save that changes nothing gives back the stored match itself, so the
+// caller can tell a retry from an edit — and so a repeated "kết thúc" whose
+// reply was lost is answered, not refused.
+export function applyRefereeSave(m: DuelMatch, save: RefereeSave): DuelMatch {
+  const players = playersOf(m);
+  const smashes = Object.fromEntries(
+    Object.entries(save.smashes).filter(
+      ([id, s]) => players.includes(id) && (s.hit > 0 || s.net > 0),
+    ),
+  );
+  if (
+    m.status === save.status &&
+    m.score?.red === save.score?.red &&
+    m.score?.blue === save.score?.blue &&
+    sameSmashes(m.smashes, smashes)
+  )
+    return m;
+  if (m.status === "done") throw new Error("REFEREE_MATCH_DONE");
+  if (!(m.pairRed && m.pairBlue)) throw new Error("DUEL_NEEDS_PAIRS");
+  if (m.status === "pending" && save.status === "done")
+    throw new Error("REFEREE_BAD_MOVE");
+  const final =
+    save.score !== null &&
+    isFinalScore({ a: save.score.red, b: save.score.blue });
+  if (save.status === "done" && !final) throw new Error("INVALID_SCORE");
+  return { ...m, status: save.status, score: save.score, smashes };
 }
 
 export interface DuelTeamTotal {
