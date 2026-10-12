@@ -27,6 +27,10 @@ export function pageSections({ t, derived }: TournamentView) {
         (SELF_DRAW_TEAM_IDS as readonly string[]).includes(a.teamId ?? ""),
       ),
     duel,
+    // The giải is being played: BẢNG ĐẤU and VUA SMASH go to the top of the
+    // page and the front of the bar. Without a bảng đấu there is nothing to
+    // move.
+    started: t.info.started === true && duel !== null,
     smash: duel !== null && duel.smashHit.length + duel.smashNet.length > 0,
     schedule: drawn && derived.matches.length > 0,
     standings: derived.matches.some((m) => m.winnerTeamId !== null),

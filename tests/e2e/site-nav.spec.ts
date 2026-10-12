@@ -68,6 +68,48 @@ test("on a phone the bar scrolls inside itself and the page does not", async ({ 
   for (const h of size.links) expect(h).toBeGreaterThanOrEqual(48);
 });
 
+test("starting the giải moves BẢNG ĐẤU to the top of the page, stopping puts it back", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/quan-tri/#giai");
+  await page.getByRole("button", { name: "Đăng nhập thử" }).click();
+  // Nothing to move until the bảng đấu exists.
+  await expect(page.getByRole("button", { name: "Bắt đầu giải" })).toBeDisabled();
+  await send(request, { type: "resetDraw", payload: {} });
+  await send(request, { type: "createDuel", payload: {} });
+  await page.reload();
+
+  const home = await page.context().newPage();
+  await home.goto("/");
+  // Which comes first on the page: the bảng đấu or poster 1.
+  const duelFirst = () =>
+    home.evaluate(
+      () =>
+        (document.querySelector("#bang-dau")!.compareDocumentPosition(
+          document.querySelector("#thong-bao")!,
+        ) &
+          Node.DOCUMENT_POSITION_FOLLOWING) !==
+        0,
+    );
+  await expect(home.locator("#bang-dau")).toHaveCount(1);
+  expect(await duelFirst()).toBe(false);
+
+  await page.getByRole("button", { name: "Bắt đầu giải" }).click();
+  await expect(page.getByText("Đã bắt đầu giải.")).toBeVisible();
+  await home.reload();
+  await expect(home.locator("#bang-dau")).toHaveCount(1);
+  expect(await duelFirst()).toBe(true);
+  expect((await labels(home))[0]).toBe("BẢNG ĐẤU");
+
+  await page.getByRole("button", { name: "Dừng giải" }).click();
+  await expect(page.getByText("Đã dừng giải.")).toBeVisible();
+  await home.reload();
+  await expect(home.locator("#bang-dau")).toHaveCount(1);
+  expect(await duelFirst()).toBe(false);
+  await home.close();
+});
+
 test("the organiser closes and reopens ĐĂNG KÝ THI ĐẤU with one tap", async ({
   page,
   request,

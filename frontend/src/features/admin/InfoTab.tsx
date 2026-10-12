@@ -49,6 +49,51 @@ function RegistrationSwitch({ admin }: { admin: ReadyAdmin }) {
   );
 }
 
+// Starting the giải moves BẢNG ĐẤU and VUA SMASH to the top of the public
+// page. It changes nothing else: refereeing, registration and the team draw
+// keep their own switches.
+function StartSwitch({ admin }: { admin: ReadyAdmin }) {
+  const { send, busy } = admin;
+  const { info, duel } = admin.view.document;
+  const hasDuel = (duel?.matches.length ?? 0) > 0;
+  const started = info.started === true;
+  return (
+    <Card title="Bắt đầu giải">
+      <div className="admin-stack">
+        <div className="pill-row">
+          <Pill tone={started && hasDuel ? "green" : "outline"}>
+            {!hasDuel
+              ? "Chưa có bảng đấu"
+              : started
+                ? "Đang thi đấu"
+                : "Chưa bắt đầu"}
+          </Pill>
+        </div>
+        <p>
+          Khi giải bắt đầu, “BẢNG ĐẤU” và “VUA SMASH” được đưa lên đầu trang
+          giải để người xem theo dõi trận và tỉ số. Dừng thì hai mục về lại
+          chỗ cũ.
+        </p>
+        <div className="row-actions">
+          <button
+            type="button"
+            className={started ? "button--ghost" : undefined}
+            disabled={busy || (!hasDuel && !started)}
+            onClick={() =>
+              send(
+                { type: "updateInfo", payload: { started: !started } },
+                started ? "Đã dừng giải." : "Đã bắt đầu giải.",
+              )
+            }
+          >
+            {started ? "Dừng giải" : "Bắt đầu giải"}
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function InfoForm({ admin }: { admin: ReadyAdmin }) {
   const { send, busy } = admin;
   const info = admin.view.document.info;
@@ -236,6 +281,7 @@ export function InfoTab({ admin }: { admin: ReadyAdmin }) {
   const v = admin.view.version;
   return (
     <div className="admin-stack">
+      <StartSwitch admin={admin} />
       <RegistrationSwitch admin={admin} />
       <InfoForm key={`info:${v}`} admin={admin} />
       <CourtsForm key={`courts:${v}`} admin={admin} />

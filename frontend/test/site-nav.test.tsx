@@ -21,7 +21,7 @@ describe("SiteNav", () => {
     ]);
   });
 
-  it("lists every section, in order, once the giải is under way", () => {
+  const underWay = () => {
     const t = makeTournament();
     t.info.registrationFormUrl = FORM;
     t.draw.status = "open";
@@ -40,6 +40,37 @@ describe("SiteNav", () => {
       smashes: { r1: { hit: 1, net: 0 } },
     });
     t.duel = { matches };
+    return t;
+  };
+
+  it("puts BẢNG ĐẤU and VUA SMASH first once the organiser starts the giải", () => {
+    const t = underWay();
+    t.info.started = true;
+    expect(links(t).map(([label]) => label)).toEqual([
+      "BẢNG ĐẤU",
+      "VUA SMASH",
+      "TRANG CHỦ",
+      "THỂ LỆ THI ĐẤU",
+      "NHÀ TÀI TRỢ",
+      "DANH SÁCH VĐV",
+      "HAI ĐỘI",
+      "ĐĂNG KÝ THI ĐẤU",
+      "BỐC THĂM CHIA ĐỘI",
+    ]);
+  });
+
+  it("keeps the usual order when started is set but there is no bảng đấu", () => {
+    const t = makeTournament();
+    t.info.started = true;
+    expect(links(t).map(([label]) => label)).toEqual([
+      "TRANG CHỦ",
+      "THỂ LỆ THI ĐẤU",
+      "NHÀ TÀI TRỢ",
+    ]);
+  });
+
+  it("lists every section, in order, once the giải is under way", () => {
+    const t = underWay();
     expect(links(t)).toEqual([
       ["TRANG CHỦ", "#thong-bao"],
       ["THỂ LỆ THI ĐẤU", "#the-le"],

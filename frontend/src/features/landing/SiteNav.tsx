@@ -5,14 +5,20 @@ import { pageSections } from "./sections";
 // and lists only the sections that are on the page right now.
 export function SiteNav({ view }: { view: TournamentView }) {
   const on = pageSections(view);
-  const items: Array<[label: string, href: string, shown: boolean]> = [
+  type Item = [label: string, href: string, shown: boolean];
+  const duel: Item[] = [
+    ["BẢNG ĐẤU", "#bang-dau", on.duel !== null],
+    ["VUA SMASH", "#vua-smash", on.smash],
+  ];
+  // Once the giải has started the scores lead the page, and so the bar.
+  const items: Item[] = [
+    ...(on.started ? duel : []),
     ["TRANG CHỦ", "#thong-bao", true],
     ["THỂ LỆ THI ĐẤU", "#the-le", true],
     ["NHÀ TÀI TRỢ", "#nha-tai-tro", true],
     ["DANH SÁCH VĐV", "#van-dong-vien", on.athletes],
     ["HAI ĐỘI", "#hai-doi", on.twoTeams],
-    ["BẢNG ĐẤU", "#bang-dau", on.duel !== null],
-    ["VUA SMASH", "#vua-smash", on.smash],
+    ...(on.started ? [] : duel),
     ["ĐĂNG KÝ THI ĐẤU", "#dang-ky", on.registration],
     // Straight to the draw itself, which is a page of its own.
     ["BỐC THĂM CHIA ĐỘI", "/boc-tham/", on.teamDraw],

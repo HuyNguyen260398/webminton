@@ -270,6 +270,13 @@ sections that are on the page right now: it and `LiveSections` both read
 there and the bar cannot link to something that is not rendered. On a phone
 the bar scrolls sideways inside itself.
 
+Once the organiser starts the giải — the `Bắt đầu giải` switch at the top of
+the admin screen's `Giải` tab, `info.started` through `updateInfo` — `BẢNG
+ĐẤU` and `VUA SMASH` move above poster 1 and to the front of the bar
+(`LiveSections.tsx::DuelSections`, `pageSections().started`). The switch moves
+those two sections and nothing else; it needs the bảng đấu to exist, and a
+document without the field counts as not started.
+
 `features/landing/Registration.tsx` is the one section with no poster behind
 it: a link to the Microsoft Form in `info.registrationFormUrl`. It **renders
 nothing when that field is null or `info.registrationOpen` is false**. The

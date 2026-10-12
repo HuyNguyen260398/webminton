@@ -7,7 +7,7 @@ import {
   Registration,
   TeamDrawCta,
 } from "../features/landing/Registration";
-import { LiveSections } from "../features/landing/LiveSections";
+import { DuelSections, LiveSections } from "../features/landing/LiveSections";
 import { SiteNav } from "../features/landing/SiteNav";
 
 export default function Page() {
@@ -29,6 +29,7 @@ export default function Page() {
   return (
     <main id="main">
       <SiteNav view={view} />
+      <DuelSections view={view} top />
       <PosterOne t={view.t} />
       <Registration t={view.t} />
       <TeamDrawCta t={view.t} />

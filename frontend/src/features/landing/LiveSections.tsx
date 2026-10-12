@@ -14,12 +14,39 @@ import { Standings } from "../matches/Standings";
 import { PlacementBracket } from "../matches/PlacementBracket";
 import { FinanceDashboard } from "../finance/FinanceDashboard";
 
+// BẢNG ĐẤU and VUA SMASH. They sit among the live sections until the
+// organiser starts the giải, and at the top of the page from then on: each
+// of the two places asks for them and only the right one gets them.
+export function DuelSections({
+  view,
+  top,
+}: {
+  view: TournamentView;
+  top: boolean;
+}) {
+  const on = pageSections(view);
+  const { duel } = on;
+  if (!duel || on.started !== top) return null;
+  return (
+    <>
+      <Section id="bang-dau" title="BẢNG ĐẤU">
+        <DuelScoreboard t={view.t} results={duel} />
+        <DuelMatchList t={view.t} />
+      </Section>
+      {on.smash && (
+        <Section id="vua-smash" title="VUA SMASH">
+          <SmashLeaders t={view.t} results={duel} />
+        </Section>
+      )}
+    </>
+  );
+}
+
 // Every section hides itself when its data is empty, so the shipped file
 // renders the posters alone and the page fills in as the tournament runs.
 export function LiveSections({ view }: { view: TournamentView }) {
   const { t, derived } = view;
   const on = pageSections(view);
-  const { duel } = on;
 
   return (
     <>
@@ -38,17 +65,7 @@ export function LiveSections({ view }: { view: TournamentView }) {
           <TeamPreview t={t} teamIds={SELF_DRAW_TEAM_IDS} />
         </Section>
       )}
-      {duel && (
-        <Section id="bang-dau" title="BẢNG ĐẤU">
-          <DuelScoreboard t={t} results={duel} />
-          <DuelMatchList t={t} />
-        </Section>
-      )}
-      {duel && on.smash && (
-        <Section id="vua-smash" title="VUA SMASH">
-          <SmashLeaders t={t} results={duel} />
-        </Section>
-      )}
+      <DuelSections view={view} top={false} />
       {on.schedule && (
         <Section id="lich-thi-dau" title="LỊCH THI ĐẤU">
           <GroupSchedule t={t} derived={derived} />
