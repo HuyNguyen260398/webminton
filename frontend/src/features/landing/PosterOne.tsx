@@ -42,11 +42,11 @@ export function PosterOne({ t }: { t: TournamentDocument }) {
     ["Ở ĐÂU?", info.location],
     [
       "ĐÁNH NHỮNG GÌ?",
-      "Đôi nam · Đôi nam nữ — 2 đội đấu 9 trận vòng loại rồi 2 trận chung kết nhân đôi điểm, tổng 11 trận",
+      "Đôi nam · Đôi nam nữ — 2 đội đấu 10 trận vòng loại rồi 2 trận chung kết nhân đôi điểm, tổng 12 trận",
     ],
     [
       "CÓ BAO NHIÊU NGƯỜI?",
-      "Chốt sổ 14 người, chia 2 đội, mỗi đội 7. Ai cũng được ra sân 3 trận",
+      "Chốt sổ 14 người, chia 2 đội, mỗi đội 7. Vòng loại nam ra sân ít nhất 3 trận, nữ ít nhất 2 trận",
     ],
   ];
 
@@ -70,8 +70,8 @@ export function PosterOne({ t }: { t: TournamentDocument }) {
         </p>
 
         <p className="poster-one__intro">
-          Hai đội. Hai nội dung. Chín trận vòng loại rồi hai trận chung kết nhân
-          đôi điểm — mười một trận gói gọn trong một buổi. Và một chầu chốt sổ
+          Hai đội. Hai nội dung. Mười trận vòng loại rồi hai trận chung kết nhân
+          đôi điểm — mười hai trận gói gọn trong một buổi. Và một chầu chốt sổ
           ngay sau đó mà đội nào cũng có phần.
         </p>
 

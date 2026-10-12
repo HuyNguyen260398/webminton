@@ -106,28 +106,28 @@ test("a wrong code is refused and the right one is remembered", async ({
   await expect(page.locator("p[role=alert]")).toHaveText("Mã trọng tài không đúng.");
   await page.getByTestId("referee-code-input").fill(CODE);
   await page.getByRole("button", { name: "Vào chấm điểm" }).click();
-  await expect(page.getByRole("button", { name: /Trận 1/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Trận 1(?!\d)/ })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("button", { name: /Trận 1/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Trận 1(?!\d)/ })).toBeVisible();
   await expect(page.getByTestId("referee-code-input")).toHaveCount(0);
 });
 
 test("the list shows which matches can be refereed", async ({ page, request }) => {
   await open(request);
   await enter(page);
-  await expect(page.getByRole("button", { name: /Trận 1/ })).toBeEnabled();
-  await expect(page.getByRole("button", { name: /Trận 1/ })).toContainText(
+  await expect(page.getByRole("button", { name: /Trận 1(?!\d)/ })).toBeEnabled();
+  await expect(page.getByRole("button", { name: /Trận 1(?!\d)/ })).toContainText(
     red[0].name.trim().split(/\s+/).at(-1)!,
   );
   // Trận 2 has no pairs yet.
   await expect(page.getByRole("button", { name: /Trận 2/ })).toBeDisabled();
-  await expect(page.getByRole("button")).toHaveCount(11);
+  await expect(page.getByRole("button")).toHaveCount(12);
 });
 
 test("a referee runs a match from start to finish", async ({ page, request }) => {
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
   expect((await first(request)).status).toBe("live");
@@ -181,7 +181,7 @@ test("the scorer fits a phone: no sideways scroll, nothing too small to hit", as
 }) => {
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
   const sizes = await page.evaluate(() => ({
@@ -222,7 +222,7 @@ test("a referee picks their name to take a match, and it shows everywhere", asyn
   });
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
 
   // With a list of names, nobody starts a match anonymously.
   const start = page.getByRole("button", { name: "Bắt đầu trận" });
@@ -238,7 +238,7 @@ test("a referee picks their name to take a match, and it shows everywhere", asyn
   expect((await first(request)).referee).toBe("Bảo");
 
   await page.getByRole("button", { name: "← Trận khác" }).click();
-  await expect(page.getByRole("button", { name: /Trận 1/ })).toContainText(
+  await expect(page.getByRole("button", { name: /Trận 1(?!\d)/ })).toContainText(
     "Trọng tài: Bảo",
   );
   // The phone remembers who is holding it for the next match.
@@ -258,7 +258,7 @@ test("a live match can be handed to another referee", async ({ page, request }) 
   await send(request, { type: "setRefereeNames", payload: { names: ["Huy", "Bảo"] } });
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByLabel("Trọng tài", { exact: true }).selectOption("Huy");
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
@@ -288,7 +288,7 @@ test("a long name is shown whole, given name included", async ({ page, request }
   });
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
   const name = page.locator(".ref-side__pair span", { hasText: long });
@@ -310,7 +310,7 @@ test("a changed code sends the referee back to the code screen", async ({
 }) => {
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
   await send(request, { type: "setRefereeCode", payload: { code: "999999" } });
@@ -334,7 +334,7 @@ test("a finished match opens read-only", async ({ page, request }) => {
   });
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await expect(page.getByTestId("score-red")).toHaveText("21");
   await expect(page.getByText("Trận đã kết thúc")).toBeVisible();
   await expect(page.getByTestId("plus-red")).toHaveCount(0);
@@ -343,7 +343,7 @@ test("a finished match opens read-only", async ({ page, request }) => {
 test("the served file never carries the code", async ({ page, request }) => {
   await open(request);
   await enter(page);
-  await page.getByRole("button", { name: /Trận 1/ }).click();
+  await page.getByRole("button", { name: /Trận 1(?!\d)/ }).click();
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await saved(page);
   const body = await (await request.get("/tournament.json")).text();

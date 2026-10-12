@@ -54,13 +54,14 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
                   đúng <b>1 séc</b>.
                 </>,
                 <>
-                  <b>Vòng loại 9 trận</b>: 7 trận đôi nam, 2 trận đôi nam nữ.
-                  Xong thì vào 2 trận chung kết — <b>cả giải 11 trận</b>.
+                  <b>Vòng loại 10 trận</b>: 8 trận đôi nam, 2 trận đôi nam nữ.
+                  Xong thì vào 2 trận chung kết — <b>cả giải 12 trận</b>.
                 </>,
                 <>
-                  Ai cũng ra sân <b>3 trận</b>, tính cả chung kết — không ai
-                  được ngồi cắn hạt dưa cả buổi. Mỗi đội có đúng một anh phải
-                  gánh thêm trận thứ tư, đội trưởng tự chọn người khoẻ nhất.
+                  Ở vòng loại, mỗi nam ra sân ít nhất <b>3 trận</b>, mỗi nữ ít
+                  nhất <b>2 trận</b> — không ai được ngồi cắn hạt dưa cả buổi.
+                  Chung kết tính riêng, ai được đội trưởng gọi tên thì đánh
+                  thêm.
                 </>,
               ]}
             />
@@ -154,7 +155,7 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
 
           <Card title="TÍNH ĐIỂM &amp; DANH HIỆU">
             <p>
-              Điểm của đội là <b>tổng số điểm ghi được qua cả 11 trận</b>,
+              Điểm của đội là <b>tổng số điểm ghi được qua cả 12 trận</b>,
               riêng 2 trận chung kết nhân đôi. Đội nào tổng cao hơn thì vô địch
               — nên kể cả biết sẽ thua trận thì vẫn phải giành từng điểm một.
             </p>

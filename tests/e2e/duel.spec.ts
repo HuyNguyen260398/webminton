@@ -67,8 +67,8 @@ test("the organiser runs a match from pairs to final score", async ({
 
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);
-  await page.getByRole("button", { name: "Tạo 11 trận" }).click();
-  await expect(page.locator(".pick-list .pick-item")).toHaveCount(11);
+  await page.getByRole("button", { name: "Tạo 12 trận" }).click();
+  await expect(page.locator(".pick-list .pick-item")).toHaveCount(12);
 
   // Nothing public yet but the empty sheet.
   const view = await page.context().newPage();
@@ -126,7 +126,7 @@ test("the organiser runs a match from pairs to final score", async ({
   const score = view.getByTestId("duel-score");
   await expect(score.locator(".duel-score__points").nth(0)).toHaveText("21");
   await expect(score.locator(".duel-score__points").nth(1)).toHaveText("15");
-  await expect(score).toContainText("Đã đánh 1/11 trận");
+  await expect(score).toContainText("Đã đánh 1/12 trận");
   const hits = view.locator("#vua-smash .card").nth(0);
   await expect(hits).toContainText("SMASH ĂN ĐIỂM NHIỀU NHẤT");
   await expect(hits.locator("li")).toHaveCount(1);

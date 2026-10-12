@@ -55,7 +55,7 @@ export const MatchSchema = z.strictObject({
   score: ScoreSchema.nullable(),
   winnerTeamId: Id.nullable(),
 });
-// The two-team format: Đội Đỏ against Đội Xanh over eleven matches. It
+// The two-team format: Đội Đỏ against Đội Xanh over twelve matches. It
 // lives beside `matches`, which belongs to the four-team schedule engine.
 export const DuelScoreSchema = z.strictObject({
   red: z.number().int().min(0).max(25),

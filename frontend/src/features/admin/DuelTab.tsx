@@ -500,7 +500,7 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
     return (
       <Card title="Bảng đấu 2 đội">
         <p>
-          11 trận giữa Đội Đỏ và Đội Xanh: 9 trận vòng loại (7 đôi nam, 2 đôi
+          12 trận giữa Đội Đỏ và Đội Xanh: 10 trận vòng loại (8 đôi nam, 2 đôi
           nam nữ) và 2 trận chung kết nhân đôi điểm. Tạo xong thì xếp cặp,
           nhập tỉ số và đếm smash cho từng trận ở đây.
         </p>
@@ -509,10 +509,10 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
             type="button"
             disabled={busy}
             onClick={() =>
-              send({ type: "createDuel", payload: {} }, "Đã tạo 11 trận.")
+              send({ type: "createDuel", payload: {} }, "Đã tạo 12 trận.")
             }
           >
-            Tạo 11 trận
+            Tạo 12 trận
           </button>
         </div>
       </Card>
@@ -582,8 +582,8 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
 
         <Card title="Ai đánh mấy trận">
           <p>
-            Thể lệ: mỗi người 3 trận tính cả chung kết, mỗi người tối đa một
-            trận chung kết. Bảng này chỉ để nhắc, không chặn.
+            Thể lệ: vòng loại mỗi nam ít nhất 3 trận, mỗi nữ ít nhất 2 trận;
+            mỗi người tối đa một trận chung kết. Bảng này chỉ để nhắc, không chặn.
           </p>
           {DUEL_SIDES.map((side) => (
             <div key={side} className="duel-count">
@@ -613,7 +613,7 @@ export function DuelTab({ admin }: { admin: ReadyAdmin }) {
 
         <Card title="Xoá bảng đấu" dashed>
           <p>
-            Xoá cả 11 trận cùng cặp đấu, tỉ số và số smash. Khôi phục được ở
+            Xoá cả 12 trận cùng cặp đấu, tỉ số và số smash. Khôi phục được ở
             mục “Lịch sử”.
           </p>
           <div className="row-actions">

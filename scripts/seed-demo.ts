@@ -2,7 +2,7 @@ import type { ApiResponse } from "../backend/src/router";
 
 // `pnpm dev:demo` — fills the local dev server (`pnpm dev`, the in-memory
 // store on :3100) with a giải that is ready to referee: two teams of seven,
-// the eleven bảng đấu matches in every state, a code, refereeing open.
+// the twelve bảng đấu matches with their pairs, a code, refereeing open.
 //
 // It starts by resetting the server through /api/test/reset. That route does
 // not exist on `pnpm dev:cloud` or on the deployed site, so against live data
@@ -35,8 +35,8 @@ const RED = [
   "Trần Quốc Bảo",
   "Lê Minh Khôi",
   "Phạm Đức Anh",
-  "Hoàng Gia Long",
   "Nguyễn Hoàng Phương Thảo Nguyên",
+  "Hoàng Gia Long",
 ];
 const BLUE = [
   "Vũ Thành Đạt",
@@ -117,30 +117,48 @@ export async function seedDemo(call: Call): Promise<void> {
       ...rest,
     });
 
-  // Trận 1: finished.
-  await match("vong-loai-1", [r[0], r[1]], [b[0], b[1]], {
-    status: "done",
-    score: { red: 21, blue: 17 },
-    referee: DEMO_REFEREES[0],
-    smashes: {
-      [r[0]]: { hit: 5, net: 1 },
-      [r[1]]: { hit: 2, net: 0 },
-      [b[0]]: { hit: 3, net: 2 },
-      [b[1]]: { hit: 1, net: 1 },
+  // Who plays which match, the same for both teams: indexes into r and b.
+  // Every man is down for exactly three vòng loại matches and the woman for
+  // two — the least the thể lệ gives them — nobody plays two in a row, and
+  // nobody has more than one final.
+  const PAIRS: Array<[string, number, number]> = [
+    ["vong-loai-1", 0, 1],
+    ["vong-loai-2", 3, 4],
+    ["vong-loai-3", 2, 6], // đôi nam nữ
+    ["vong-loai-4", 5, 3],
+    ["vong-loai-5", 2, 0],
+    ["vong-loai-6", 1, 4],
+    ["vong-loai-7", 0, 3],
+    ["vong-loai-8", 5, 6], // đôi nam nữ
+    ["vong-loai-9", 2, 1],
+    ["vong-loai-10", 5, 4],
+    ["chung-ket-1", 0, 4],
+    ["chung-ket-2", 1, 6], // đôi nam nữ
+  ];
+  const STATE: Record<string, Record<string, unknown>> = {
+    // Trận 1: finished.
+    "vong-loai-1": {
+      status: "done",
+      score: { red: 21, blue: 17 },
+      referee: DEMO_REFEREES[0],
+      smashes: {
+        [r[0]]: { hit: 5, net: 1 },
+        [r[1]]: { hit: 2, net: 0 },
+        [b[0]]: { hit: 3, net: 2 },
+        [b[1]]: { hit: 1, net: 1 },
+      },
     },
-  });
-  // Trận 2: being played — open it on /trong-tai and carry on from 11–9.
-  await match("vong-loai-2", [r[2], r[5]], [b[2], b[3]], {
-    status: "live",
-    score: { red: 11, blue: 9 },
-    referee: DEMO_REFEREES[1],
-    smashes: { [r[2]]: { hit: 2, net: 0 }, [b[3]]: { hit: 1, net: 1 } },
-  });
-  // Trận 3 (đôi nam nữ), 4 and 5: pairs set, ready for a referee to start.
-  await match("vong-loai-3", [r[3], r[6]], [b[4], b[6]]);
-  await match("vong-loai-4", [r[4], r[0]], [b[5], b[0]]);
-  await match("vong-loai-5", [r[1], r[3]], [b[1], b[2]]);
-  // Trận 6–9 and the two finals keep no pairs: "chưa xếp cặp".
+    // Trận 2: being played — open it on /trong-tai and carry on from 11–9.
+    "vong-loai-2": {
+      status: "live",
+      score: { red: 11, blue: 9 },
+      referee: DEMO_REFEREES[1],
+      smashes: { [r[3]]: { hit: 2, net: 0 }, [b[4]]: { hit: 1, net: 1 } },
+    },
+  };
+  // Every other match has its pairs and waits for a referee to start it.
+  for (const [matchId, x, y] of PAIRS)
+    await match(matchId, [r[x], r[y]], [b[x], b[y]], STATE[matchId]);
 
   await send("setRefereeCode", { code: DEMO_CODE });
   await send("setRefereeOpen", { open: true });
@@ -165,7 +183,7 @@ if (import.meta.filename === process.argv[1]) {
         "",
         "✓ Đã nạp dữ liệu thử vào máy chủ dev (trong bộ nhớ — khởi động lại là mất).",
         "",
-        "  2 đội × 7 VĐV · 11 trận: 1 đã xong, 1 đang đánh, 3 sẵn sàng, 6 chưa xếp cặp",
+        "  2 đội × 7 VĐV · 12 trận: 1 đã xong, 1 đang đánh, 10 đã xếp cặp chờ đánh",
         `  Trọng tài: ${DEMO_REFEREES.join(", ")}`,
         "",
         "  Trọng tài   http://localhost:3000/trong-tai/        mã: " + DEMO_CODE,

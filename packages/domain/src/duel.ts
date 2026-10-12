@@ -11,14 +11,16 @@ export const FINAL_WEIGHT = 2;
 export const weight = (m: Pick<DuelMatch, "stage">) =>
   m.stage === "final" ? FINAL_WEIGHT : 1;
 
-// Nine vòng loại matches — seven đôi nam, two đôi nam nữ — then the two
-// finals. The mixed matches sit third and seventh so the one woman in each
-// team gets a rest between hers.
+// Ten vòng loại matches — eight đôi nam, two đôi nam nữ — then the two
+// finals. With six men and one woman a side that is exactly three vòng loại
+// matches for every man and two for the woman, which is the least the thể lệ
+// gives them. The mixed matches sit third and eighth so she gets a rest
+// between hers.
 const PLAN: Array<Pick<DuelMatch, "stage" | "category">> = [
-  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
+  ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({
     stage: "playoff" as const,
     category:
-      n === 3 || n === 7
+      n === 3 || n === 8
         ? ("mixed_doubles" as const)
         : ("mens_doubles" as const),
   })),

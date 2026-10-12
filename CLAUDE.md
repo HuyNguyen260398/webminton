@@ -57,8 +57,8 @@ public page on :3000 shows that snapshot. `pnpm dev` also works from
 `frontend/`.
 
 `pnpm dev:demo` (`scripts/seed-demo.ts`), run beside `pnpm dev`, resets that
-in-memory store and loads two teams of seven, the eleven bảng đấu matches in
-every state (one done, one live, three with pairs, six without), the referee
+in-memory store and loads two teams of seven, the twelve bảng đấu matches, all
+with pairs (one done, one live, ten ready to start), the referee
 code `123456` and refereeing open. It begins with `/api/test/reset`, which only
 `pnpm dev` answers, so it cannot write to `dev:cloud` or the deployed site.
 
@@ -151,8 +151,9 @@ The giải is now Đội Đỏ against Đội Xanh, and that lives in `document.
 beside — not inside — the four-team `matches` engine, which is dormant unless
 a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
 
-- `createDuel` lays out eleven matches: nine vòng loại (seven đôi nam, two đôi
-  nam nữ) and two finals. `resetDuel` removes them.
+- `createDuel` lays out twelve matches: ten vòng loại (eight đôi nam, two đôi
+  nam nữ) and two finals. With six men and one woman a side that is exactly
+  three vòng loại matches per man and two per woman, the thể lệ minimum. `resetDuel` removes them.
 - `saveDuelMatch` carries a whole match in one save: both pairs, the status
   (`pending` → `live` → `done`), the final score and the smash counts
   (`hit` = smash ăn điểm, `net` = smash rúc lưới, per athlete per match).

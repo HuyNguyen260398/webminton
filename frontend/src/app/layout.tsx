@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Giải cầu lông nội bộ 2026 · Hội lông thủ CN1416",
   description:
-    "Hai đội, hai nội dung, mười một trận gói gọn trong một buổi — thông tin giải, thể lệ thi đấu và nhà tài trợ.",
+    "Hai đội, hai nội dung, mười hai trận gói gọn trong một buổi — thông tin giải, thể lệ thi đấu và nhà tài trợ.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -60,18 +60,18 @@ const done = (
 const mixed: Partial<Save> = { pairRed: ["r1", "r7"], pairBlue: ["b1", "b7"] };
 
 describe("bảng đấu — the sheet", () => {
-  it("is nine vòng loại matches and two finals, seven plus two and one plus one", () => {
+  it("is ten vòng loại matches and two finals, eight plus two and one plus one", () => {
     const { matches } = makeState().document.duel!;
     const count = (stage: string, category: string) =>
       matches.filter((m) => m.stage === stage && m.category === category)
         .length;
-    expect(matches).toHaveLength(11);
-    expect(count("playoff", "mens_doubles")).toBe(7);
+    expect(matches).toHaveLength(12);
+    expect(count("playoff", "mens_doubles")).toBe(8);
     expect(count("playoff", "mixed_doubles")).toBe(2);
     expect(count("final", "mens_doubles")).toBe(1);
     expect(count("final", "mixed_doubles")).toBe(1);
     expect(matches.map((m) => m.order)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     ]);
     expect(
       matches.every((m) => m.status === "pending" && m.score === null),
@@ -216,7 +216,7 @@ describe("bảng đấu — totals", () => {
       score: { red: 21, blue: 10 },
     });
     const r = deriveDuel(s.document)!;
-    expect(r.played).toBe(10);
+    expect(r.played).toBe(11);
     expect(r.finished).toBe(false);
   });
 
@@ -269,7 +269,7 @@ describe("bảng đấu — totals", () => {
     expect(r.leader).toBe("blue");
   });
 
-  it("says nobody leads before a match is played, and knows when all eleven are in", () => {
+  it("says nobody leads before a match is played, and knows when all twelve are in", () => {
     let s = makeState();
     expect(deriveDuel(s.document)).toMatchObject({
       leader: null,
@@ -280,10 +280,10 @@ describe("bảng đấu — totals", () => {
       s = done(s, m.id, 21, 12, m.category === "mixed_doubles" ? mixed : {});
     const r = deriveDuel(s.document)!;
     expect(r.finished).toBe(true);
-    // 9 × 21 + 2 × 42 against 9 × 12 + 2 × 24.
-    expect(r.totals.red.points).toBe(273);
-    expect(r.totals.blue.points).toBe(156);
-    expect(r.totals.red.wins).toBe(11);
+    // 10 × 21 + 2 × 42 against 10 × 12 + 2 × 24.
+    expect(r.totals.red.points).toBe(294);
+    expect(r.totals.blue.points).toBe(168);
+    expect(r.totals.red.wins).toBe(12);
   });
 });
 
