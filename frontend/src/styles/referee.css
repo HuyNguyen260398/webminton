@@ -1,0 +1,277 @@
+/* /trong-tai — the referees' page. One column, sized for thumbs: every
+   control at least 48px, the two +1 buttons at least 96px tall. */
+.ref-page {
+  min-height: 100dvh;
+}
+.ref-wrap {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+  display: grid;
+  gap: 16px;
+}
+.ref-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.ref-title small {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.ref-hint {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* The code screen */
+.ref-gate {
+  display: grid;
+  gap: 12px;
+}
+.ref-gate label {
+  font-weight: 700;
+}
+.ref-gate__input {
+  width: 100%;
+  min-height: 64px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ref-gate button {
+  min-height: 56px;
+}
+
+/* The match list */
+.ref-group {
+  display: grid;
+  gap: 8px;
+}
+.ref-group h2 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ref-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+button.ref-match {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: stretch;
+  justify-items: stretch;
+  align-content: center;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-hard-sm);
+  font: inherit;
+  text-align: left;
+  transform: none;
+}
+button.ref-match:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  border-style: dashed;
+}
+.ref-match__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ref-match__note {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--red);
+}
+.ref-match__side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ref-match__names {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The scorer */
+.ref-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+button.ref-bar__back {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-weight: 700;
+}
+.ref-bar__state {
+  min-height: 1.2em;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+}
+.ref-score {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ref-side {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-hard-sm);
+  color: #fff;
+  text-align: center;
+}
+.ref-side__team {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ref-side__pair {
+  display: grid;
+  min-height: 2.6em;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.ref-side__pair span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ref-side__points {
+  font-size: 4.5rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ref-side button {
+  width: 100%;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 900;
+  box-shadow: none;
+  transform: none;
+  touch-action: manipulation;
+}
+button.ref-plus {
+  min-height: 104px;
+  background: var(--paper);
+  font-size: 2.6rem;
+}
+button.ref-plus:active:not(:disabled) {
+  background: var(--yellow);
+}
+button.ref-minus {
+  min-height: 48px;
+  background: transparent;
+  color: #fff;
+  border-color: #fff;
+  font-size: 1.1rem;
+}
+.ref-side button:disabled {
+  opacity: 0.4;
+}
+button.ref-main {
+  width: 100%;
+  min-height: 64px;
+  font-size: 1.15rem;
+}
+
+.ref-smash {
+  display: grid;
+  gap: 10px;
+}
+.ref-smash h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+}
+.ref-player__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ref-player {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+}
+.ref-count {
+  display: grid;
+  grid-template-columns: 1fr 52px 2.5rem 52px;
+  align-items: center;
+  gap: 8px;
+}
+.ref-count small {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.ref-count b {
+  grid-column: 3;
+  font-size: 1.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ref-count button {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 900;
+  box-shadow: none;
+  transform: none;
+  touch-action: manipulation;
+}
+.ref-count button:first-of-type {
+  grid-column: 2;
+}
+.ref-count button:last-of-type {
+  grid-column: 4;
+}

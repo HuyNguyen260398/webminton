@@ -246,7 +246,9 @@ test("saving smashes on a live match keeps the running score", async ({
   });
   await signIn(page);
   await page.getByRole("button", { name: /Trận 1 ·/ }).click();
-  await page.getByRole("button", { name: `Tăng Smash ăn điểm của ${r1.name}` }).click();
+  await page
+    .getByRole("button", { name: `Tăng Smash ăn điểm của ${r1.name}`, exact: true })
+    .click();
   await page.getByRole("button", { name: "Lưu số smash" }).click();
   await expect(page.getByText("Đã lưu số smash.")).toBeVisible();
   const m = (await state(request)).document.duel!.matches[0];
