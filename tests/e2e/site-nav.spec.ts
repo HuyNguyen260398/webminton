@@ -15,7 +15,11 @@ async function send(request: APIRequestContext, command: unknown) {
   });
   expect(res.ok(), await res.text()).toBe(true);
 }
-const labels = (page: Page) => page.locator(".site-nav a").allInnerTexts();
+// The bar renders once tournament.json has loaded; reading it sooner gives [].
+async function labels(page: Page) {
+  await expect(page.locator(".site-nav a").first()).toBeVisible();
+  return page.locator(".site-nav a").allInnerTexts();
+}
 
 test.beforeEach(async ({ request }) => {
   expect((await request.post("/api/test/reset")).ok()).toBe(true);
