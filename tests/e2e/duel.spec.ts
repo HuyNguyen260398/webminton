@@ -10,7 +10,12 @@ interface Athlete {
 }
 interface State {
   version: number;
-  document: { athletes: Athlete[] };
+  document: {
+    athletes: Athlete[];
+    referee?: { open: boolean };
+    duel?: { matches: { id: string; status: string; score: unknown }[] };
+  };
+  secrets: { refereeCode: string | null };
 }
 
 const state = async (request: APIRequestContext) =>
@@ -197,4 +202,84 @@ test("needs sign-in to change a match", async ({ request }) => {
     },
   });
   expect(res.status()).toBe(401);
+});
+
+test("the organiser creates a code and opens refereeing", async ({
+  page,
+  request,
+}) => {
+  await send(request, { type: "createDuel", payload: {} });
+  await signIn(page);
+  await expect(page.getByTestId("referee-code")).toHaveText("Chưa có mã");
+  await expect(page.getByRole("button", { name: "Mở chấm điểm" })).toBeDisabled();
+
+  await page.getByRole("button", { name: "Tạo mã" }).click();
+  await expect(page.getByTestId("referee-code")).toHaveText(/^\d{6}$/);
+  const code = await page.getByTestId("referee-code").innerText();
+  expect((await state(request)).secrets.refereeCode).toBe(code);
+
+  await page.getByRole("button", { name: "Mở chấm điểm" }).click();
+  await expect(page.getByRole("button", { name: "Đóng chấm điểm" })).toBeVisible();
+  expect((await state(request)).document.referee).toEqual({ open: true });
+  expect(await (await request.get("/tournament.json")).text()).not.toContain(code);
+});
+
+test("saving smashes on a live match keeps the running score", async ({
+  page,
+  request,
+}) => {
+  const { athletes } = (await state(request)).document;
+  const [r1, r2] = men(athletes, "red");
+  const [b1, b2] = men(athletes, "blue");
+  await send(request, { type: "createDuel", payload: {} });
+  // As if a referee were three points in.
+  await send(request, {
+    type: "saveDuelMatch",
+    payload: {
+      matchId: "vong-loai-1",
+      pairRed: [r1.id, r2.id],
+      pairBlue: [b1.id, b2.id],
+      status: "live",
+      score: { red: 3, blue: 2 },
+      smashes: {},
+    },
+  });
+  await signIn(page);
+  await page.getByRole("button", { name: /Trận 1 ·/ }).click();
+  await page.getByRole("button", { name: `Tăng Smash ăn điểm của ${r1.name}` }).click();
+  await page.getByRole("button", { name: "Lưu số smash" }).click();
+  await expect(page.getByText("Đã lưu số smash.")).toBeVisible();
+  const m = (await state(request)).document.duel!.matches[0];
+  expect(m.status).toBe("live");
+  expect(m.score).toEqual({ red: 3, blue: 2 });
+});
+
+test("reopening a finished match keeps its score for correcting", async ({
+  page,
+  request,
+}) => {
+  const { athletes } = (await state(request)).document;
+  const [r1, r2] = men(athletes, "red");
+  const [b1, b2] = men(athletes, "blue");
+  await send(request, { type: "createDuel", payload: {} });
+  await send(request, {
+    type: "saveDuelMatch",
+    payload: {
+      matchId: "vong-loai-1",
+      pairRed: [r1.id, r2.id],
+      pairBlue: [b1.id, b2.id],
+      status: "done",
+      score: { red: 21, blue: 15 },
+      smashes: {},
+    },
+  });
+  await signIn(page);
+  await page.getByRole("button", { name: /Trận 1 ·/ }).click();
+  const reopen = page.getByRole("button", { name: "Mở lại trận" });
+  await reopen.click();
+  await page.getByRole("button", { name: "Bấm lần nữa để xác nhận" }).click();
+  await expect(page.getByText("Đã mở lại trận")).toBeVisible();
+  const m = (await state(request)).document.duel!.matches[0];
+  expect(m.status).toBe("live");
+  expect(m.score).toEqual({ red: 21, blue: 15 });
 });
