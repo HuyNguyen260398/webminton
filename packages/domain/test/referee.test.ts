@@ -18,10 +18,19 @@ function makeState(): AdminState {
     ["b1", "blue"],
     ["b2", "blue"],
   ] as const) {
-    document.athletes.push({ id, name: id, gender: "male", teamId, active: true });
+    document.athletes.push({
+      id,
+      name: id,
+      gender: "male",
+      teamId,
+      active: true,
+    });
     priv[id] = { skillBand: 2, phone: null, note: "" };
   }
-  const s = run({ document, private: priv }, { type: "createDuel", payload: {} });
+  const s = run(
+    { document, private: priv },
+    { type: "createDuel", payload: {} },
+  );
   return run(s, {
     type: "saveDuelMatch",
     payload: {
@@ -151,7 +160,11 @@ describe("applyRefereeSave", () => {
   it("finishes only on a final score", () => {
     const m = applyRefereeSave(first(makeState()), live({ red: 20, blue: 18 }));
     const finish = (red: number, blue: number) =>
-      applyRefereeSave(m, { status: "done", score: { red, blue }, smashes: {} });
+      applyRefereeSave(m, {
+        status: "done",
+        score: { red, blue },
+        smashes: {},
+      });
     expect(() => finish(20, 18)).toThrow("INVALID_SCORE");
     expect(() =>
       applyRefereeSave(m, { status: "done", score: null, smashes: {} }),

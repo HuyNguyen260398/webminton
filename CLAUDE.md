@@ -162,6 +162,35 @@ In the admin screen the `Trận` tab is `DuelTab` unless a four-team draw is
 confirmed, in which case it is the old `MatchesTab`. The public page shows
 `BẢNG ĐẤU` and `VUA SMASH` once the bảng đấu exists.
 
+### The referees' page
+
+`/trong-tai` lets whoever umpires a court run their own match from a phone:
+start it, score it point by point, count smashes, finish it. It is the second
+public write, `POST /api/referee/{check,match}`, an API Gateway route with no
+authorizer and its own throttle. History shows these saves as `trong-tai`.
+
+- It works only while `document.referee.open` is true and the request carries
+  the six-digit code, both set in the `Trọng tài` card of the `Trận` tab
+  (`setRefereeOpen`, `setRefereeCode`). The code lives in `AdminState.secrets`,
+  beside the document, and never reaches `tournament.json`. Changing it locks
+  out every phone holding the old one.
+- A referee sends status, score and smashes for one match — never pairs. The
+  router turns that into a `saveDuelMatch` with the stored pairs
+  (`duel.ts::applyRefereeSave`), so it passes through `applyCommand` like every
+  other edit. A `done` match is locked to referees; reopening is the
+  organiser's.
+- A `live` match carries a running score. **A score no longer means the match
+  is finished**: totals, wins, `played` and the winner mark all test
+  `status === "done"`.
+- A save that changes nothing is answered without writing, so a retried
+  `Kết thúc trận` succeeds. A version collision with the other court is
+  retried, as on `/boc-tham`.
+- The page keeps a draft of the open match (`lib/use-referee.ts`) and saves it
+  500ms after the last tap. The poll of `tournament.json` replaces the draft
+  only when nothing is unsaved and the snapshot is not older than the page's
+  own last save.
+- Live scoring adds 40–60 versions per match. That is expected.
+
 ### Derived state is never stored
 
 The JSON stores **facts only**: match scores, team membership, finance lines.
@@ -242,7 +271,9 @@ Phone first: one column with the tab bar fixed to the bottom, two panes from
   Real AWS clients are constructed only in `aws.ts`.
 - `frontend` — Next.js App Router with `output: "export"`; **no server
   runtime**. `/quan-tri` is a second static page whose tabs live in
-  `features/admin/` and whose styles are `src/styles/admin.css`. Types are
+  `features/admin/` and whose styles are `src/styles/admin.css`. `/trong-tai`
+  is a third, with its screens in `features/referee/` and its styles in
+  `src/styles/referee.css`. Types are
   imported across the workspace by relative path
   (`../../../packages/domain/src/schema`). The public design system lives in
   `src/styles/poster.css` and `features/landing/primitives.tsx`.
@@ -250,7 +281,8 @@ Phone first: one column with the tab bar fixed to the bottom, two panes from
   ACM, Route53 (`main.tf`); the table, Lambda, its role and the HTTP API
   (`backend.tf`); Cognito with Google as the only identity provider
   (`auth.tf`). `infra/test/architecture.test.ts` asserts the invariants
-  against the HCL text: admin routes behind the JWT authorizer, the Lambda
+  against the HCL text: admin routes behind the JWT authorizer, the two open write routes
+  throttled, the Lambda
   able to write only `tournament.json`, PITR and deletion protection on the
   table, and no resource with a fixed monthly fee.
 - `scripts` — `validate-tournament.ts`, `draw-teams.ts`, `seed.ts`,
