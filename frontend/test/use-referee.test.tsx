@@ -110,8 +110,15 @@ describe("SaveQueue", () => {
 });
 
 describe("useMatchDraft", () => {
+  // The hook remembers each match across visits, so every test gets its own.
+  let id = "";
+  let n = 0;
+  beforeEach(() => {
+    id = `tran-${++n}`;
+  });
   const stored = (score: DuelMatch["score"]): DuelMatch => ({
     ...createDuelMatches()[0],
+    id,
     pairRed: ["r1", "r2"],
     pairBlue: ["b1", "b2"],
     status: "live",
@@ -203,6 +210,61 @@ describe("useMatchDraft", () => {
     expect(onRefused).toHaveBeenCalledTimes(1);
     expect(onRefused.mock.calls[0][0].code).toBe("REFEREE_MATCH_DONE");
     expect(result.current.draft.score).toEqual({ red: 3, blue: 2 });
+  });
+
+  it("shows the last taps when the match is reopened before their save lands", async () => {
+    const first = setUp();
+    first.tap();
+    // "← Trận khác" inside the half second, then straight back in.
+    first.unmount();
+    const again = renderHook(
+      ({ at }: { at: string }) =>
+        useMatchDraft("048213", stored({ red: 3, blue: 2 }), at, vi.fn()),
+      { initialProps: { at: T0 } },
+    );
+    expect(again.result.current.draft.score).toEqual({ red: 4, blue: 2 });
+    await flush();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    // The reload that left alongside the save comes back without it.
+    again.rerender({ at: "2026-10-18T01:00:01.000Z" });
+    expect(again.result.current.draft.score).toEqual({ red: 4, blue: 2 });
+    // And a visit after the save has landed still starts from it.
+    again.unmount();
+    const third = renderHook(() =>
+      useMatchDraft("048213", stored({ red: 3, blue: 2 }), T0, vi.fn()),
+    );
+    expect(third.result.current.draft.score).toEqual({ red: 4, blue: 2 });
+  });
+
+  it("has one queue per match: a save still retrying from an earlier visit sends the newest taps", async () => {
+    const first = setUp();
+    const bodies: { score: unknown }[] = [];
+    let online = false;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_path: string, init: RequestInit) => {
+        if (!online) throw new TypeError("offline");
+        bodies.push(JSON.parse(init.body as string));
+        return { ok: true, status: 200, json: async () => ({ updatedAt: T1 }) };
+      }),
+    );
+    first.tap();
+    first.unmount();
+    await flush();
+    const again = renderHook(() =>
+      useMatchDraft("048213", stored({ red: 3, blue: 2 }), T0, vi.fn()),
+    );
+    expect(again.result.current.state).toBe("saving");
+    act(() =>
+      again.result.current.change({
+        ...again.result.current.draft,
+        score: { red: 5, blue: 2 },
+      }),
+    );
+    online = true;
+    await flush(RETRY_MS);
+    expect(bodies.map((b) => b.score)).toEqual([{ red: 5, blue: 2 }]);
+    expect(again.result.current.state).toBe("saved");
   });
 
   it("sends what is unsaved when the screen is left", async () => {

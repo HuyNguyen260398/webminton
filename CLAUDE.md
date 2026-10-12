@@ -156,7 +156,10 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
 - A pair is rendered publicly only once its match is `live` or `done`.
 - Two organisers scoring two courts: a stale `saveDuelMatch` is accepted when
   the match itself is unchanged since the version the screen was on
-  (`router.ts::sameDuelMatch`). Every other stale command is still a `409`.
+  (`router.ts::sameDuelMatch`). Any other command is also accepted stale when
+  every version in between was a referee's save (`router.ts::staleButSafe`) —
+  otherwise live scoring would make the off switch and every fee tick a `409`.
+  Every other stale command is still a `409`.
 
 In the admin screen the `Trận` tab is `DuelTab` unless a four-team draw is
 confirmed, in which case it is the old `MatchesTab`. The public page shows
@@ -185,8 +188,13 @@ authorizer and its own throttle. History shows these saves as `trong-tai`.
 - A save that changes nothing is answered without writing, so a retried
   `Kết thúc trận` succeeds. A version collision with the other court is
   retried, as on `/boc-tham`.
+- Restoring an old version keeps the current code and the current on/off
+  switch.
+- The referee always sends the whole match, so an organiser's edit of a live
+  match can be overwritten by the referee's next tap. The admin editor says so.
 - The page keeps a draft of the open match (`lib/use-referee.ts`) and saves it
-  500ms after the last tap. The poll of `tournament.json` replaces the draft
+  500ms after the last tap. The draft and its save queue are kept per match
+  for the life of the page, so leaving a match and reopening it loses nothing. The poll of `tournament.json` replaces the draft
   only when nothing is unsaved and the snapshot is not older than the page's
   own last save.
 - Live scoring adds 40–60 versions per match. That is expected.

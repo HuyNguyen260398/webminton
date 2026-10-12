@@ -215,6 +215,14 @@ function MatchEditor({
 
         {both && (
           <>
+            {m.status === "live" && (
+              <small>
+                Trận đang đánh: nếu trọng tài đang chấm trận này ở /trong-tai
+                thì số smash và tỉ số sửa ở đây có thể bị điện thoại của trọng
+                tài ghi đè ở lần bấm kế tiếp. Muốn sửa chắc chắn, đợi trọng tài
+                kết thúc trận rồi sửa.
+              </small>
+            )}
             <h4 className="duel-heading">Đếm smash</h4>
             <div className="duel-smash">
               {players.map((id) => (

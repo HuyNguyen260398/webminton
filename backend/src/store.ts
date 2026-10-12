@@ -24,7 +24,8 @@ export interface TournamentStore {
     entry: Omit<HistoryEntry, "version">,
   ): Promise<StoredState>;
   markPublished(version: number): Promise<void>;
-  history(): Promise<HistoryEntry[]>;
+  // Newest first. With `since`, only the versions after that one.
+  history(since?: number): Promise<HistoryEntry[]>;
   snapshot(version: number): Promise<AdminState | null>;
 }
 
@@ -86,9 +87,10 @@ export class MemoryStore implements TournamentStore {
     this.current = JSON.stringify({ ...stored, publishedVersion: version });
   }
 
-  async history() {
+  async history(since = 0) {
     return [...this.versions.values()]
       .map((v) => v.entry)
+      .filter((e) => e.version > since)
       .sort((a, b) => b.version - a.version);
   }
 

@@ -117,7 +117,7 @@ export class DynamoStore implements TournamentStore {
     }
   }
 
-  async history(): Promise<HistoryEntry[]> {
+  async history(since?: number): Promise<HistoryEntry[]> {
     const entries: HistoryEntry[] = [];
     let from: Record<string, unknown> | undefined;
     // A page stops at 1 MB of items read, and each version item carries the
@@ -126,8 +126,16 @@ export class DynamoStore implements TournamentStore {
       const page = await this.db.send(
         new QueryCommand({
           TableName: this.table,
-          KeyConditionExpression: "pk = :pk AND begins_with(sk, :v)",
-          ExpressionAttributeValues: { ":pk": PK, ":v": "V#" },
+          // "CURRENT" sorts before every "V#…", so a lower bound alone
+          // leaves it out.
+          KeyConditionExpression:
+            since === undefined
+              ? "pk = :pk AND begins_with(sk, :v)"
+              : "pk = :pk AND sk > :v",
+          ExpressionAttributeValues: {
+            ":pk": PK,
+            ":v": since === undefined ? "V#" : versionKey(since),
+          },
           ProjectionExpression: "#version, #at, #actor, #type, #request",
           ExpressionAttributeNames: {
             "#version": "version",

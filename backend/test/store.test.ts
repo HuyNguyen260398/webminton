@@ -60,6 +60,15 @@ describe("MemoryStore", () => {
     expect((await store.read())!.secrets).toBeUndefined();
   });
 
+  it("lists only the history after a given version when asked", async () => {
+    const store = new MemoryStore();
+    let s = await store.write(null, makeAdminState(), entry("r1"));
+    s = await store.write(s, makeAdminState(), entry("r2"));
+    await store.write(s, makeAdminState(), entry("r3"));
+    expect((await store.history(1)).map((h) => h.version)).toEqual([3, 2]);
+    expect(await store.history(3)).toEqual([]);
+  });
+
   it("round-trips Vietnamese text and returns copies, not references", async () => {
     const store = new MemoryStore();
     const state = makeAdminState();

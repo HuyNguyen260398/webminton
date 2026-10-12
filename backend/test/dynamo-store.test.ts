@@ -123,6 +123,15 @@ describe("DynamoStore", () => {
     await expect(store.markPublished(1)).resolves.toBeUndefined();
   });
 
+  it("asks only for the versions after the one given", async () => {
+    const db = fakeDb(() => ({ Items: [] }));
+    await new DynamoStore(db as never, "t").history(41);
+    expect(db.sent[0].input).toMatchObject({
+      KeyConditionExpression: "pk = :pk AND sk > :v",
+      ExpressionAttributeValues: { ":pk": "T#noi-bo-2026", ":v": "V#000041" },
+    });
+  });
+
   it("lists the whole history across pages, without loading each version's state", async () => {
     const pages = [
       { Items: [{ version: 3, ...entry }], LastEvaluatedKey: { pk: "p", sk: "V#000003" } },

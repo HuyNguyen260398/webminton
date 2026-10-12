@@ -218,6 +218,94 @@ describe("referee — scoring a match", () => {
 });
 
 describe("referee — the organiser's side", () => {
+  // Two courts save every few seconds; without this the organiser could
+  // never land the off switch, a code change or a fee tick between them.
+  it("lets the organiser act on a screen that is stale only by referee saves", async () => {
+    const { version } = await view();
+    await referee({});
+    await referee({ score: { red: 1, blue: 0 } });
+    const stale = (requestId: string, command: unknown) =>
+      call(
+        "POST",
+        "/api/admin/commands",
+        { baseVersion: version, requestId, command },
+        ADMIN,
+      );
+    expect(
+      (await stale("fee", { type: "updateInfo", payload: { feeVnd: 60000 } })).status,
+    ).toBe(200);
+    // The fee save was the organiser's own: this screen is now truly stale.
+    expect(
+      (await stale("fee-2", { type: "updateInfo", payload: { feeVnd: 70000 } })).status,
+    ).toBe(409);
+  });
+
+  it("lets the organiser close refereeing and change the code mid-rally", async () => {
+    let { version } = await view();
+    await referee({});
+    const res = await call(
+      "POST",
+      "/api/admin/commands",
+      {
+        baseVersion: version,
+        requestId: "close",
+        command: { type: "setRefereeOpen", payload: { open: false } },
+      },
+      ADMIN,
+    );
+    expect(res.status).toBe(200);
+    expect((await referee({ score: { red: 1, blue: 0 } })).status).toBe(403);
+    await admin({ type: "setRefereeOpen", payload: { open: true } });
+    ({ version } = await view());
+    await referee({ score: { red: 1, blue: 0 } });
+    const changed = await call(
+      "POST",
+      "/api/admin/commands",
+      {
+        baseVersion: version,
+        requestId: "recode",
+        command: { type: "setRefereeCode", payload: { code: "999999" } },
+      },
+      ADMIN,
+    );
+    expect(changed.status).toBe(200);
+    expect((await referee({ score: { red: 2, blue: 0 } })).status).toBe(401);
+  });
+
+  it("still refuses the organiser's stale save of the match a referee changed", async () => {
+    const { version } = await view();
+    await referee({ score: { red: 1, blue: 0 } });
+    const res = await call(
+      "POST",
+      "/api/admin/commands",
+      {
+        baseVersion: version,
+        requestId: "wipe",
+        command: {
+          type: "saveDuelMatch",
+          payload: { matchId: "vong-loai-1", ...pairs, status: "pending", score: null, smashes: {} },
+        },
+      },
+      ADMIN,
+    );
+    expect(res.status).toBe(409);
+    expect((await stored()).score).toEqual({ red: 1, blue: 0 });
+  });
+
+  it("does not reopen or close refereeing when an old version is restored", async () => {
+    const { version: whileOpen } = await view();
+    await admin({ type: "setRefereeOpen", payload: { open: false } });
+    const res = await call(
+      "POST",
+      "/api/admin/restore",
+      { baseVersion: (await view()).version, requestId: "undo-open", version: whileOpen },
+      ADMIN,
+    );
+    expect(res.status).toBe(200);
+    expect((await view()).document.referee).toEqual({ open: false });
+    expect((await referee({})).status).toBe(403);
+  });
+
   it("shows the organiser the code", async () => {
     expect((await view()).secrets).toEqual({ refereeCode: CODE });
   });

@@ -24,12 +24,15 @@ async function post<T>(path: string, body: unknown): Promise<T> {
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",
+      // The last taps are sent as the phone locks; let them finish.
+      keepalive: true,
     });
   } catch {
     throw new RefereeError("NETWORK", OFFLINE);
   }
-  // A throttle is API Gateway asking for a moment, not saying no.
-  if (res.status === 429 || res.status >= 500)
+  // A throttle is API Gateway asking for a moment, and a 409 is the other
+  // court winning the version five times running. Neither is a no.
+  if (res.status === 409 || res.status === 429 || res.status >= 500)
     throw new RefereeError("NETWORK", OFFLINE);
   const data = (await res.json().catch(() => null)) as {
     code?: string;

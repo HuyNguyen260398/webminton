@@ -142,6 +142,25 @@ async function sameDuelMatch(
   return then !== undefined && stable(then) === stable(find(cur));
 }
 
+// A referee's save moves the version every few seconds on match day, and it
+// touches nothing but its own match. So an organiser whose screen is behind
+// only by referee saves is not really stale: the off switch, a code change or
+// a fee tick must land between two rallies. Their own save of a bảng đấu
+// match is the exception and keeps the stricter rule above.
+async function staleButSafe(
+  deps: Deps,
+  cur: StoredState,
+  baseVersion: number,
+  command: unknown,
+): Promise<boolean> {
+  if (await sameDuelMatch(deps, cur, baseVersion, command)) return true;
+  if ((command as { type?: unknown })?.type === "saveDuelMatch") return false;
+  const since = await deps.store.history(baseVersion);
+  return (
+    since.length > 0 && since.every((h) => h.actorEmail === REFEREE_ACTOR)
+  );
+}
+
 async function commit(
   deps: Deps,
   actorEmail: string,
@@ -293,7 +312,7 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
           body,
           type,
           (s) => applyCommand(s, body.command, actor, deps.now()),
-          (cur) => sameDuelMatch(deps, cur, body.baseVersion, body.command),
+          (cur) => staleButSafe(deps, cur, body.baseVersion, body.command),
         );
       }
 
@@ -316,6 +335,8 @@ export async function route(req: ApiRequest, deps: Deps): Promise<ApiResponse> {
           document: PublicTournamentSchema.parse({
             ...old.document,
             updatedAt: deps.now(),
+            // Nor may it open or close their page behind the organiser's back.
+            referee: old.document.duel ? s.document.referee : undefined,
           }),
           private: PrivateMapSchema.parse(old.private),
           // An undo must not change what the referees were told.

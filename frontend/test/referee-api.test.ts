@@ -38,6 +38,8 @@ describe("referee API", () => {
     expect(res.updatedAt).toBe("2026-10-18T01:00:00.000Z");
     const [path, init] = vi.mocked(fetch).mock.calls[0];
     expect(path).toBe("/api/referee/match");
+    // A save sent as the phone locks must outlive the page going to sleep.
+    expect((init as RequestInit).keepalive).toBe(true);
     expect(JSON.parse((init as RequestInit).body as string)).toEqual({
       code: "048213",
       matchId: "vong-loai-1",
@@ -53,7 +55,7 @@ describe("referee API", () => {
     expect(e.message).toBe("Mã trọng tài không đúng.");
   });
 
-  it("treats a dropped connection, a throttle and a server error as try-again", async () => {
+  it("treats a dropped connection, a throttle, a collision and a server error as try-again", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
@@ -61,7 +63,7 @@ describe("referee API", () => {
       }),
     );
     expect((await failure(saveMatch("048213", "m", save))).code).toBe("NETWORK");
-    for (const status of [429, 500, 502, 503]) {
+    for (const status of [409, 429, 500, 502, 503]) {
       reply(status, { message: "Too Many Requests" });
       expect((await failure(saveMatch("048213", "m", save))).code).toBe("NETWORK");
     }
