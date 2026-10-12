@@ -128,7 +128,7 @@ test("the organiser runs a match from pairs to final score", async ({
   await expect(score.locator(".duel-score__points").nth(1)).toHaveText("15");
   await expect(score).toContainText("Đã đánh 1/12 trận");
   const hits = view.locator("#vua-smash .card").nth(0);
-  await expect(hits).toContainText("SMASH ĂN ĐIỂM NHIỀU NHẤT");
+  await expect(hits).toContainText("MÁY ĐÓNG GẠCH");
   await expect(hits.locator("li")).toHaveCount(1);
   await expect(hits.locator("li")).toContainText(r1.name);
   await expect(hits.locator("li b")).toHaveText("3");

@@ -26,8 +26,8 @@ describe("PosterTwo", () => {
     for (const label of [
       "NHẤT",
       "NHÌ",
-      "SMASH ĂN ĐIỂM NHIỀU NHẤT",
-      "SMASH RÚC LƯỚI NHIỀU NHẤT",
+      "MÁY ĐÓNG GẠCH",
+      "VUA PHÁ LƯỚI",
     ])
       expect(screen.getByText(label)).toBeDefined();
     expect(screen.queryByText("KHUYẾN KHÍCH")).toBeNull();

@@ -206,14 +206,14 @@ export function SmashLeaders({
     <div className="finance-grid">
       <Leaders
         t={t}
-        title="SMASH ĂN ĐIỂM NHIỀU NHẤT"
+        title="MÁY ĐÓNG GẠCH"
         blurb="Đập một phát, ăn một điểm. Cái này để khoe."
         rows={results.smashHit}
         value={(r) => r.hit}
       />
       <Leaders
         t={t}
-        title="SMASH RÚC LƯỚI NHIỀU NHẤT"
+        title="VUA PHÁ LƯỚI"
         blurb="Đập rất mạnh, rất đẹp, và rất trúng lưới. Cái này để cả hội nhắc tới Tết."
         rows={results.smashNet}
         value={(r) => r.net}

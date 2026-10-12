@@ -170,8 +170,8 @@ export function PosterTwo({ t }: { t: TournamentDocument }) {
               trận. Một cái để khoe, một cái để cả hội nhắc tới Tết:
             </p>
             <div className="pill-row">
-              <Pill tone="red">SMASH ĂN ĐIỂM NHIỀU NHẤT</Pill>
-              <Pill tone="outline">SMASH RÚC LƯỚI NHIỀU NHẤT</Pill>
+              <Pill tone="red">MÁY ĐÓNG GẠCH</Pill>
+              <Pill tone="outline">VUA PHÁ LƯỚI</Pill>
             </div>
           </Card>
 
