@@ -26,6 +26,7 @@ Node 24 (`.nvmrc`), pnpm 10.32.1, ESM everywhere (`"type": "module"`).
 pnpm install
 pnpm dev              # next dev on :3000 + local admin API on :3100
 pnpm dev:cloud        # the same, over the REAL table and live tournament.json
+pnpm dev:demo         # fill a running `pnpm dev` with a giải ready to referee
 pnpm typecheck        # tsc over packages/domain and scripts
 pnpm --filter @webminton/frontend typecheck   # the frontend is separate
 pnpm test             # vitest — domain, scripts, frontend, infra
@@ -52,6 +53,12 @@ real router over an in-memory store seeded from the test fixture (not from
 of Google; restarting it resets the data. Once an admin save publishes, the
 public page on :3000 shows that snapshot. `pnpm dev` also works from
 `frontend/`.
+
+`pnpm dev:demo` (`scripts/seed-demo.ts`), run beside `pnpm dev`, resets that
+in-memory store and loads two teams of seven, the eleven bảng đấu matches in
+every state (one done, one live, three with pairs, six without), the referee
+code `123456` and refereeing open. It begins with `/api/test/reset`, which only
+`pnpm dev` answers, so it cannot write to `dev:cloud` or the deployed site.
 
 `pnpm dev:cloud` is the same pair over the **real** table and site bucket,
 with the API on :3200. Table and bucket names come from `TABLE_NAME` /
