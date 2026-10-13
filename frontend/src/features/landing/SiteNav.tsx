@@ -15,6 +15,7 @@ export function SiteNav({ view }: { view: TournamentView }) {
     ...(on.started ? duel : []),
     ["TRANG CHỦ", "#thong-bao", true],
     ["THỂ LỆ THI ĐẤU", "#the-le", true],
+    ["GIẢI THƯỞNG", "#giai-thuong", true],
     ["NHÀ TÀI TRỢ", "#nha-tai-tro", true],
     ["DANH SÁCH VĐV", "#van-dong-vien", on.athletes],
     ["HAI ĐỘI", "#hai-doi", on.twoTeams],

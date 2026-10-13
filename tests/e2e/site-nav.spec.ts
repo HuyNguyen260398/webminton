@@ -36,7 +36,12 @@ test.afterAll(async ({ playwright }) => {
 test("the bar lists what is on the page and takes the reader there", async ({ page }) => {
   await page.goto("/");
   const shown = await labels(page);
-  expect(shown.slice(0, 3)).toEqual(["TRANG CHỦ", "THỂ LỆ THI ĐẤU", "NHÀ TÀI TRỢ"]);
+  expect(shown.slice(0, 4)).toEqual([
+    "TRANG CHỦ",
+    "THỂ LỆ THI ĐẤU",
+    "GIẢI THƯỞNG",
+    "NHÀ TÀI TRỢ",
+  ]);
   expect(shown).toContain("DANH SÁCH VĐV");
   expect(shown).toContain("ĐĂNG KÝ THI ĐẤU");
   // Nothing to draw and no bảng đấu yet: no dead links.

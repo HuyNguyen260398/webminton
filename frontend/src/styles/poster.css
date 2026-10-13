@@ -710,6 +710,80 @@
     grid-template-columns: 1fr;
   }
 }
+/* ================= GIẢI THƯỞNG =================
+   No poster behind this one. Two medals and two prizes still under wraps,
+   each a card with a medal or a question mark in its top corner. */
+.prizes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(18px, 2.6vw, 30px);
+}
+.prizes__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+/* Two cards in a row are as tall as the longer one. The pill and the line
+   under it sit at the bottom, so they line up across the row. */
+.prizes__card .pill-row {
+  margin-top: auto;
+  padding-top: 18px;
+}
+.prizes__card > h3 {
+  padding-right: 76px;
+}
+.prizes__card p {
+  margin: 0;
+}
+.prizes__medal,
+.prizes__gift {
+  position: absolute;
+  top: clamp(14px, 2vw, 22px);
+  right: clamp(14px, 2vw, 22px);
+  width: 64px;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(3px 3px 0 var(--ink));
+}
+/* The ribbon hangs from the card's top edge. */
+.prizes__medal {
+  top: -3px;
+}
+/* Both sit lower than the card's title, so the line under it steps aside. */
+.prizes__medal + p,
+.prizes__gift + p {
+  padding-right: 76px;
+}
+.prizes__ribbon {
+  fill: var(--red);
+}
+.prizes__star,
+.prizes__box {
+  fill: var(--ink);
+}
+.prizes__medal--gold .prizes__disc,
+.prizes__bow {
+  fill: var(--yellow);
+}
+.prizes__medal--silver .prizes__disc {
+  fill: #d3d6da;
+}
+.prizes__mark {
+  fill: var(--yellow);
+  font-size: 26px;
+  font-weight: 900;
+}
+.prizes__card .prizes__secret {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+@media (max-width: 860px) {
+  .prizes {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ================= Live data sections ================= */
 .team-grid,
 .finance-grid {

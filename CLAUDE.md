@@ -261,8 +261,13 @@ links to it (`TeamDrawCta`) only while the draw is open, and shows `HAI ĐỘI`
 once anyone has rolled.
 
 The landing page is `frontend/src/app/page.tsx`: poster 1 → `ĐĂNG KÝ THI ĐẤU` → marquee
-→ poster 2 → poster 3 → the live data sections → a `<details>` linking the
-original JPGs.
+→ poster 2 → `GIẢI THƯỞNG` → poster 3 → the live data sections → a `<details>`
+linking the original JPGs.
+
+`features/landing/Prizes.tsx` is `GIẢI THƯỞNG`: fixed copy with no poster and
+no data behind it, so it is always on the page — a gold medal for each member
+of the winning team, silver for the runner-up, and one prize each for `MÁY
+ĐÓNG GẠCH` and `VUA PHÁ LƯỚI`, kept secret until after the giải.
 
 `features/landing/SiteNav.tsx` is the sticky bar at the top. It lists only the
 sections that are on the page right now: it and `LiveSections` both read

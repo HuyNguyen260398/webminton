@@ -3,6 +3,7 @@ import { useTournament } from "../lib/use-tournament";
 import { PosterOne } from "../features/landing/PosterOne";
 import { PosterTwo } from "../features/landing/PosterTwo";
 import { PosterThree } from "../features/landing/PosterThree";
+import { Prizes } from "../features/landing/Prizes";
 import {
   Registration,
   TeamDrawCta,
@@ -38,6 +39,7 @@ export default function Page() {
         TỪNG ĐIỂM
       </div>
       <PosterTwo t={view.t} />
+      <Prizes />
       <PosterThree t={view.t} />
       <LiveSections view={view} />
       <footer className="container section">

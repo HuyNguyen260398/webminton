@@ -69,7 +69,24 @@ test("renders the rule cards and sponsor tiers", async ({ page }) => {
   for (const tier of ["KIM CƯƠNG", "BẠCH KIM", "VÀNG"])
     await expect(page.getByText(tier, { exact: true })).toBeVisible();
   for (const pill of ["NHẤT", "NHÌ", "MÁY ĐÓNG GẠCH"])
-    await expect(page.getByText(pill, { exact: true })).toBeVisible();
+    await expect(
+      page.locator("#the-le").getByText(pill, { exact: true }),
+    ).toBeVisible();
+});
+
+test("announces the medals and the two secret smash prizes", async ({ page }) => {
+  await page.goto("/");
+  const cards = page.locator("#giai-thuong .card");
+  await expect(cards).toHaveCount(4);
+  await expect(cards.nth(0)).toContainText("huy chương vàng");
+  await expect(cards.nth(1)).toContainText("huy chương bạc");
+  for (const [i, title] of [
+    [2, "MÁY ĐÓNG GẠCH"],
+    [3, "VUA PHÁ LƯỚI"],
+  ] as const) {
+    await expect(cards.nth(i)).toContainText(title);
+    await expect(cards.nth(i)).toContainText("bật mí sau giải");
+  }
 });
 
 // The show/hide rules themselves are covered by frontend/test/live-sections
@@ -221,8 +238,8 @@ test("every title slab stays on a single line, down to 390px", async ({
     const slabs = page.locator(
       ".section-title, .poster-two__title, .poster-three__title",
     );
-    await expect(slabs).toHaveCount(8);
-    for (let i = 0; i < 8; i++) {
+    await expect(slabs).toHaveCount(9);
+    for (let i = 0; i < 9; i++) {
       const lines = await slabs.nth(i).evaluate((el) => {
         const range = document.createRange();
         range.selectNodeContents(el);

@@ -13,10 +13,11 @@ const links = (t: TournamentDocument) =>
   );
 
 describe("SiteNav", () => {
-  it("links only what is on the page: with no data, the three posters", () => {
+  it("links only what is on the page: with no data, the posters and the prizes", () => {
     expect(links(makeTournament())).toEqual([
       ["TRANG CHỦ", "#thong-bao"],
       ["THỂ LỆ THI ĐẤU", "#the-le"],
+      ["GIẢI THƯỞNG", "#giai-thuong"],
       ["NHÀ TÀI TRỢ", "#nha-tai-tro"],
     ]);
   });
@@ -51,6 +52,7 @@ describe("SiteNav", () => {
       "SMASH OF THE DAY",
       "TRANG CHỦ",
       "THỂ LỆ THI ĐẤU",
+      "GIẢI THƯỞNG",
       "NHÀ TÀI TRỢ",
       "DANH SÁCH VĐV",
       "HAI ĐỘI",
@@ -65,6 +67,7 @@ describe("SiteNav", () => {
     expect(links(t).map(([label]) => label)).toEqual([
       "TRANG CHỦ",
       "THỂ LỆ THI ĐẤU",
+      "GIẢI THƯỞNG",
       "NHÀ TÀI TRỢ",
     ]);
   });
@@ -74,6 +77,7 @@ describe("SiteNav", () => {
     expect(links(t)).toEqual([
       ["TRANG CHỦ", "#thong-bao"],
       ["THỂ LỆ THI ĐẤU", "#the-le"],
+      ["GIẢI THƯỞNG", "#giai-thuong"],
       ["NHÀ TÀI TRỢ", "#nha-tai-tro"],
       ["DANH SÁCH VĐV", "#van-dong-vien"],
       ["HAI ĐỘI", "#hai-doi"],
