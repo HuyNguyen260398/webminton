@@ -2,3 +2,7 @@ packages:
   - packages/*
   - frontend
   - backend
+
+# Scripts run on the Node in .nvmrc whatever the machine has installed: pnpm
+# fetches it once and keeps it in its own store.
+useNodeVersion: 24.20.0
