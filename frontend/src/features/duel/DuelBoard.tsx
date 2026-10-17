@@ -17,11 +17,12 @@ export const duelTitle = (m: DuelMatch, matches: DuelMatch[]) =>
   m.stage === "final"
     ? `Chung kết ${duelCategory(m).toLocaleLowerCase("vi-VN")}`
     : `Trận ${matches.filter((x) => x.stage === "playoff").indexOf(m) + 1}`;
-// Two courts: the matches go on in order two at a time, one lượt after
-// another, the first of each lượt on sân 1 and the second on sân 2.
+// The two courts the club books. The matches go on in order two at a time,
+// one lượt after another, the first of each lượt on the first court.
+export const DUEL_COURTS = [13, 14] as const;
 export function duelSlot(m: DuelMatch, matches: DuelMatch[]) {
   const i = [...matches].sort((a, b) => a.order - b.order).indexOf(m);
-  return { round: Math.floor(i / 2) + 1, court: (i % 2) + 1 };
+  return { round: Math.floor(i / 2) + 1, court: DUEL_COURTS[i % 2] };
 }
 export const duelSlotLabel = (m: DuelMatch, matches: DuelMatch[]) => {
   const { round, court } = duelSlot(m, matches);

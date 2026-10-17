@@ -73,10 +73,10 @@ describe("DuelMatchList", () => {
     const matches = createDuelMatches();
     expect(matches.map((m) => duelSlotLabel(m, matches))).toEqual(
       [1, 2, 3, 4, 5, 6].flatMap((r) => [
-        `Lượt ${r} · Sân 1`,
-        `Lượt ${r} · Sân 2`,
+        `Lượt ${r} · Sân 13`,
+        `Lượt ${r} · Sân 14`,
       ]),
     );
-    expect(board("pending").textContent).toContain("Lượt 1 · Sân 1");
+    expect(board("pending").textContent).toContain("Lượt 1 · Sân 13");
   });
 });
