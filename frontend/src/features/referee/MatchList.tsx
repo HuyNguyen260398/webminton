@@ -8,7 +8,7 @@ import {
   pairOf,
   type DuelSide,
 } from "../../../../packages/domain/src/duel";
-import { duelCategory, duelTitle } from "../duel/DuelBoard";
+import { duelCategory, duelSlotLabel, duelTitle } from "../duel/DuelBoard";
 
 export const teamOf = (t: TournamentDocument, side: DuelSide) =>
   t.teams.find((x) => x.id === DUEL_TEAMS[side]);
@@ -20,9 +20,11 @@ const shortName = (t: TournamentDocument, id: string) =>
 const ready = (m: DuelMatch) => m.pairRed !== null && m.pairBlue !== null;
 // A final's title already names its category.
 export const matchTitle = (m: DuelMatch, matches: DuelMatch[]) =>
-  m.stage === "final"
-    ? duelTitle(m, matches)
-    : `${duelTitle(m, matches)} · ${duelCategory(m)}`;
+  `${
+    m.stage === "final"
+      ? duelTitle(m, matches)
+      : `${duelTitle(m, matches)} · ${duelCategory(m)}`
+  } · ${duelSlotLabel(m, matches)}`;
 
 const GROUPS = [
   { label: "Đang đánh", has: (m: DuelMatch) => m.status === "live" },

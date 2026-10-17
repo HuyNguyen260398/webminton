@@ -165,7 +165,11 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
   shown to the organiser but not enforced.
 - Pairs are rendered publicly as soon as they are saved, on every match
   (`Chưa xếp cặp` until then). `BẢNG ĐẤU` lays matches out two per row
-  (one on a phone).
+  (one on a phone) and names players by their given name, the last word
+  (`DuelBoard.tsx::shortNames`; the last two where two athletes share one).
+- There are two courts. Matches go on two at a time in `order`, so each
+  match is labelled `Lượt N · Sân 1/2` (`DuelBoard.tsx::duelSlot`) on the
+  public board and the referees' list. It is derived, not stored.
 - Two organisers scoring two courts: a stale `saveDuelMatch` is accepted when
   the match itself is unchanged since the version the screen was on
   (`router.ts::sameDuelMatch`). Any other command is also accepted stale when

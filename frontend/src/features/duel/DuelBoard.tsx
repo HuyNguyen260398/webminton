@@ -17,11 +17,36 @@ export const duelTitle = (m: DuelMatch, matches: DuelMatch[]) =>
   m.stage === "final"
     ? `Chung kết ${duelCategory(m).toLocaleLowerCase("vi-VN")}`
     : `Trận ${matches.filter((x) => x.stage === "playoff").indexOf(m) + 1}`;
+// Two courts: the matches go on in order two at a time, one lượt after
+// another, the first of each lượt on sân 1 and the second on sân 2.
+export function duelSlot(m: DuelMatch, matches: DuelMatch[]) {
+  const i = [...matches].sort((a, b) => a.order - b.order).indexOf(m);
+  return { round: Math.floor(i / 2) + 1, court: (i % 2) + 1 };
+}
+export const duelSlotLabel = (m: DuelMatch, matches: DuelMatch[]) => {
+  const { round, court } = duelSlot(m, matches);
+  return `Lượt ${round} · Sân ${court}`;
+};
 const STATUS = {
   pending: "Chưa đánh",
   live: "Đang đánh",
   done: "Đã xong",
 } as const;
+
+// The board calls players by their given name, the last word of a Vietnamese
+// name, and adds the word before it only where two players share one.
+export function shortNames(t: TournamentDocument): Map<string, string> {
+  const words = new Map(t.athletes.map((a) => [a.id, a.name.trim().split(/\s+/)]));
+  const count = new Map<string, number>();
+  for (const w of words.values())
+    count.set(w.at(-1)!, (count.get(w.at(-1)!) ?? 0) + 1);
+  return new Map(
+    [...words].map(([id, w]) => [
+      id,
+      w.slice(count.get(w.at(-1)!)! > 1 ? -2 : -1).join(" "),
+    ]),
+  );
+}
 
 const team = (t: TournamentDocument, side: DuelSide) =>
   t.teams.find((x) => x.id === DUEL_TEAMS[side]);
@@ -71,10 +96,12 @@ function Row({
   t,
   m,
   side,
+  names,
 }: {
   t: TournamentDocument;
   m: DuelMatch;
   side: DuelSide;
+  names: Map<string, string>;
 }) {
   const other = side === "red" ? "blue" : "red";
   const won =
@@ -92,7 +119,7 @@ function Row({
         <small className="draw-row__pair">
           {pair
             ? pair
-                .map((id) => t.athletes.find((a) => a.id === id)?.name ?? "?")
+                .map((id) => names.get(id) ?? "?")
                 .join(" · ")
             : "Chưa xếp cặp"}
         </small>
@@ -106,6 +133,7 @@ function Row({
 
 export function DuelMatchList({ t }: { t: TournamentDocument }) {
   const matches = t.duel?.matches ?? [];
+  const names = shortNames(t);
   const stages = [
     { key: "playoff", label: "Vòng loại" },
     { key: "final", label: "Chung kết — điểm nhân đôi" },
@@ -136,8 +164,11 @@ export function DuelMatchList({ t }: { t: TournamentDocument }) {
                         {STATUS[m.status]}
                       </span>
                     </span>
-                    <Row t={t} m={m} side="red" />
-                    <Row t={t} m={m} side="blue" />
+                    <b className="duel-match__slot">
+                      {duelSlotLabel(m, matches)}
+                    </b>
+                    <Row t={t} m={m} side="red" names={names} />
+                    <Row t={t} m={m} side="blue" names={names} />
                     {m.referee && m.status !== "pending" && (
                       <small className="duel-match__referee">
                         Trọng tài: {m.referee}

@@ -1277,6 +1277,13 @@ button.team-draw__back {
   justify-content: space-between;
   gap: 10px;
 }
+.duel-match__slot {
+  display: block;
+  margin: -2px 0 6px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 .duel-match__referee {
   display: block;
   padding: 6px 12px 2px;

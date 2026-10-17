@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { DuelMatchList } from "../src/features/duel/DuelBoard";
+import {
+  DuelMatchList,
+  duelSlotLabel,
+  shortNames,
+} from "../src/features/duel/DuelBoard";
 import { createDuelMatches } from "../../packages/domain/src/duel";
 import { makeTournament } from "../../packages/domain/src/testing/fixtures";
 
@@ -47,5 +51,32 @@ describe("DuelMatchList", () => {
 
   it("marks the winner once the match is done", () => {
     expect(board("done").querySelectorAll(".is-winner")).toHaveLength(1);
+  });
+
+  it("calls players by their given name, two words where that is shared", () => {
+    const t = makeTournament();
+    t.athletes = [
+      ["a", "Nguyễn Gia Huy"],
+      ["b", "Trần Văn Huy"],
+      ["c", "Nhật"],
+      ["d", "Lee Chong Vinh"],
+    ].map(([id, name]) => ({ id, name, gender: "male", teamId: null, active: true }));
+    expect(Object.fromEntries(shortNames(t))).toEqual({
+      a: "Gia Huy",
+      b: "Văn Huy",
+      c: "Nhật",
+      d: "Vinh",
+    });
+  });
+
+  it("puts the matches two at a time on the two courts", () => {
+    const matches = createDuelMatches();
+    expect(matches.map((m) => duelSlotLabel(m, matches))).toEqual(
+      [1, 2, 3, 4, 5, 6].flatMap((r) => [
+        `Lượt ${r} · Sân 1`,
+        `Lượt ${r} · Sân 2`,
+      ]),
+    );
+    expect(board("pending").textContent).toContain("Lượt 1 · Sân 1");
   });
 });

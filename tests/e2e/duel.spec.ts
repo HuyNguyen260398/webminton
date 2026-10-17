@@ -56,6 +56,8 @@ const men = (athletes: Athlete[], teamId: string) =>
   athletes.filter((a) => a.teamId === teamId && a.gender === "male");
 const women = (athletes: Athlete[], teamId: string) =>
   athletes.filter((a) => a.teamId === teamId && a.gender === "female");
+// BẢNG ĐẤU shows the given name, the last word (none is shared in the fixture).
+const given = (a: Athlete) => a.name.split(" ").at(-1)!;
 
 test("the organiser runs a match from pairs to final score", async ({
   page,
@@ -92,14 +94,14 @@ test("the organiser runs a match from pairs to final score", async ({
   await expect(page.getByRole("status")).toContainText("Đã lưu cặp.");
   await view.reload();
   await expect(card).toContainText("Chưa đánh");
-  await expect(card).toContainText(`${r1.name} · ${r2.name}`);
+  await expect(card).toContainText(`${given(r1)} · ${given(r2)}`);
 
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await expect(page.getByRole("status")).toContainText("Đã gọi trận");
   await view.reload();
   await expect(card).toContainText("Đang đánh");
-  await expect(card).toContainText(`${r1.name} · ${r2.name}`);
-  await expect(card).toContainText(`${b1.name} · ${b2.name}`);
+  await expect(card).toContainText(`${given(r1)} · ${given(r2)}`);
+  await expect(card).toContainText(`${given(b1)} · ${given(b2)}`);
 
   // Count smashes, then the final score.
   for (let i = 0; i < 3; i++)
