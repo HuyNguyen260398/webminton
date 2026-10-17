@@ -951,6 +951,10 @@
 .draw-row.is-winner .draw-row__team {
   font-weight: 900;
 }
+.draw-row__team.is-empty {
+  font-weight: 500;
+  opacity: 0.72;
+}
 .draw-row__pair {
   display: block;
   overflow: hidden;
@@ -1267,9 +1271,6 @@ button.team-draw__back {
   .duel-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-.duel-grid .draw-row__pair {
-  white-space: normal;
 }
 .duel-match__head {
   display: flex;

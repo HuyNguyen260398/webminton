@@ -167,6 +167,7 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
   (`Chưa xếp cặp` until then). `BẢNG ĐẤU` lays matches out two per row
   (one on a phone) and names players by their given name, the last word
   (`DuelBoard.tsx::shortNames`; the last two where two athletes share one).
+  A match row is the pair alone; the team is only its colour square.
 - There are two courts, sân 13 and 14 (`DuelBoard.tsx::DUEL_COURTS`).
   Matches go on two at a time in `order`, so each match is labelled
   `Lượt N · Sân 13/14` (`DuelBoard.tsx::duelSlot`) on the

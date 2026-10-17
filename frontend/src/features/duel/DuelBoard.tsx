@@ -110,20 +110,19 @@ function Row({
   const pair = pairOf(m, side);
   return (
     <div className={`draw-row${won ? " is-winner" : ""}`}>
+      {/* The colour says which team; the pair is the headline. */}
       <span
         className="draw-row__flag"
         style={{ background: team(t, side)?.color }}
-        aria-hidden="true"
+        role="img"
+        aria-label={team(t, side)?.name ?? side}
       />
       <span className="draw-row__who">
-        <span className="draw-row__team">{team(t, side)?.name ?? side}</span>
-        <small className="draw-row__pair">
+        <span className={`draw-row__team${pair ? "" : " is-empty"}`}>
           {pair
-            ? pair
-                .map((id) => names.get(id) ?? "?")
-                .join(" · ")
+            ? pair.map((id) => names.get(id) ?? "?").join(" · ")
             : "Chưa xếp cặp"}
-        </small>
+        </span>
       </span>
       <span className="draw-row__score">
         {m.score ? m.score[side] : "—"}
