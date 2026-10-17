@@ -86,12 +86,13 @@ test("the organiser runs a match from pairs to final score", async ({
     page.getByLabel("Đội Đỏ — người 2").locator(`option[value="${r1.id}"]`),
   ).toHaveCount(0);
 
-  // Saved but not called: the pairs stay off the public page.
+  // Saved but not called: the pairs are already on the public page.
+  await expect(card).toContainText("Chưa xếp cặp");
   await page.getByRole("button", { name: "Lưu cặp" }).click();
   await expect(page.getByRole("status")).toContainText("Đã lưu cặp.");
   await view.reload();
   await expect(card).toContainText("Chưa đánh");
-  await expect(card).not.toContainText(r1.name);
+  await expect(card).toContainText(`${r1.name} · ${r2.name}`);
 
   await page.getByRole("button", { name: "Bắt đầu trận" }).click();
   await expect(page.getByRole("status")).toContainText("Đã gọi trận");

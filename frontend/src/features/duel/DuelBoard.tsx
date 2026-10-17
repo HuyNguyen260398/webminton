@@ -79,8 +79,7 @@ function Row({
   const other = side === "red" ? "blue" : "red";
   const won =
     m.status === "done" && m.score !== null && m.score[side] > m.score[other];
-  // Until the organiser calls the match, the opposing pair stays a secret.
-  const pair = m.status === "pending" ? null : pairOf(m, side);
+  const pair = pairOf(m, side);
   return (
     <div className={`draw-row${won ? " is-winner" : ""}`}>
       <span
@@ -90,13 +89,13 @@ function Row({
       />
       <span className="draw-row__who">
         <span className="draw-row__team">{team(t, side)?.name ?? side}</span>
-        {pair && (
-          <small className="draw-row__pair">
-            {pair
-              .map((id) => t.athletes.find((a) => a.id === id)?.name ?? "?")
-              .join(" · ")}
-          </small>
-        )}
+        <small className="draw-row__pair">
+          {pair
+            ? pair
+                .map((id) => t.athletes.find((a) => a.id === id)?.name ?? "?")
+                .join(" · ")
+            : "Chưa xếp cặp"}
+        </small>
       </span>
       <span className="draw-row__score">
         {m.score ? m.score[side] : "—"}
@@ -116,7 +115,7 @@ export function DuelMatchList({ t }: { t: TournamentDocument }) {
       {stages.map((stage) => (
         <div className="duel-stage" key={stage.key}>
           <h3 className="draw-stage">{stage.label}</h3>
-          <div className="draw-grid">
+          <div className="draw-grid duel-grid">
             {matches
               .filter((m) => m.stage === stage.key)
               .map((m) => (

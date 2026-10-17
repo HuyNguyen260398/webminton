@@ -163,7 +163,9 @@ a four-team draw is confirmed. `packages/domain/src/duel.ts` owns it.
 - Pairs are validated for team, gender and active status on every save
   (`finalize` re-checks all of them). How many matches each athlete plays is
   shown to the organiser but not enforced.
-- A pair is rendered publicly only once its match is `live` or `done`.
+- Pairs are rendered publicly as soon as they are saved, on every match
+  (`Chưa xếp cặp` until then). `BẢNG ĐẤU` lays matches out two per row
+  (one on a phone).
 - Two organisers scoring two courts: a stale `saveDuelMatch` is accepted when
   the match itself is unchanged since the version the screen was on
   (`router.ts::sameDuelMatch`). Any other command is also accepted stale when

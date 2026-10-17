@@ -4,7 +4,7 @@ import { DuelMatchList } from "../src/features/duel/DuelBoard";
 import { createDuelMatches } from "../../packages/domain/src/duel";
 import { makeTournament } from "../../packages/domain/src/testing/fixtures";
 
-function board(status: "live" | "done") {
+function board(status: "pending" | "live" | "done") {
   const t = makeTournament();
   for (const [id, teamId] of [
     ["r1", "red"],
@@ -25,6 +25,19 @@ function board(status: "live" | "done") {
 }
 
 describe("DuelMatchList", () => {
+  it("shows the pairs before the match is called", () => {
+    const el = board("pending");
+    expect(el.textContent).toContain("r1 · r2");
+    expect(el.textContent).toContain("b1 · b2");
+  });
+
+  it("says a match without pairs is still waiting for them", () => {
+    const t = makeTournament();
+    t.duel = { matches: createDuelMatches() };
+    const el = render(<DuelMatchList t={t} />).getByTestId("duel-vong-loai-1");
+    expect(el.textContent).toContain("Chưa xếp cặp");
+  });
+
   it("shows a live match's score without calling a winner", () => {
     const el = board("live");
     expect(el.textContent).toContain("21");

@@ -1260,6 +1260,17 @@ button.team-draw__back {
 .duel-stage + .duel-stage {
   margin-top: clamp(40px, 5vw, 56px);
 }
+.duel-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 640px) {
+  .duel-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.duel-grid .draw-row__pair {
+  white-space: normal;
+}
 .duel-match__head {
   display: flex;
   align-items: center;
